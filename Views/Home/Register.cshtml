@@ -1,0 +1,1051 @@
+﻿
+@model CPEA.Utilities.ViewModel.Register1VM
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>EDUREX Academy Enrollment</title>
+    <!-- core:css -->
+    <link rel="stylesheet" href="~/assets/vendors/core/core.css">
+    <!-- endinject -->
+    <!-- plugin css for this page -->
+    <link rel="stylesheet" href="~/assets/vendors/select2/select2.min.css">
+    <link rel="stylesheet" href="~/assets/vendors/jquery-tags-input/jquery.tagsinput.min.css">
+    <link rel="stylesheet" href="~/assets/vendors/dropzone/dropzone.min.css">
+    <link rel="stylesheet" href="~/assets/vendors/dropify/dist/dropify.min.css">
+    <link rel="stylesheet" href="~/assets/vendors/bootstrap-colorpicker/bootstrap-colorpicker.min.css">
+    <link rel="stylesheet" href="~/assets/vendors/bootstrap-datepicker/bootstrap-datepicker.min.css">
+    <link rel="stylesheet" href="~/assets/vendors/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="~/assets/vendors/tempusdominus-bootstrap-4/tempusdominus-bootstrap-4.min.css">
+    <link rel="stylesheet" href="~/assets/vendors/prismjs/themes/prism.css">
+    <link rel="stylesheet" href="~/assets/vendors/sweetalert2/sweetalert2.min.css">
+    <!-- end plugin css for this page -->
+    <!-- inject:css -->
+    <link rel="stylesheet" href="~/assets/fonts/feather-font/css/iconfont.css">
+    <link rel="stylesheet" href="~/assets/vendors/flag-icon-css/css/flag-icon.min.css">
+    <!-- endinject -->
+    <!-- Layout styles -->
+    <link rel="stylesheet" href="~/assets/css/demo_5/style.css">
+    <!-- End layout styles -->
+    <link rel="shortcut icon" href="~/assets/images/edurexIcon.png" />
+
+    <style>
+        /* The container */
+        .container {
+            display: block;
+            position: relative;
+            padding-left: 25px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            /*font-size: 22px;*/
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            font-weight: 400;
+            font-size: 0.875rem;
+        }
+
+            /* Hide the browser's default checkbox */
+            .container input {
+                position: absolute;
+                opacity: 0;
+                cursor: pointer;
+                height: 0;
+                width: 0;
+            }
+
+        /* Create a custom checkbox */
+        .checkmark {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 20px;
+            width: 20px;
+            background-color: #eee;
+        }
+
+        /* On mouse-over, add a grey background color */
+        .container:hover input ~ .checkmark {
+            background-color: #ccc;
+        }
+
+        /* When the checkbox is checked, add a blue background */
+        .container input:checked ~ .checkmark {
+            background-color: #2196F3;
+        }
+
+        /* Create the checkmark/indicator (hidden when not checked) */
+        .checkmark:after {
+            content: "";
+            position: absolute;
+            display: none;
+        }
+
+        /* Show the checkmark when checked */
+        .container input:checked ~ .checkmark:after {
+            display: block;
+        }
+
+        /* Style the checkmark/indicator */
+        .container .checkmark:after {
+            left: 9px;
+            top: 5px;
+            width: 5px;
+            height: 10px;
+            border: solid white;
+            border-width: 0 3px 3px 0;
+            -webkit-transform: rotate(45deg);
+            -ms-transform: rotate(45deg);
+            transform: rotate(45deg);
+        }
+
+    </style>
+</head>
+
+<body>
+    <div class="main-wrapper">
+
+        <!-- partial:../../partials/_navbar.html -->
+        <div class="horizontal-menu">
+            <nav class="navbar top-navbar">
+                <div class="container">
+                    <div class="navbar-content">
+                        <div style="height:100px; width:200px;">
+                            <img src="~/assets/images/EdurexAcademy.png" style="max-width:100%; height:auto; margin-top:10px;" />
+                        </div>
+                        <!--<a href="#" class="navbar-brand">
+                            <div></div>
+                            <span style="width:100px;height:70px;"></span>-->
+                        @*<img src="~/assets/images/Edurex1.jpeg" style="max-width:100%; height:auto" />*@
+                        <!--</a>-->
+                        <ul class="navbar-nav">
+                            <li>
+                                <a href="https://edurex.academy" class="btn btn-link" style="margin-top: 15px; color: #058383 !important ">
+                                    <span>Back to Website</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a asp-controller="Home" asp-action="Login" class="btn btn-primary" style="margin-top: 15px; background-color: #058383 !important ">
+                                    <span>Log In</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+        </div>
+        <!-- partial -->
+
+        <div class="page-wrapper">
+
+            <div class="page-content">
+                <form asp-action="Register">
+                    <button type="submit" asp-controller="Home" asp-action="SendEmail" class="btn btn-primary float-center mt-4 ml-2" style="background-color: #058383 !important;"><i data-feather="mail" class="mr-3 icon-md"></i>Send to Email</button>
+                </form>
+               
+                @*<form class="forms-sample" asp-action="Register">*@
+                <div class="row">
+                    <div class="col-md-12 grid-margin">
+                        <div class="card">
+                            <div class="card-body">
+                                <h6 class="card-title">Select Type</h6>
+                                <div class="row">
+                                    <div class="col-sm-4">
+                                        <div class="form-group">
+                                            <label class="control-label">Program Type<span style="color:red">*</span></label>
+                                            <select asp-for="registerz.accountType" class="js-example-basic-single w-100" data-width="100%" id="reg1AcctType" required>
+                                                <option value="">Select an option</option>
+                                                <option value="Personal">Personal</option>
+                                                <option value="Business">Business</option>
+                                            </select>
+                                        </div>
+                                    </div><!-- Col -->
+                                </div><!-- Row -->
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="businessSection" class="row" style="display:none">
+                    <form class="forms-sample" asp-action="Register">
+                        <div class="col-md-12 grid-margin">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h6 class="card-title">Business Information</h6>
+                                    <div class="row">
+                                        <div class="col-sm-4">
+                                            <div class="form-group">
+                                                <label class="control-label">Business Name<span style="color:red">*</span></label>
+                                                <input asp-for="registerz.businessReg.BusinessName" class="form-control" placeholder="Enter business name" required />
+                                                <span asp-validation-for="registerz.businessReg.BusinessName" class="text-danger"></span>
+                                            </div>
+                                        </div><!-- Col -->
+                                        <div class="col-sm-4">
+                                            <div class="form-group">
+                                                <label class="control-label">Business Email<span style="color:red">*</span></label>
+                                                <input asp-for="registerz.businessReg.BusinessEmail" class="form-control" placeholder="Enter business email" required />
+                                                <span asp-validation-for="registerz.businessReg.BusinessEmail" class="text-danger"></span>
+                                            </div>
+                                        </div><!-- Col -->
+                                        <div class="col-sm-4">
+                                            <div class="form-group">
+                                                <label class="control-label">Business Phone<span style="color:red">*</span></label>
+                                                <input asp-for="registerz.businessReg.BusinessPhone" class="form-control" placeholder="Enter business phone" required />
+                                                <span asp-validation-for="registerz.businessReg.BusinessPhone" class="text-danger"></span>
+                                            </div>
+                                        </div><!-- Col -->
+                                    </div><!-- Row -->
+                                    <div class="row">
+                                        <div class="col-sm-4">
+                                            <div class="form-group">
+                                                <label class="control-label">Country<span style="color:red">*</span></label>
+                                                <select class="js-example-basic-single w-100" data-width="100%" id="busiCountry" data-placeholder="Nigeria" asp-items="@Model.countryListz.Select(x => new SelectListItem(){Text = x.Name, Value = x.Id.ToString()}).ToList()">
+                                                    <option value="163">Nigeria</option>
+                                                </select>
+                                            </div>
+                                        </div><!-- Col -->
+                                        <div class="col-sm-4">
+                                            <div class="form-group">
+                                                <label class="control-label">State<span style="color:red">*</span></label>
+                                                <select class="js-example-basic-single w-100" data-placeholder="Select an option" data-width="100%" asp-items="@Model.nigeriaStatesListz.Select(x => new SelectListItem(){Text = x.Name,Value = x.Id.ToString()}).ToList()" id="busiState">
+                                                    <option label="empty" value=""></option>
+                                                </select>
+                                            </div>
+                                        </div><!-- Col -->
+                                        <div class="col-sm-4">
+                                            <div class="form-group">
+                                                <label class="control-label">City<span style="color:red">*</span></label>
+                                                <select class="js-example-basic-single w-100" data-placeholder="Select an option" required asp-for="registerz.businessReg.BusinessCityId" data-width="100%" id="busiCity">
+                                                    <option label="empty" value=""></option>
+                                                </select>
+                                                <span asp-validation-for="registerz.businessReg.BusinessCityId" class="text-danger"></span>
+                                            </div>
+                                        </div><!-- Col -->
+                                    </div><!-- Row -->
+                                    <div class="row">
+                                        <div class="col-sm-12">
+                                            <div class="form-group">
+                                                <label class="control-label">Address<span style="color:red">*</span></label>
+                                                <input class="form-control" asp-for="registerz.businessReg.BusinessAddress" placeholder="Address" required>
+                                                <span asp-validation-for="registerz.businessReg.BusinessAddress" class="text-danger"></span>
+                                            </div>
+                                        </div><!-- Col -->
+                                    </div><!-- Row -->
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-12 grid-margin">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h6 class="card-title">Personal Information</h6>
+                                    <div class="row">
+                                        <div class="col-sm-4">
+                                            <div class="form-group">
+                                                <label class="control-label">First Name<span style="color:red">*</span></label>
+                                                <input asp-for="registerz.businessReg.FirstName" class="form-control" placeholder="Enter first name" required />
+                                                <span asp-validation-for="registerz.businessReg.FirstName" class="text-danger"></span>
+                                            </div>
+                                        </div><!-- Col -->
+                                        <div class="col-sm-4">
+                                            <div class="form-group">
+                                                <label class="control-label">Last Name<span style="color:red">*</span></label>
+                                                <input asp-for="registerz.businessReg.LastName" class="form-control" placeholder="Enter last name" required />
+                                                <span asp-validation-for="registerz.businessReg.LastName" class="text-danger"></span>
+                                            </div>
+                                        </div><!-- Col -->
+                                        <div class="col-sm-4">
+                                            <div class="form-group">
+                                                <label class="control-label">Role<span style="color:red">*</span></label>
+                                                <select class="js-example-basic-single w-100" data-width="100%" data-placeholder="Select an option" required asp-for="registerz.businessReg.UserRole">
+                                                    <option label="empty" value="">Select an option</option>
+                                                    <option value="Manager">Manager</option>
+                                                    <option value="Team Lead">Team Lead</option>
+                                                </select>
+                                                <span asp-validation-for="registerz.businessReg.UserRole" class="text-danger"></span>
+                                            </div>
+                                        </div><!-- Col -->
+                                    </div><!-- Row -->
+                                    <div class="row">
+                                        <div class="col-sm-4">
+                                            <div class="form-group">
+                                                <label class="control-label">Gender<span style="color:red">*</span></label>
+                                                <select class="js-example-basic-single w-100" data-width="100%" data-placeholder="Select an option" required asp-for="registerz.businessReg.Gender">
+                                                    <option label="empty" value="">Select an option</option>
+                                                    <option value="Male">Male</option>
+                                                    <option value="Female">Female</option>
+                                                </select>
+                                                <span asp-validation-for="registerz.businessReg.Gender" class="text-danger"></span>
+                                            </div>
+                                        </div><!-- Col -->
+                                        <div class="col-sm-4">
+                                            <div class="form-group">
+                                                <label class="control-label">Email<span style="color:red">*</span></label>
+                                                <input type="email" asp-for="registerz.businessReg.Email" class="form-control" placeholder="Enter email" required />
+                                                <span asp-validation-for="registerz.businessReg.Email" class="text-danger"></span>
+                                            </div>
+                                        </div><!-- Col -->
+                                        <div class="col-sm-4">
+                                            <div class="form-group">
+                                                <label class="control-label">Phone 1<span style="color:red">*</span></label>
+                                                <input type="text" asp-for="registerz.businessReg.PhoneNo" class="form-control" placeholder="Enter phone number" required />
+                                                <span asp-validation-for="registerz.businessReg.PhoneNo" class="text-danger"></span>
+                                            </div>
+                                        </div><!-- Col -->
+                                    </div><!-- Row -->
+                                    <div class="row">
+                                        <div class="col-sm-4">
+                                            <div class="form-group">
+                                                <label class="control-label">Phone 2</label>
+                                                <input asp-for="registerz.businessReg.AlternatePhone" class="form-control" placeholder="Enter phone number 2">
+                                            </div>
+                                        </div><!-- Col -->
+                                        <div class="col-sm-4">
+                                            <div class="form-group">
+                                                <label class="control-label">Username<span style="color:red">*</span></label>
+                                                <input asp-for="registerz.businessReg.Username" class="form-control" placeholder="Enter Username" required />
+                                                <span asp-validation-for="registerz.businessReg.Username" class="text-danger"></span>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <div class="form-group">
+                                                <label class="control-label">Password<span style="color:red">*</span></label>
+                                                <input class="form-control" type="password" asp-for="registerz.businessReg.Password" placeholder="Enter password" required />
+                                                <span asp-validation-for="registerz.businessReg.Password" class="text-danger"></span>
+
+                                            </div>
+                                        </div><!-- Col -->
+                                    </div><!-- Row -->
+                                    <div class="row">
+                                        <div class="col-sm-12">
+                                            <div class="form-group">
+                                                <button type="submit" class="btn btn-primary" style="background-color: #058383 !important; float:right "><i class="mdi mdi-bank"></i>Save &amp; Continue</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div id="personalSection" class="row" style="display:none">
+                    <form class="forms-sample" asp-action="Register">
+                        <div class="col-md-12 grid-margin">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h6 class="card-title">Personal Information</h6>
+                                    <div class="row">
+                                        <div class="col-sm-4">
+                                            <div class="form-group">
+                                                <label class="control-label">First Name<span style="color:red">*</span></label>
+                                                <input asp-for="registerz.personalReg.FirstName" class="form-control" placeholder="Enter first name" required />
+                                                <span asp-validation-for="registerz.personalReg.FirstName" class="text-danger"></span>
+                                            </div>
+                                        </div><!-- Col -->
+                                        <div class="col-sm-4">
+                                            <div class="form-group">
+                                                <label class="control-label">Last Name<span style="color:red">*</span></label>
+                                                <input asp-for="registerz.personalReg.LastName" class="form-control" placeholder="Enter last name" required />
+                                                <span asp-validation-for="registerz.personalReg.LastName" class="text-danger"></span>
+                                            </div>
+                                        </div><!-- Col -->
+                                        <div class="col-sm-4">
+                                            <div class="form-group">
+                                                <label class="control-label">Middle Name</label>
+                                                <input asp-for="registerz.personalReg.MiddleName" class="form-control" placeholder="Enter middle name" />
+                                            </div>
+                                        </div><!-- Col -->
+                                    </div><!-- Row -->
+                                    <div class="row">
+                                        <div class="col-sm-4">
+                                            <div class="form-group">
+                                                <label class="control-label">Gender<span style="color:red">*</span></label>
+                                                <select class="js-example-basic-single w-100" data-width="100%" data-placeholder="Select an option" required asp-for="registerz.personalReg.Gender">
+                                                    <option label="empty" value="">Select an option</option>
+                                                    <option value="Male">Male</option>
+                                                    <option value="Female">Female</option>
+                                                </select>
+                                                <span asp-validation-for="registerz.personalReg.Gender" class="text-danger"></span>
+                                            </div>
+                                        </div><!-- Col -->
+                                        <div class="col-sm-4">
+                                            <div class="form-group">
+                                                <label class="control-label">Email<span style="color:red">*</span></label>
+                                                <input type="email" asp-for="registerz.personalReg.Email" class="form-control" placeholder="Enter email" required />
+                                                <span asp-validation-for="registerz.personalReg.Email" class="text-danger"></span>
+                                            </div>
+                                        </div><!-- Col -->
+                                        <div class="col-sm-4">
+                                            <div class="form-group">
+                                                <label class="control-label">Phone 1<span style="color:red">*</span></label>
+                                                <input type="text" asp-for="registerz.personalReg.PhoneNo" class="form-control" placeholder="Enter phone number" required />
+                                                <span asp-validation-for="registerz.personalReg.PhoneNo" class="text-danger"></span>
+                                            </div>
+                                        </div><!-- Col -->
+                                    </div><!-- Row -->
+                                    <div class="row">
+                                        <div class="col-sm-4">
+                                            <div class="form-group">
+                                                <label class="control-label">Phone 2</label>
+                                                <input type="text" asp-for="registerz.personalReg.AlternatePhone" class="form-control" placeholder="Enter phone number 2">
+                                            </div>
+                                        </div><!-- Col -->
+                                        <div class="col-sm-4">
+                                            <div class="form-group">
+                                                <label class="control-label">Username<span style="color:red">*</span></label>
+                                                <input type="text" asp-for="registerz.personalReg.Username" class="form-control" placeholder="Enter Username" required />
+                                                <span asp-validation-for="registerz.personalReg.Username" class="text-danger"></span>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <div class="form-group">
+                                                <label class="control-label" for="exampleInputPassword1">Password<span style="color:red">*</span></label>
+                                                <input class="form-control" type="password" asp-for="registerz.personalReg.Password" placeholder="Enter password" required />
+                                                <span asp-validation-for="registerz.personalReg.Password" class="text-danger"></span>
+                                            </div>
+                                        </div><!-- Col -->
+                                    </div><!-- Row -->
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-12 grid-margin">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h6 class="card-title">Address</h6>
+                                    <div class="row">
+                                        <div class="col-sm-4">
+                                            <div class="form-group">
+                                                <label class="control-label">Country<span style="color:red">*</span></label>
+                                                <select class="js-example-basic-single w-100" data-width="100%" id="persCountry" data-placeholder="Nigeria" asp-items="@Model.countryListz.Select(x => new SelectListItem(){Text = x.Name, Value = x.Id.ToString() }).ToList()">
+                                                    <option value="163">Nigeria</option>
+                                                </select>
+                                            </div>
+                                        </div><!-- Col -->
+                                        <div class="col-sm-4">
+                                            <div class="form-group">
+                                                <label class="control-label">State<span style="color:red">*</span></label>
+                                                <select class="js-example-basic-single w-100" data-placeholder="Select an option" data-width="100%" asp-items="@Model.nigeriaStatesListz.Select(x => new SelectListItem(){Text = x.Name, Value = x.Id.ToString()}).ToList()" id="persState">
+                                                    <option label="empty" value=""></option>
+                                                </select>
+                                            </div>
+                                        </div><!-- Col -->
+                                        <div class="col-sm-4">
+                                            <div class="form-group">
+                                                <label class="control-label">City<span style="color:red">*</span></label>
+                                                <select class="js-example-basic-single w-100" data-placeholder="Select an option" required asp-for="registerz.personalReg.CityId" data-width="100%" id="persCity">
+                                                    <option label="empty" value=""></option>
+                                                </select>
+                                                <span asp-validation-for="registerz.personalReg.CityId" class="text-danger"></span>
+                                            </div>
+                                        </div><!-- Col -->
+                                    </div><!-- Row -->
+                                    <div class="row">
+                                        <div class="col-sm-12">
+                                            <div class="form-group">
+                                                <label class="control-label">Address<span style="color:red">*</span></label>
+                                                <input class="form-control" asp-for="registerz.personalReg.Address" placeholder="Address" required />
+                                                <span asp-validation-for="registerz.personalReg.Address" class="text-danger"></span>
+                                            </div>
+                                        </div><!-- Col -->
+                                    </div><!-- Row -->
+                                    <div class="row">
+                                        <div class="col-sm-12">
+                                            <div class="form-group">
+                                                <button type="submit" class="btn btn-primary" style="background-color: #058383 !important; float: right"><i class="mdi mdi-bank"></i>Save &amp; Continue</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!--<div class="row">
+    <div class="col-md-12 grid-margin">
+        <div class="card">
+            <div class="card-body">
+                <h6 class="card-title">Personal Information</h6>
+                <div class="row">
+                    <div class="col-sm-4">
+                        <div class="form-group">
+                            <label class="control-label">Last Name<span style="color:red">*</span></label>
+                            <input type="text" class="form-control" placeholder="Enter last name" required>
+                            <span class="text-danger"></span>
+                        </div>
+                    </div><!-- Col -->
+                <!--<div class="col-sm-4">
+        <div class="form-group">
+            <label class="control-label">First Name<span style="color:red">*</span></label>
+            <input type="text" asp-for="registerz.FirstName" class="form-control" placeholder="Enter first name" required>
+            <span asp-validation-for="registerz.FirstName" class="text-danger"></span>
+        </div>
+    </div>-->
+                <!-- Col -->
+                <!--<div class="col-sm-4">
+        <div class="form-group">
+            <label class="control-label">Middle Name</label>
+            <input type="text" asp-for="registerz.MiddleName" class="form-control" placeholder="Enter middle name">
+        </div>
+    </div>-->
+                <!-- Col -->
+                <!--</div>--><!-- Row -->
+                <!--<div class="row">
+    <div class="col-sm-4">
+        <div class="form-group">
+            <label class="control-label">Gender<span style="color:red">*</span></label>
+            <select class="js-example-basic-single w-100" data-width="100%" data-placeholder="Select an option" required asp-for="registerz.Gender">
+                <option label="empty" value=""></option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+            </select>
+        </div>
+    </div>-->
+                <!-- Col -->
+                <!--<div class="col-sm-4">
+        <div class="form-group">
+            <label class="control-label">Date of Birth<span style="color:red">*</span></label>
+            <div class="input-group date datepicker" id="datePickerExample">
+                <input type="text" asp-for="registerz.DateOfBirth" class="form-control" required><span class="input-group-addon"><i data-feather="calendar"></i></span>
+                <span asp-validation-for="registerz.DateOfBirth" class="text-danger"></span>
+            </div>
+        </div>
+    </div>-->
+                <!-- Col -->
+                <!--<div class="col-sm-4">
+        <div class="form-group">
+            <label class="control-label" for="exampleInputPassword1">Password<span style="color:red">*</span></label>
+            <input type="password" class="form-control" id="exampleInputPassword1" autocomplete="current-password" asp-for="registerz.Password" placeholder="Enter password" required>
+        </div>
+    </div>-->
+                <!-- Col -->
+                <!--</div>--><!-- Row -->
+                <!--<div class="row">
+    <div class="col-sm-4">
+        <div class="form-group">
+            <label class="control-label">Email<span style="color:red">*</span></label>
+            <input type="email" asp-for="registerz.Email" class="form-control" placeholder="Enter email" required>
+            <span asp-validation-for="registerz.Email" class="text-danger"></span>
+        </div>
+    </div>-->
+                <!-- Col -->
+                <!--<div class="col-sm-4">
+        <div class="form-group">
+            <label class="control-label">Phone 1<span style="color:red">*</span></label>
+            <input type="text" asp-for="registerz.Phone" class="form-control" placeholder="Enter phone number" required>
+            <span asp-validation-for="registerz.Phone" class="text-danger"></span>
+        </div>
+    </div>-->
+                <!-- Col -->
+                <!--<div class="col-sm-4">
+        <div class="form-group">
+            <label class="control-label">Phone 2</label>
+            <input type="text" asp-for="registerz.AlternatePhone" class="form-control" placeholder="Enter phone number 2">
+
+        </div>
+    </div>-->
+                <!-- Col -->
+                <!--</div>--><!-- Row -->
+                <!--</div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12 grid-margin">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-title">Address</h6>
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <div class="form-group">
+                                <label class="control-label">Country<span style="color:red">*</span></label>
+                                <select class="js-example-basic-single w-100" data-width="100%" id="country" data-placeholder="Nigeria" required data-url="@Url.Action("statesByCountryId", "Home")" asp-items="@Model.countryListz.Select(x => new SelectListItem() { Text = x.Name, Value = x.Id.ToString() }).ToList()">
+                                    <option value="163">Nigeria</option>
+                                </select>
+                            </div>
+                        </div>-->
+                <!-- Col -->
+                <!--<div class="col-sm-4">
+        <div class="form-group">
+            <label class="control-label">State<span style="color:red">*</span></label>
+            <select class="js-example-basic-single w-100" data-placeholder="Select an option" required data-url="@Url.Action("citiesByStateId", "Home")" data-width="100%" asp-items="@Model.nigeriaStatesListz.Select(x => new SelectListItem() { Text = x.Name, Value = x.Id.ToString() }).ToList()" id="state">
+                <option label="empty" value=""></option>
+            </select>
+        </div>
+    </div>-->
+                <!-- Col -->
+                <!--<div class="col-sm-4">
+        <div class="form-group">
+            <label class="control-label">City<span style="color:red">*</span></label>
+            <select class="js-example-basic-single w-100" data-placeholder="Select an option" required asp-for="registerz.CityId" data-width="100%" id="city">
+                <option label="empty" value=""></option>
+            </select>
+        </div>
+    </div>-->
+                <!-- Col -->
+                <!--</div>--><!-- Row -->
+                <!--<div class="row">
+    <div class="col-sm-12">
+        <div class="form-group">
+            <label class="control-label">Address<span style="color:red">*</span></label>
+            <input type="text" class="form-control" asp-for="registerz.Address" placeholder="Address" id="address" required>
+            <span asp-validation-for="registerz.Address" class="text-danger"></span>
+        </div>
+    </div>-->
+                <!-- Col -->
+                <!--</div>--><!-- Row -->
+                <!--</div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="row">
+        <div class="col-md-12 grid-margin">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-title">Program & Courses</h6>
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <div class="form-group">
+                                <label class="control-label">Program <span style="color:red">*</span></label>
+                                <select class="js-example-basic-single w-100" data-width="100%" id="program" data-placeholder="Select an option" required asp-items="Model.programListz.Select(x => new SelectListItem() { Text = x.Name, Value = x.Id.ToString() }).ToList()">
+                                    <option label="empty" value=""></option>
+                                </select>
+                            </div>
+                        </div>-->
+                <!-- Col -->
+                <!--<div class="col-sm-4">
+        <div class="form-group">
+            <label class="control-label">Program Category<span style="color:red">*</span></label>
+            <select class="js-example-basic-single w-100" asp-for="registerz.ProgramId" data-placeholder="Select an option" required data-width="100%" id="programCat">
+                <option label="empty" value=""></option>
+            </select>
+        </div>
+    </div>-->
+                <!-- Col -->
+                <!--<div class="col-sm-4">
+            <div class="form-group">
+                <label class="control-label">Program Option</label>
+                <select class="js-example-basic-single w-100" asp-for="registerz.ProgramOptionId" data-placeholder="Select an option" data-width="100%" id="programoption">
+                    <option label="empty" value=""></option>
+                </select>
+            </div>
+        </div>
+    </div>-->
+                <!-- Row -->
+                <!--<div class="row" style="display:none;">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label class="control-label">Subject Options</label>
+                                <select class="form-control" id="subjects" style="color:black" asp-for="registerz.SubjectIds" data-placeholder="Select multiple options" data-width="100%">
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row" id="choices" style="display:none">
+        <div class="col-md-12 grid-margin">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-title">JAMB UTME DateTime.Now.Year CHOICES</h6>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label class="control-label">First Institution</label>
+                                <select class="js-example-basic-single w-100 institutions" data-placeholder="Select an option" asp-for="registerz.Choices.FirstInstitution" data-width="100%" id="firstInstitution">
+                                    <option label="empty" value=0></option>
+                                </select>
+                            </div>
+                        </div>-->
+                <!-- Col -->
+                <!--<div class="col-sm-6">
+        <div class="form-group">
+            <label class="control-label">First Course</label>
+            <select class="js-example-basic-single w-100 courses" data-placeholder="Select an option" asp-for="registerz.Choices.FirstCourse" data-width="100%" id="firstCourse">
+                <option label="empty" value=0></option>
+            </select>
+        </div>
+    </div>-->
+                <!-- Col -->
+                <!--</div>--><!-- Row -->
+                <!--<div class="row">
+    <div class="col-sm-6">
+        <div class="form-group">
+            <label class="control-label">Second Institution</label>
+            <select class="js-example-basic-single w-100 institutions" data-placeholder="Select an option" asp-for="registerz.Choices.SecondInstitution" data-width="100%" id="secondInstitution">
+                <option label="empty" value=0></option>
+            </select>
+        </div>
+    </div>-->
+                <!-- Col -->
+                <!--<div class="col-sm-6">
+        <div class="form-group">
+            <label class="control-label">Second Course</label>
+            <select class="js-example-basic-single w-100 courses" data-placeholder="Select an option" asp-for="registerz.Choices.SecondCourse" data-width="100%" id="secondCourse">
+                <option label="empty" value=0></option>
+            </select>
+        </div>
+    </div>-->
+                <!-- Col -->
+                <!--</div>--><!-- Row -->
+                <!--</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row" style="display:none;" id="subjectOptions">
+        <div class="col-md-12 grid-margin">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-title">Subject Options <span id="maxSub"></span></h6>
+                    <div class="row">
+                        <div id="divSubjects">
+                        </div>
+                    </div>-->
+                <!-- Row -->
+                <!--</div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12 grid-margin">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-title">Payment</h6>
+                    <div class="row" id="paymentDes" style="display:none">
+                        <div class="alert alert-success col-sm-12" role="alert">
+                            <span style="font-size:20px;" id="price"></span>
+                            <br />
+                            <span style="font-size:20px;">Please pay between</span> <span id="deposit" style="font-size:20px;"></span> <span style="font-size:20px;">and</span> <span id="fullP" style="font-size:20px;"></span> <span style="font-size:20px;">or</span> <span id="usd" style="font-size:20px;"></span> <span style="font-size:20px;"> to complete registration</span>
+                        </div>
+                    </div>
+                    <input type="hidden" id="amountF" />
+                    <input type="hidden" id="amountD" />
+
+                    <div class="row">
+                        <div class="col-sm-7">
+                            <div class="form-group">
+                                <label class="control-label">Select your payment<span style="color:red">*</span></label><br />
+                                <div class="form-check form-check-inline">
+                                    <label class="form-check-label">
+                                        <input type="radio" class="form-check-input" name="optionsRadios5" id="optionDeposit" value="Deposit">
+                                        Deposit
+                                    </label>
+                                    <span id="deposit3" style="margin-top: -7px; margin-left: 5px;"></span>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <label class="form-check-label">
+                                        <input type="radio" class="form-check-input" name="optionsRadios5" id="optionsFull" value="Full">
+                                        Full Tuition
+                                    </label>
+                                    <span id="fullTuition" style="margin-top:-7px; margin-left:5px;"></span>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <label class="form-check-label">
+                                        <input type="radio" class="form-check-input" name="optionsRadios5" id="optionsPart" value="Part">
+                                        Part Payment
+                                    </label>
+                                </div>
+                            </div>
+                        </div>-->
+                <!-- Col -->
+                <!--<div class="col-sm-5">
+        <div class="form-group">
+            <label class="control-label">Amount to pay<span style="color:red">*</span></label>
+            <input type="number" class="form-control" readonly asp-for="registerz.Amount" required placeholder="Amount you want to pay" id="amount">
+            <span style=" font-size: smaller; font-style: italic; display: none" id="displ">Enter amount between <span id="deposit2"></span> and <span id="maximumPrice"></span> </span>
+        </div>
+    </div>-->
+                <!-- Col -->
+                <!--</div>--><!-- Row -->
+                <!--<div class="row">-->
+                <!--<div class="col-sm-2">
+        <div class="form-group">
+            <label class="control-label">Select Payment Method</label>
+        </div>
+    </div>-->
+                <!-- Col -->
+                <!--<div class="col-sm-8">
+    <label class="control-label">Select Payment Method</label>
+    <div class="form-group">
+        <div class="form-check form-check-inline">
+            <label class="form-check-label" style="margin-top:3px">
+                <input type="radio" class="form-check-input" name="optionsRadios2" id="optionCard" value="Card">
+                Card
+            </label>
+            <div style="height: 20px; width: 50px; margin-left: 5px; margin-top:-9px">
+                <img src="~/assets/images/visa.png" style="max-width: 100%; height: auto;" />
+            </div>
+            <div style="height: 20px; width: 70px;">
+                <img src="~/assets/images/master.png" style="max-width: 100%; height: auto; margin-top:-17px" />
+            </div>
+        </div>
+        <div class="form-check form-check-inline">
+            <label class="form-check-label">
+                <input type="radio" class="form-check-input" name="optionsRadios2" id="optionsOffline" value="Offline">
+                Offline Payment
+            </label>
+        </div>
+        <div class="form-check form-check-inline">
+            <label class="form-check-label">
+                <input type="radio" class="form-check-input" name="optionsRadios2" id="optionsTransfer" value="Transfer">
+                Online Transfer
+            </label>-->
+                @*<div style="height: 20px; width: 50px; margin-left: 5px;">
+            <img src="~/assets/images/bankTr.png" style="max-width: 100%; height: auto; margin-top: -10px" />
+        </div>*@
+                <!--</div>
+    <div class="form-check form-check-inline">
+        <label class="form-check-label">
+            <input type="radio" class="form-check-input" name="optionsRadios2" id="optionsBank" value="Bank">
+            Bank Connect
+        </label>-->
+                @*<div style="height: 20px; width: 50px; margin-left: 5px;">
+            <img src="~/assets/images/bConnect1.jpeg" style="max-width: 100%; height: auto; margin-top: -15px" />
+        </div>*@
+                <!--</div>
+        </div>
+    </div>-->
+                <!-- Col -->
+                <!--<div class="col-sm-4">
+        <div class="form-group">
+            <label class="control-label">Referral/Discount Code</label>
+            if (Model.refCode != null && Model.refCode != "")
+            {
+                <input type="text" class="form-control" readonly="readonly" asp-for="registerz.referralCode" value="Model.refCode" placeholder="Referral Code">
+            }
+            else
+            {
+                <input type="text" class="form-control" asp-for="registerz.referralCode" placeholder="Referral Code" id="refCode">
+            }
+            <span style=" font-size: smaller; font-style: italic; display: none" id="discountCal">You will get <span id="discount"></span> ( <span id="perc"></span> of <span id="pPrice">)</span> </span>
+        </div>
+    </div>-->
+                <!-- Col -->
+                <!--</div>--><!-- Row -->
+                <!--<div class="row" id="offlineAccount" style="display:none">
+        <div class="alert alert-success col-sm-12" role="alert">
+            <span style="font-size:15px; font-weight:bold">Offline Payment Account Details</span>
+            <br />
+            <span style="font-size:15px;"> Bank Name : </span><span style="font-size:15px; font-weight:bold">FCMB</span><br /> <span style="font-size:15px;"> Account Number : </span> <span style="font-size:15px; font-weight:bold"> 9032475016</span> <br /><span style="font-size:15px;">Account Name : </span> <span style="font-size: 15px; font-weight: bold">EDUREX Technologies </span>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="control-label">How did you hear about us?<span style="color:red">*</span></label>
+                if (Model.refCode != null && Model.refCode != "")
+                {
+                    <select class="js-example-basic-single w-100" data-placeholder="Select an option" asp-for="registerz.heardAboutUs" data-width="100%">
+
+                        <option value="Search engine">Search engine (Google, Bing, etc...)</option>
+                        <option value="Recommended by friend">Recommended by friend</option>
+                        <option value="Social media">Social media</option>
+                        <option value="Radio">Radio</option>
+                        <option value="Television">Television</option>
+                        <option value="Billboard">Billboard</option>
+                        <option value="Direct Sales by Staff">Direct Sales by Staff</option>
+                        <option selected value="Referral">Referral</option>
+                        <option value="Others">Others</option>
+                    </select>
+                }
+                else
+                {
+                    <select class="js-example-basic-single w-100" data-placeholder="Select an option" asp-for="registerz.heardAboutUs" data-width="100%">
+                        <option label="empty" value=""></option>
+                        <option value="Search engine">Search engine (Google, Bing, etc...)</option>
+                        <option value="Recommended by friend">Recommended by friend</option>
+                        <option value="Social media">Social media</option>
+                        <option value="Radio">Radio</option>
+                        <option value="Television">Television</option>
+                        <option value="Billboard">Billboard</option>
+                        <option value="Direct Sales by Staff">Direct Sales by Staff</option>
+                        <option value="Referral">Referral</option>
+                        <option value="Others">Others</option>
+                    </select>
+                }
+            </div>
+        </div>-->
+                <!-- Col -->
+                <!--</div>--><!-- Row -->
+                <!--<div class="row">
+    <div class="col-sm-2">
+        <div class="form-group">
+            <label>Referral Code</label>
+
+        </div>
+    </div>-->
+                <!-- Col -->
+                <!--<div class="col-sm-8">
+        <input type="text" class="form-control" asp-for="registerz.referralCode" placeholder="Referral Code" id="refCode">
+    </div>-->
+                <!-- Col -->
+                <!--</div>--><!-- Row -->
+                <!--<div class="row">-->
+                <!--<div class="col-sm-2">
+        <div class="form-group">
+            <label>Select Payment Method</label>
+
+        </div>
+    </div>-->
+                <!-- Col -->
+                <!--<div class="col-sm-8">
+    <div class="form-group">
+        <button type="submit" id="cardButton" class="btn btn-primary" asp-action="RegisterCard" style="display:none;"><i class="mdi mdi-bank"></i>Submit Form</button>
+        <button type="submit" id="transferButton" class="btn btn-primary" asp-action="RegisterTransfer" style="display:none;"><i class="mdi mdi-bank"></i>Submit Form</button>
+        <button type="submit" id="bankButton" class="btn btn-primary" asp-action="RegisterBankConnect" style="display:none;"><i class="mdi mdi-cached"></i>Submit Form</button>
+        <button type="submit" id="offlineButton" class="btn btn-primary" asp-action="RegisterOffline" style="display:none;"><i class="mdi mdi-cached"></i>Submit Form</button>
+
+    </div>-->
+                @*<input type="submit" value="Debit Card" id="cardButton" class="btn btn-primary disableButton submit" asp-action="RegisterCard" style="margin-right: 10px; background-color: #058383 !important" />*@
+                @*<input type="submit" value="Account Transfer" id="transferButton" class="btn btn-secondary disableButton submit" asp-action="RegisterTransfer" style="margin-right: 10px;" />*@
+                @*<input type="submit" value="Bank Connect" id="bankButton" class="btn btn-info disableButton submit" asp-action="RegisterBankConnect" style="margin-right: 10px;" />*@
+                @*</div>*@<!-- Col -->
+                <!--</div>--><!-- Row -->
+                <!--<br />
+                </div>
+            </div>
+        </div>
+    </div>-->
+                @*</form>*@
+            </div>
+
+            <!-- partial:../../partials/_footer.html -->
+            <partial name="_myFooter" />
+            <!-- partial -->
+
+        </div>
+    </div>
+
+    <!-- core:js -->
+    <script src="~/assets/vendors/core/core.js"></script>
+    <!-- endinject -->
+    <!-- plugin js for this page -->
+    <script src="~/assets/vendors/jquery-validation/jquery.validate.min.js"></script>
+    <script src="~/assets/vendors/bootstrap-maxlength/bootstrap-maxlength.min.js"></script>
+    <script src="~/assets/vendors/inputmask/jquery.inputmask.min.js"></script>
+    <script src="~/assets/vendors/select2/select2.min.js"></script>
+    <script src="~/assets/vendors/typeahead.js/typeahead.bundle.min.js"></script>
+    <script src="~/assets/vendors/jquery-tags-input/jquery.tagsinput.min.js"></script>
+    <script src="~/assets/vendors/dropzone/dropzone.min.js"></script>
+    <script src="~/assets/vendors/dropify/dist/dropify.min.js"></script>
+    <script src="~/assets/vendors/bootstrap-colorpicker/bootstrap-colorpicker.min.js"></script>
+    <script src="~/assets/vendors/bootstrap-datepicker/bootstrap-datepicker.min.js"></script>
+    <script src="~/assets/vendors/moment/moment.min.js"></script>
+    <script src="~/assets/vendors/tempusdominus-bootstrap-4/tempusdominus-bootstrap-4.js"></script>
+    <script src="~/assets/vendors/prismjs/prism.js"></script>
+    <script src="~/assets/vendors/clipboard/clipboard.min.js"></script>
+    <script src="~/assets/vendors/sweetalert2/sweetalert2.min.js"></script>
+    <!-- end plugin js for this page -->
+    <!-- inject:js -->
+    <script src="~/assets/vendors/feather-icons/feather.min.js"></script>
+    <script src="~/assets/js/template.js"></script>
+    <!-- endinject -->
+    <!-- custom js for this page -->
+    <script src="~/assets/js/form-validation.js"></script>
+    <script src="~/assets/js/bootstrap-maxlength.js"></script>
+    <script src="~/assets/js/inputmask.js"></script>
+    <script src="~/assets/js/select2.js"></script>
+    <script src="~/assets/js/typeahead.js"></script>
+    <script src="~/assets/js/tags-input.js"></script>
+    <script src="~/assets/js/dropzone.js"></script>
+    <script src="~/assets/js/dropify.js"></script>
+    <script src="~/assets/js/bootstrap-colorpicker.js"></script>
+    <script src="~/assets/js/datepicker.js"></script>
+    <script src="~/assets/js/timepicker.js"></script>
+    <script src="~/assets/vendors/sweetalert2/sweetalert2.min.js"></script>
+    <script src="~/assets/js/myRegisterScript.js"></script>
+    <script src="~/assets/js/ShowAlert.js"></script>
+
+    <script type="text/javascript">
+
+        document.getElementById("amount").addEventListener("focusout", ValidateAmount);
+        function ValidateAmount() {
+            
+            let x = document.querySelector('#optionsPart');
+
+            if (x.checked) {
+                
+                let a = document.getElementById("amount").value;
+                let d =document.getElementById("amountD").value;
+                let f = document.getElementById("amountF").value;
+
+                if (parseInt(a) < parseInt(d)) {
+
+                    document.getElementById("displ").innerHTML = "Amount must not be less than " + document.getElementById("deposit2").innerHTML;
+                    document.getElementById("amount").value = document.getElementById("amountD").value;
+                }
+                else if (parseInt(a) > parseInt(f)) {
+
+                    document.getElementById("displ").innerHTML = "Amount must not be greater than " + document.getElementById("fullP").innerHTML;
+                    document.getElementById("amount").value = document.getElementById("amountF").value;
+                }
+                else {
+                    document.getElementById("displ").innerHTML = "Enter amount between " + document.getElementById("deposit2").innerHTML + " and " + document.getElementById("fullP").innerHTML;
+                }
+            }
+        }
+
+        document.getElementById("refCode").addEventListener("focusout", CodeLossFocus);
+        
+        function CodeLossFocus() {
+           
+            let f = document.getElementById("amountF").value;
+           
+            //Get discount Rate
+            //--------------------            
+            let code = document.getElementById("refCode").value;
+
+            let urlSubjects = '/Home/getDiscountRate';
+            $.post(urlSubjects, { GetDiscountRate: code }, function (data) {
+
+                if (data > 0) {
+
+                    let discount = (parseInt(f) * parseInt(data)) / 100;
+                    $("#discountCal").css("display", "block");
+
+                    document.getElementById("discount").innerHTML = ("₦" + discount.toLocaleString('en-US') + ".00").bold();
+
+                    document.getElementById("perc").innerHTML = (data + "%").bold();
+                    document.getElementById("pPrice").innerHTML = document.getElementById("fullP").innerHTML;
+
+                    var amountEntered = document.getElementById("amount").value;
+                    var totalPayable = parseInt(amountEntered) + parseInt(discount);
+                    var balance = parseInt(f) - parseInt(discount);
+
+                    if (parseInt(totalPayable) > parseInt(f)) {
+                        alert("Your amount payable can be " + balance + " or less because of the discount");
+                        document.getElementById("amount").value = balance;
+                        document.getElementById("displ").innerHTML = "Amount must not be greater than ₦" + (balance.toLocaleString('en-US') + ".00").bold();
+
+                    }
+                }
+                else {
+                    $("#discountCal").css("display", "none");
+                }
+            });
+
+        }
+    </script>
+
+</body>
+</html>
+
+
+
+
+
+
+

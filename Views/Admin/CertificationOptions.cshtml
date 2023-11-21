@@ -1,0 +1,71 @@
+﻿@{
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+}
+
+@model CPEA.Utilities.ViewModel.CertificationsVM
+
+<nav class="page-breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="@Url.Action("Programs","Admin")">Programs</a></li>
+        <li class="breadcrumb-item"><a href="@Url.Action("ProgramCategories","Admin")">Categories</a></li>
+        <li class="breadcrumb-item"><a href="@Url.Action("Certifications","Admin")">Certifications</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Certifications Price Options</li>
+    </ol>
+</nav>
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="container-fluid mt-5 d-flex justify-content-center w-100">
+                    <div class="table-responsive w-100">
+                        <div>
+                            <h4 class="mb-3 mb-md-0">@Model.CertPriceOptionVM.certName Price Options</h4>
+                        </div>
+                        <br />
+                        <table class="table table-hover mb-0 " id="dataTableExample">
+                            <thead>
+                                <tr>
+                                    <th class="pt-0">Exam Date</th>
+                                    <th class="pt-0">Amount</th>
+                                    <th class="pt-0">Charges</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model != null && Model.CertPriceOptionVM.CertPriceOptionV.Count > 0)
+                                {
+                                    @foreach (var item in Model.CertPriceOptionVM.CertPriceOptionV)
+                                    {
+                                        <tr>
+                                            <td>@Html.DisplayFor(modelItem => item.ExamDate)</td>
+                                            <td>@Html.DisplayFor(modelItem => item.Amount)</td>
+                                            <td>@Html.DisplayFor(modelItem => item.Charges)</td>
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+                <div>
+                    @if (Model != null && Model.CertPriceOptionVM.CertPriceOptionV.Count > 0)
+                    {
+                        <a class="btn btn-primary" onclick="CourseData(@Model.CertPriceOptionVM.certId, '@Model.CertPriceOptionVM.certName')" data-toggle="modal" data-target="#CertpriceOptionModal" style="margin-top: 15px; background-color: #058383 !important "> New Price Option</a>
+                        <partial name="AddCertPrice" />
+                    }
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function CourseData(g, h) {
+        document.getElementById('certId').value = g;
+        document.getElementById('certName').value = h;
+
+    }
+</script>
+
+

@@ -1,0 +1,32 @@
+﻿<!-- Modal -->
+
+@model CPEA.Utilities.ViewModel.RegisteredUsersVM
+<div class="modal fade" id="unblockUserModal" tabindex="-1" role="dialog" aria-labelledby="unblockUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="unblockUserModalLabel">Unblock User</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form asp-action="UnBlockUser">
+                    <div class="form-group">
+                        <label for="userEmail" class="col-form-label">User Email :</label>
+                        <input type="text" class="form-control" id="userEmail" readonly asp-for="@Model.blockUserDTO.userEmail">
+                    </div>
+                    <div class="form-group">
+                        <label for="pin" class="col-form-label">Your PIN:</label>
+                        <input type="password" class="form-control" id="pin" asp-for="@Model.blockUserDTO.PIN">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary" style="margin-right: 10px; background-color: #058383 !important">Unblock</button>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>

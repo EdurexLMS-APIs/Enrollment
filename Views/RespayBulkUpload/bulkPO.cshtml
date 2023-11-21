@@ -1,0 +1,9 @@
+﻿@model CPEA.Utilities.RespayClasses.BulkPOUpload
+
+<h4>Start Uploading Files Here</h4>
+<hr />
+
+<form method="post" enctype="multipart/form-data">
+    <input type="file" name="bulkFile" required asp-for="bulkFile" />
+    <button class="btn btn-success" type="submit" asp-controller="RespayBulkUpload" asp-action="bulkPO">Upload to Database</button>
+</form>

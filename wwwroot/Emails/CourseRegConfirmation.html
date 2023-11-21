@@ -1,0 +1,191 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional //EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html style="margin: 0; padding: 0" xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title></title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width" />
+    <style type="text/css">
+      body {
+        margin: 0;
+        background-color: #f7f7f7;
+      }
+      table {
+        border-spacing: 0;
+      }
+      td {
+        padding: 0;
+      }
+      img {
+        border: 0;
+      }
+      .wrapper {
+        width: 100%;
+        table-layout: fixed;
+        background-color: #f7f7f7;
+        padding: 50px 10px;
+      }
+      .main {
+        background-color: #fff;
+        margin: 0 auto;
+        width: 100%;
+        max-width: 460px;
+        border-spacing: 0;
+        font-family: sans-serif;
+        color: #3c3c3c;
+      }
+
+      .logo {
+        text-align: center;
+      }
+
+      .header {
+        font-weight: 600;
+        font-size: 24px;
+        font-family: sans-serif;
+      }
+
+      .green-button {
+        text-decoration: none;
+        color: #fff;
+        background-color: #038618;
+        text-align: center;
+        padding: 15px 30px;
+        border-radius: 4px;
+        font-weight: 600;
+      }
+
+      .two-columns {
+        text-align: center;
+      }
+
+      .two-columns .column {
+        width: 100%;
+        max-width: 80px;
+        display: inline-block;
+        vertical-align: top;
+        border: #038618 solid 1px;
+        border-radius: 6px;
+        text-align: center;
+        margin: 0 12px;
+      }
+      .two-columns .column .outlined-button {
+        width: 100%;
+        text-decoration: none;
+        color: #038618;
+      }
+
+      .four-columns {
+        text-align: center;
+        font-size: 0;
+        padding: 25px 100px;
+      }
+
+      .four-columns .column {
+        width: 100%;
+      }
+    </style>
+  </head>
+
+  <body>
+    <center class="wrapper">
+      <table class="main" width="100%">
+          <!--<tr style="text-align: center">
+              <td class="logo">
+                  <img src="C:\Users\CAROLINE\source\repos\CPEA\CPEA\wwwroot\assets\imagesEdurexAcademy.png" alt="EDUREX" title="EDUREX" />
+              </td>
+          </tr>-->
+        <tr>
+          <td style="padding: 0 30px">
+            <table width="100%">
+              <tr style="text-align: center">
+                  <td style="padding: 40px 30px 70px 30px">
+                      <h3 style="text-align: left; padding: 10px 0 30px 0">
+                         Course Registration Confirmation
+                      </h3>
+                      <p style="text-align: left; line-height: 23px; font-size: 15px">
+                          Dear {StudentName},
+                      </p>
+                      <p style="text-align: left; line-height: 23px; font-size: 15px">
+                          We are delighted to confirm your successful registration for the {CourseName} at EDUREX Academy.
+                      </p>
+                      <p style="text-align: left; line-height: 23px; font-size: 15px">
+                          Below are the details of your registration:
+                      </p>
+                      <p style="text-align: left;line-height: 23px;font-size: 15px; font-weight:bold; padding: 0 0 0px 0px;">
+                          Registration Details:
+                      </p>
+                      <p style=" text-align: left; line-height: 23px; font-size: 15px; padding: 0px 0 10px 0px;">
+                          •	Student ID: {StudentId} <br />
+                          •	Registered Course: {CourseName} <br />
+                          •	Start Date: {StartDate} <br />
+                          •	End Date: {EndDate} <br />
+                          •	Certificate Awarded by: (EDUREX / University of Ibadan) <br />
+                      </p>
+
+
+                      <p style="text-align: left;line-height: 23px;font-size: 15px; font-weight:bold; padding: 0 0 0px 0px;">
+                          Payment Status:
+                      </p>
+                      <p style=" text-align: left; line-height: 23px; font-size: 15px; padding: 0px 0 10px 0px;">
+                          •	Total Amount Paid:  {StudentId} <br />
+
+                          •	Payment Record <br />
+                          {tblPaymentRecord}
+                      </p>
+                      <p style="text-align: left;line-height: 23px;font-size: 15px; font-weight:bold; padding: 0 0 0px 0px;">
+                          Important Dates:
+                      </p>
+                      <p style=" text-align: left; line-height: 23px; font-size: 15px; padding: 0px 0 10px 0px;">
+                          •	Orientation Session: (Orientation Date and Time) <br />
+                      </p>
+
+                      <p style="text-align: left;line-height: 23px;font-size: 15px; padding: 0 0 0px 0px;">
+                          <span style=" font-weight: bold;">Login Information:</span> You can access the Learning Management System (LMS) using the following credentials:
+                      </p>
+                      <p style=" text-align: left; line-height: 23px; font-size: 15px; padding: 0px 0 0px 0px;">
+                          •	LMS URL:  <br />
+                          •	Username:   <br />
+                          •	Temporary Password:   <br />
+                      </p>
+                      <p style=" text-align: left; line-height: 23px; font-size: 15px; padding: 0px 0 10px 0px;">
+                          You will be able to access your course materials, assignments, and other resources through our Learning Management System (LMS) using the provided login credentials. For security reasons, please change your password immediately upon logging in to the LMS.
+                      </p>
+
+
+                      <p style="text-align: left;line-height: 23px;font-size: 15px; padding: 0 0 0px 0px;">
+                          <span style=" font-weight: bold;">Support and Contact Information:</span> You can access the Learning Management System (LMS) using the following credentials:
+                      </p>
+                      <p style=" text-align: left; line-height: 23px; font-size: 15px; padding: 0px 0 15px 0px;">
+                          •	Email:   <br />
+                          •	Phone:   <br />
+                      </p>
+                      <p style=" text-align: left; line-height: 23px; font-size: 15px; padding: 0px 0 10px 0px;">
+                          Thank you for choosing EDUREX Academy for your educational journey. We wish you all the best in your studies.
+                      </p>
+
+
+                      <p style=" text-align: left; line-height: 23px; font-size: 15px; padding: 0px 0 10px 0px;">
+                          Warm regards,
+                      </p>
+
+                  </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr style="text-align: center">
+          <td style="padding: 0 0 80px 0">
+              <p style="line-height: 0; color: #adb6ca">https://edurex.academy</p>
+            <p style="color: #adb6ca">Ikoyi, Lagos State.</p>
+            <p style="line-height: 1; color: #fff">.</p>
+            <p style="line-height: 0; color: #adb6ca">
+              Manage email preferences or
+            </p>
+            <a href="/" style="line-height: 0; color: #adb6ca">unsubscribe</a>
+          </td>
+        </tr>
+      </table>
+    </center>
+  </body>
+</html>

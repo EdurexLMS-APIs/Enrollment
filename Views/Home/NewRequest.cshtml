@@ -1,0 +1,36 @@
+﻿
+@model CPEA.Models.UserRequest
+<form class="forms-sample" asp-action="NewRequest">
+
+    <div class="col-md-12 grid-margin">
+        <div class="card">
+            <div class="card-body">
+                <h6 class="card-title">Request Information</h6>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="form-group">
+                            <label class="control-label">Title<span style="color:red">*</span></label>
+                            <input asp-for="Title" class="form-control" placeholder="Enter title" required />
+                        </div>
+                    </div><!-- Col -->
+                </div><!-- Row -->
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="form-group">
+                            <label class="control-label">Request<span style="color:red">*</span></label>
+                            <textarea class="form-control" asp-for="Request" rows="5"></textarea>
+                        </div>
+                    </div><!-- Col -->
+                </div>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary" style="float:right; background-color: #058383 !important">Submit Request</button>
+                        </div>
+                    </div><!-- Col -->
+                </div>
+            </div>
+        </div>
+    </div>
+    
+</form>

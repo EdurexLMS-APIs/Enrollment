@@ -1,0 +1,67 @@
+﻿@model CPEA.Utilities.ViewModel.UserPaymentsVM
+
+
+<div class="d-flex justify-content-between align-items-center flex-wrap grid-margin">
+    <div class="col-sm-10">
+        <h4 class="mb-3 mb-md-0">Payment History</h4>
+    </div>
+    <div class="col-sm-2">
+        <h4 class="mb-3 mb-md-0"><a href="@Url.Action("Payment","Home")" class="btn p-0"> Back to Payment</a></h4>
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg-12 col-xl-12 grid-margin stretch-card">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-baseline mb-2">
+                    <h6 class="card-title mb-0"></h6>
+                </div>
+                <div class="table-responsive">
+                    <table id="dataTableExample" class="table">
+                        <thead>
+                            <tr>
+                                <th class="pt-0">Description</th>
+                                <th class="pt-0">Amount</th>
+                                <th class="pt-0">Payment Date</th>
+                                <th class="pt-0">Status</th>
+
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model != null && Model.UserPaymentList.Count > 0)
+                            {
+                                @foreach (var item in Model.UserPaymentList)
+                                {
+                                    <tr>
+                                        <td>@Html.DisplayFor(modelItem => item.paymentForName)</td>
+                                        <td>@Html.DisplayFor(modelItem => item.Amount)</td>
+                                        <td>@Html.DisplayFor(modelItem => item.PaymentDate)</td>
+                                        <td>
+                                            @if (item.Status == CPEA.Utilities.PaymentStatusEnums.Paid)
+                                            {
+                                                <span class="badge badge-success">PAID</span>
+                                            }
+                                            else if (item.Status == CPEA.Utilities.PaymentStatusEnums.Initialized)
+                                            {
+                                                <span class="badge badge-warning">INITIALIZED</span>
+                                            }
+                                            else if (item.Status == CPEA.Utilities.PaymentStatusEnums.Pending)
+                                            {
+                                                <span class="badge badge-info-muted">PENDING</span>
+                                            }
+                                            else if (item.Status == CPEA.Utilities.PaymentStatusEnums.Failed)
+                                            {
+                                                <span class="badge badge-danger">FAILED</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>

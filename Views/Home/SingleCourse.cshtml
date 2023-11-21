@@ -1,0 +1,150 @@
+﻿@model CPEA.Utilities.ViewModel.UserCourseRecord
+
+<div class="d-flex justify-content-between align-items-center flex-wrap grid-margin">
+    <div class="col-sm-10">
+        <h4 class="mb-3 mb-md-0">Course Details</h4>
+    </div>
+    <div class="col-sm-2">
+        <h4 class="mb-3 mb-md-0"><a href="@Url.Action("Courses","Home")" class="btn p-0"> Back to Courses</a></h4>
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg-12 col-xl-12 grid-margin stretch-card">
+        <div class="card">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-sm-3">
+                        <div class="col-sm-5" style="float:left">
+                            <p class="text-muted tx-12">Code</p>
+                        </div>
+                        <div class="col-sm-7" style="float:right">
+                            <h6 class="text-body mb-2">@Model.CourseCode</h6>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="col-sm-5" style="float:left">
+                            <p class="text-muted tx-12">Name</p>
+                        </div>
+                        <div class="col-sm-7" style="float:right">
+                            <h6 class="text-body mb-2">@Model.Name</h6>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="col-sm-3" style="float:left">
+                            <p class="text-muted tx-12">Description</p>
+                        </div>
+                        <div class="col-sm-9" style="float:right">
+                            <h6 class="text-body mb-2">@Model.Description</h6>
+                        </div>
+                    </div>
+                </div>
+                <hr />
+                <div class="row">
+                    <div class="col-sm-3">
+                        <div class="col-sm-5" style="float:left">
+                            <p class="text-muted tx-12">Category</p>
+                        </div>
+                        <div class="col-sm-7" style="float:right">
+                            <h6 class="text-body mb-2">@Model.Category</h6>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="col-sm-5" style="float:left">
+                            <p class="text-muted tx-12">Program</p>
+                        </div>
+                        <div class="col-sm-7" style="float:right">
+                            <h6 class="text-body mb-2">@Model.Program</h6>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="col-sm-3" style="float:left">
+                            <p class="text-muted tx-12">Institution</p>
+                        </div>
+                        <div class="col-sm-9" style="float:right">
+                            <h6 class="text-body mb-2">@Model.Institutio</h6>
+                        </div>
+                    </div>
+                </div>
+                <hr />
+                <div class="row">
+                    <div class="col-sm-3">
+                        <div class="col-sm-5" style="float:left">
+                            <p class="text-muted tx-12">Course Option</p>
+                        </div>
+                        <div class="col-sm-7" style="float:right">
+                            <h6 class="text-body mb-2">@Model.CourseOption</h6>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="col-sm-5" style="float:left">
+                            <p class="text-muted tx-12">Duration</p>
+                        </div>
+                        <div class="col-sm-7" style="float:right">
+                            <h6 class="text-body mb-2">@Model.Duration</h6>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="col-sm-5" style="float:left">
+                            <p class="text-muted tx-12">Start Date</p>
+                        </div>
+                        <div class="col-sm-7" style="float:right">
+                            <h6 class="text-body mb-2">@Model.StartDate</h6>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="col-sm-5" style="float:left">
+                            <p class="text-muted tx-12">End Date</p>
+                        </div>
+                        <div class="col-sm-7" style="float:right">
+                            <h6 class="text-body mb-2">@Model.EndDate</h6>
+                        </div>
+                    </div>
+                </div>
+                <hr />
+                <div class="row">
+                    <div class="col-sm-3">
+                        <div class="col-sm-5" style="float:left">
+                            <p class="text-muted tx-12">Certificate Type</p>
+                        </div>
+                        <div class="col-sm-7" style="float:right">
+                            <h6 class="text-body mb-2">@Model.certificateType</h6>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="col-sm-5" style="float:left">
+                            <p class="text-muted tx-12">Delivery State</p>
+                        </div>
+                        <div class="col-sm-7" style="float:right">
+                            <h6 class="text-body mb-2">@Model.CourierState</h6>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="col-sm-5" style="float:left">
+                            <p class="text-muted tx-12">Registered Date</p>
+                        </div>
+                        <div class="col-sm-7" style="float:right">
+                            <h6 class="text-body mb-2">@Model.RegDate</h6>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="col-sm-5" style="float:left">
+                            <p class="text-muted tx-12">Certificate Issued</p>
+                        </div>
+                        <div class="col-sm-7" style="float:right">
+                            @if (@Model.CertIssued == true)
+                            {
+                                <h6 class="text-body mb-2 badge badge-success">@Model.CertIssued</h6>
+                            }
+                            else
+                            {
+                                <h6 class="text-body mb-2 badge badge-danger">@Model.CertIssued</h6>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+

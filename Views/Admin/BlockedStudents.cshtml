@@ -1,0 +1,146 @@
+﻿@{
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+}
+
+@model CPEA.Utilities.ViewModel.RegisteredStudentsVM
+<div class="d-flex justify-content-between align-items-center flex-wrap grid-margin">
+    <div>
+        <h4 class="mb-3 mb-md-0">Blocked Students</h4>
+    </div>
+</div>
+
+
+@if (CPEA.Utilities.GeneralClass.role == "Admin")
+{
+    <div class="row">
+        <div class="col-lg-12 col-xl-12 grid-margin stretch-card">
+            <div class="card">
+                <div class="card-body">
+
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0 " id="dataTableExample">
+                            <thead>
+                                <tr>
+                                    <th class="pt-0">Student Id</th>
+                                    <th class="pt-0">Full Name</th>
+                                    <th class="pt-0">Email</th>
+                                    <th class="pt-0">Reg. Date</th>
+                                    <th class="pt-0">Last Login</th>
+                                    <th class="pt-0">Total Courses</th>
+                                    <th class="pt-0">Total Certs</th>
+                                    <th class="pt-0">Action</th>
+
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model != null && Model.RegisteredStudents.Count > 0)
+                                {
+                                    @foreach (var item in Model.RegisteredStudents)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <a asp-controller="Admin" asp-action="SingleStudent" asp-route-email="@item.Email"> @Html.DisplayFor(modelItem => item.StudentNumber)</a>
+                                            </td>
+                                            <td>@Html.DisplayFor(modelItem => item.FirstName) @Html.DisplayFor(modelItem => item.LastName)</td>
+                                            <td>
+                                                <a asp-controller="Admin" asp-action="SingleStudent" asp-route-email="@item.Email"> @Html.DisplayFor(modelItem => item.Email)</a>
+                                            </td>
+                                            <td>@Html.DisplayFor(modelItem => item.RegisteredDate)</td>
+                                            <td>
+                                                @if (item.LastLogin != new DateTime())
+                                                {
+                                                    @Html.DisplayFor(modelItem => item.LastLogin)
+                                                }
+                                            </td>
+                                            <td>@Html.DisplayFor(modelItem => item.TotalCourses)</td>
+                                            <td>@Html.DisplayFor(modelItem => item.TotalCertifications)</td>
+                                            <td>
+                                                <partial name="UnBlockStudent" />
+                                                <div class="dropdown mb-2">
+                                                    <button class="btn p-0" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                        <i class="icon-lg text-muted pb-3px" data-feather="more-horizontal"></i>
+                                                    </button>
+                                                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                                        <a class="dropdown-item d-flex align-items-center" href="#" onclick="BlockUser('@item.Email @item.StudentNumber @item.FirstName @item.LastName')" data-toggle="modal" data-target="#unblockStudentModal"><i data-feather="user-check" class="icon-sm mr-2"></i> <span class="">Unblock</span></a>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+}
+else
+{
+    <div class="row">
+        <div class="col-lg-12 col-xl-12 grid-margin stretch-card">
+            <div class="card">
+                <div class="card-body">
+
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0 " id="dataTableExample">
+                            <thead>
+                                <tr>
+                                    <th class="pt-0">Student Id</th>
+                                    <th class="pt-0">Full Name</th>
+                                    <th class="pt-0">Email</th>
+                                    <th class="pt-0">Reg. Date</th>
+                                    <th class="pt-0">Last Login</th>
+                                    <th class="pt-0">Total Courses</th>
+                                    <th class="pt-0">Total Certs</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model != null && Model.RegisteredStudents.Count > 0)
+                                {
+                                    @foreach (var item in Model.RegisteredStudents)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <a asp-controller="Admin" asp-action="SingleStudent" asp-route-email="@item.Email"> @Html.DisplayFor(modelItem => item.StudentNumber)</a>
+                                            </td>
+                                            <td>@Html.DisplayFor(modelItem => item.FirstName) @Html.DisplayFor(modelItem => item.LastName)</td>
+                                            <td>
+                                                <a asp-controller="Admin" asp-action="SingleStudent" asp-route-email="@item.Email"> @Html.DisplayFor(modelItem => item.Email)</a>
+                                            </td>
+                                            <td>@Html.DisplayFor(modelItem => item.RegisteredDate)</td>
+                                            <td>
+                                                @if (item.LastLogin != new DateTime())
+                                                {
+                                                    @Html.DisplayFor(modelItem => item.LastLogin)
+                                                }
+                                            </td>
+                                            <td>@Html.DisplayFor(modelItem => item.TotalCourses)</td>
+                                            <td>@Html.DisplayFor(modelItem => item.TotalCertifications)</td>
+                                            
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+}
+<script>
+    function BlockUser(g) {
+        if (g != null) {
+            var fields = g.split(' ');
+
+            document.getElementById('studentEmail').value = fields[0];
+            document.getElementById('studentEmailR').value = fields[0];
+            document.getElementById('studentNumber').value = fields[1];
+            document.getElementById('studentName').value = fields[2] + " " + fields[3];
+        }
+    }
+</script>

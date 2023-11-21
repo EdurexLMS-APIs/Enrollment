@@ -1,0 +1,60 @@
+﻿<!-- Modal -->
+@model CPEA.Utilities.ViewModel.PaymentVM
+<div class="modal fade" id="confirmModal" tabindex="-1" role="dialog" aria-labelledby="resetUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="resetUserModalLabel">Confirm Payment</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form asp-action="ConfirmPayment">
+
+                    <div class="form-group">
+                        <label class="col-form-label">Payment Ref :</label>
+                        <input type="text" class="form-control" readonly id="paymentR">
+                        <input type="hidden" class="form-control" readonly id="Id" asp-for="ConfirmPayment.Id" >
+                    </div>
+                    <div class="form-group">
+                        <label for="pin" class="col-form-label">Your PIN:</label>
+                        <input type="password" class="form-control" id="pin" asp-for="@Model.ConfirmPayment.PIN">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary" style="margin-right: 10px; background-color: #058383 !important">Confirm</button>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    function displayIcon() {
+
+        var value = document.getElementById('password').value;
+        if (value.length > 0) {
+            $("#toggleP").css("display", "block");
+        }
+        else {
+
+            $("#toggleP").css("display", "none");
+        }
+    }
+
+    function clicktoggleP() {
+
+        var type = $("#password").attr('type');
+
+        if (type == "password") {
+            $("#password").attr('type', 'text');
+        }
+        else {
+            $("#password").attr('type', 'password');
+
+        }
+    }
+</script>

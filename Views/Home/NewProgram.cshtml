@@ -1,0 +1,51 @@
+﻿@model CPEA.Utilities.ViewModel.DashboardVM
+<div class="modal fade" id="NewProgram" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalCenterTitle">Program Details</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form asp-action="NewProgram">
+                    <input type="hidden" class="form-control form-control-sm" asp-for="SourceView" id="sourceProgram">
+                    @*<div class="form-group">
+            <label class="control-label" style="float:left">Program Category</label>
+            <select data-width="100%" style="color:black" id="programCat" data-placeholder="Select an option" asp-items="@Model.programCategoryListz.Select(x => new SelectListItem() { Text = x.Name, Value = x.Id.ToString() }).ToList()">
+                <option value="Select">Select an option</option>
+            </select>
+        </div>*@
+                    <div class="form-group">
+                        <label class="control-label" style="float:left">Programs</label>
+                        <select data-width="100%" style="color:black" data-placeholder="Select an option" id="program">
+                            <option value="Select">Select</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label" style="float:left">Program Category</label>
+                        <select data-width="100%" style="color:black" id="programCat" data-placeholder="Select an option" asp-items="@Model.programListz.Select(x => new SelectListItem() { Text = x.Name, Value = x.Id.ToString() }).ToList()">
+                            <option value="Select">Select an option</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label" style="float:left">Program Option</label>
+                        <select asp-for="programOptionId" style="color:black" data-placeholder="Select an option" data-width="100%" id="programoption">
+                            <option value="Select">Select</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label" style="float:left">Subject Options <span id="maxSub"></span></label>
+                        <select multiple class="form-control" id="subjects" style="text-align:left; color:black" asp-for="SubjectIds" data-placeholder="Select multiple options" data-width="100%">
+                        </select>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary" style="margin-right: 10px; background-color: #058383 !important">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

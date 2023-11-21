@@ -1,0 +1,79 @@
+﻿@model CPEA.Utilities.ViewModel.UserCertificationsVM
+<div class="d-flex justify-content-between align-items-center flex-wrap grid-margin">
+    <div>
+        <h4 class="mb-3 mb-md-0">My Certifications</h4>
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg-12 col-xl-12 grid-margin stretch-card">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-baseline mb-2">
+                    <h6 class="card-title mb-0"></h6>
+                </div>
+                <div class="table-responsive">
+                    <table id="dataTableExample" class="table">
+                        <thead>
+                            <tr>
+                                <th class="pt-0">Short Code</th>
+                                <th class="pt-0">Cert. Name</th>
+                                <th class="pt-0">Provider</th>
+                                <th class="pt-0">Price</th>
+                                <th class="pt-0">ExamDate</th>
+                                <th class="pt-0">Status</th>
+                                <th class="pt-0">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model != null && Model.UserCertificationList.Count > 0)
+                            {
+                                @foreach (var item in Model.UserCertificationList)
+                                {
+                                    <tr>
+                                        <td>@Html.DisplayFor(modelItem => item.ShortCode)</td>
+                                        <td>@Html.DisplayFor(modelItem => item.Name)</td>
+                                        <td>@Html.DisplayFor(modelItem => item.provider)</td>
+                                        <td>₦ @Html.DisplayFor(modelItem => item.Price)</td>
+                                        <td>@Html.DisplayFor(modelItem => item.ExamDate)</td>
+                                        <td>
+                                            @if (item.ProgramStatus == CPEA.Utilities.UserCourseStatusEnums.Completed)
+                                            {
+                                                <span class="badge badge-success">COMPLETED</span>
+                                            }
+                                            else if (item.ProgramStatus == CPEA.Utilities.UserCourseStatusEnums.InProgress)
+                                            {
+                                                <span class="badge badge-warning">IN PROGRESS</span>
+                                            }
+                                            else if (item.ProgramStatus == CPEA.Utilities.UserCourseStatusEnums.Pending)
+                                            {
+                                                <span class="badge badge-danger">REGISTERED</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            <div class="dropdown mb-2">
+                                                <button class="btn p-0" type="button" id="dropdownMenuButton1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                    <i class="icon-lg text-muted pb-3px" data-feather="more-horizontal"></i>
+                                                </button>
+                                                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                                                    <a class="dropdown-item d-flex align-items-center" href="#"><i data-feather="edit" class="icon-sm mr-2"></i> <span class="">Print Registration</span></a>
+                                                    <a class="dropdown-item d-flex align-items-center" href="#"><i data-feather="download" class="icon-sm mr-2"></i> <span class="">Download Guide</span></a>
+                                                    <a class="dropdown-item d-flex align-items-center" href="#"><i data-feather="plus-square" class="icon-sm mr-2"></i> <span class="">Change Exam Date</span></a>
+
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+<div style=" text-align:right">
+    <a  asp-controller="Home" asp-action="OnlyCertifications" class="btn btn-primary" style="margin-top: 15px; background-color: #058383 !important ">Register New Certification</a>
+    @*<partial name="NewProgram" />*@
+</div>

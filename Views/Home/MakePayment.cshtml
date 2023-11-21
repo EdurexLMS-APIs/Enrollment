@@ -1,0 +1,106 @@
+﻿@model CPEA.Utilities.ViewModel.StudentDashboardVM
+<div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalCenterTitle">Course Payment</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-success col-sm-12" role="alert">
+                    <div class="row">
+                        <div class="form-group">
+                            <span style="font-size:15px;">Amount owing is <span style="font-size:15px; font-weight:bold" id="amountOwingMP"></span></span>
+                        </div>
+                    </div>
+                </div>
+                <form asp-action="MakePayment">
+                    <input type="hidden" class="form-control form-control-sm" asp-for=" ChangeCDateDTO.paymentDTO.UserPaymentForId" id="userCIdMP">
+                    <input type="hidden" class="form-control form-control-sm" asp-for="SourceView" id="sourceMP">
+                    <input type="hidden" asp-for="ChangeCDateDTO.paymentDTO.PaymentMethod" id="paymentMethodDTOMP" value="Card" />
+                    <input type="hidden" asp-for="ChangeCDateDTO.paymentDTO.paymentRef" id="OfflinePaymentRefDTOMP" />
+                    <div class="form-group">
+                        <label for="colFormLabelSm">Amount</label>
+                        <input type="text" class="form-control form-control-sm" asp-for="ChangeCDateDTO.paymentDTO.Amount" id="amount" placeholder="Enter amount to pay">
+                    </div>
+                    <div class="form-group">
+                        <label for="colFormLabelSm" style="margin-top:3px">Select payment method</label>
+                        <div class="form-check form-check-inline">
+                            <label class="form-check-label" style="margin-top:3px">
+                                <input type="radio" class="form-check-input" name="optionsRadios2" id="optionCardMP" value="Card" checked>
+                                Debit Card
+                            </label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <label class="form-check-label">
+                                <input type="radio" class="form-check-input" name="optionsRadios2" id="optionsOfflineMP" value="Offline">
+                                Offline Payment
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div id="offlineAccountMP" style="display:none">
+                            <div class="alert alert-success col-sm-12" role="alert">
+                                <div class="row">
+                                    <div class="col-sm-3" style="float:left">
+                                        <div class="form-group">
+
+                                        </div>
+                                    </div><!-- Col -->
+                                    <div class="col-sm-6">
+                                        <div class="form-group">
+                                            <span style="font-size:15px; font-weight:bold">Offline Payment Account Details</span>
+                                        </div>
+                                    </div><!-- Col -->
+                                    <div class="col-sm-3" style="float:right">
+                                        <div class="form-group">
+
+                                        </div>
+                                    </div><!-- Col -->
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-6" style="float:left">
+                                        <div class="form-group">
+                                            <span style="font-size:15px;"> Bank Name : </span><span style="font-size:15px; font-weight:bold">FCMB</span><br /> <span style="font-size:15px;"> Account Number : </span> <span style="font-size:15px; font-weight:bold"> 9032475016</span> <br /><span style="font-size:15px;">Account Name : </span> <span style="font-size: 15px; font-weight: bold">EDUREX</span>
+                                        </div>
+                                    </div><!-- Col -->
+                                    <div class="col-sm-6" style="float:right">
+                                        <div class="form-group">
+                                            <span style="font-size:15px;"> Bank Name : </span><span style="font-size:15px; font-weight:bold">GTBank</span><br /> <span style="font-size:15px;"> Account Number : </span> <span style="font-size:15px; font-weight:bold"> 0829888314</span> <br /><span style="font-size:15px;">Account Name : </span> <span style="font-size: 15px; font-weight: bold">EDUREX</span>
+                                        </div>
+                                    </div><!-- Col -->
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-5" style="float: left; text-align: right; margin-top: 5px">
+                                        <div class="form-group">
+                                            <span style="font-size:15px; font-weight:bold; text-align:right">Your Transaction Ref : </span>
+                                        </div>
+                                    </div><!-- Col -->
+                                    <div class="col-sm-6">
+                                        <div class="form-group">
+                                            <span style="font-size:20px; font-weight:bold" id="transactionRefMP">Offline Payment Account Details</span>
+                                        </div>
+                                    </div><!-- Col -->
+                                    <div class="col-sm-1" style="float:right">
+                                        <div class="form-group">
+
+                                        </div>
+                                    </div><!-- Col -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary float-right mt-4 ml-2" style="background-color: #058383 !important;"><i data-feather="send" class="mr-3 icon-md"></i>Make Payment</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

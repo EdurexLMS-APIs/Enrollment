@@ -1,0 +1,115 @@
+﻿@model CPEA.Models.ProgramOptions
+<div class="modal fade bd-example-modal-lg" id="AddProgramOption" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalCenterTitle">Program Option Details</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form asp-action="AddProgramOption">
+                    <div class="row">
+
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label class="control-label">Program</label>
+                                <select class="js-example-basic-single w-100" data-width="100%" id="ProgramId">
+                                    <option>-- SELECT --</option>
+                                    @foreach (var item in ViewBag.listPro)
+                                    {
+                                        <option value="@item.Value">@item.Text</option>
+                                    }
+                                </select>
+
+                            </div>
+                        </div><!-- Col -->
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label class="control-label">Program Category</label>
+                                <select class="js-example-basic-single w-100" data-width="100%" asp-for="CategoryId" id="CategoryId">
+                                    <option>-- SELECT --</option>
+                                    @foreach (var item in ViewBag.listCat)
+                                    {
+                                        <option value="@item.Value">@item.Text</option>
+                                    }
+                                </select>
+
+                            </div>
+                        </div><!-- Col -->
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <div class="form-group">
+                                <label class="control-label">Name</label>
+                                <input type="text" asp-for="Name" class="form-control" placeholder="Enter name">
+                            </div>
+                        </div><!-- Col -->
+                        <div class="col-sm-8">
+                            <div class="form-group">
+                                <label class="control-label">Description</label>
+                                <input type="text" asp-for="Description" class="form-control" placeholder="Enter description">
+                            </div>
+                        </div><!-- Col -->
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label class="control-label">Price (NGN)</label>
+                                <input type="text" asp-for="PriceNGN" class="form-control" placeholder="Enter price">
+                            </div>
+                        </div><!-- Col -->
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label class="control-label">Deposit (NGN)</label>
+                                <input type="text" asp-for="DepositNGN" class="form-control" placeholder="Enter deposit">
+                            </div>
+                        </div><!-- Col -->
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label class="control-label">Price (USD)</label>
+                                <input type="text" asp-for="PriceUSD" class="form-control" placeholder="Enter price">
+                            </div>
+                        </div><!-- Col -->
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label class="control-label">Deposit (USD)</label>
+                                <input type="text" asp-for="DepositUSD" class="form-control" placeholder="Enter deposit">
+                            </div>
+                        </div><!-- Col -->
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <div class="form-group">
+                                <label class="control-label">Duration</label>
+                                <input type="number" min="0" asp-for="Duration" class="form-control" placeholder="Enter duration">
+                            </div>
+                        </div><!-- Col -->
+                        <div class="col-sm-4">
+                            <div class="form-group">
+                                <label class="control-label">Start Date</label>
+                                <div class="input-group date datepicker" id="datePickerExample">
+                                    <input type="text" asp-for="StartDate" class="form-control" required><span class="input-group-addon"><i data-feather="calendar"></i></span>
+                                </div>
+                            </div>
+                        </div><!-- Col -->
+                        <div class="col-sm-4">
+                            <div class="form-group">
+                                <label class="control-label">Max Subject</label>
+                                <input type="number" min="0" asp-for="MaxSubjectSelection" class="form-control" placeholder="Enter maximum subject to be selected">
+                            </div>
+                        </div><!-- Col -->
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary" style="margin-right: 10px; background-color: #058383 !important">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

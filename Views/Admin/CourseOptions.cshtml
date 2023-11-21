@@ -1,0 +1,100 @@
+﻿@{
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+}
+
+@model CPEA.Utilities.ViewModel.CoursesVM
+
+<nav class="page-breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="@Url.Action("Programs","Admin")">Programs</a></li>
+        <li class="breadcrumb-item"><a href="@Url.Action("ProgramCategories","Admin")">Categories</a></li>
+        <li class="breadcrumb-item"><a href="@Url.Action("Courses","Admin")">Courses</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Course Price Options</li>
+    </ol>
+</nav>
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="container-fluid mt-5 d-flex justify-content-center w-100">
+                    <div class="table-responsive w-100">
+                        <div>
+                            <h4 class="mb-3 mb-md-0">@Model.CoursePriceOptionVM.courseName Price Options</h4>
+                        </div>
+                        <br />
+                        <table class="table table-hover mb-0 " id="dataTableExample">
+                            <thead>
+                                <tr>
+                                    <th class="pt-0">Start Date</th>
+                                    <th class="pt-0">End Date</th>
+                                    <th class="pt-0">Price Option</th>
+                                    <th class="pt-0">Duration</th>
+                                    <th class="pt-0">Amount</th>
+                                    <th class="pt-0">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model != null && Model.CoursePriceOptionVM.CoursePriceOptionV.Count > 0)
+                                {
+                                    @foreach (var item in Model.CoursePriceOptionVM.CoursePriceOptionV)
+                                    {
+                                        <tr>
+                                            <td>@Html.DisplayFor(modelItem => item.StartDate)</td>
+                                            <td>@Html.DisplayFor(modelItem => item.EndDate)</td>
+                                            <td>@Html.DisplayFor(modelItem => item.Name)</td>
+                                            <td>@Html.DisplayFor(modelItem => item.Duration)</td>
+                                            <td>₦ @Html.DisplayFor(modelItem => item.Amount)</td>
+                                            <td>
+                                                <partial name="EditCourseOption" />
+
+                                                <div class="dropdown mb-2">
+                                                    <button class="btn p-0" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                        <i class="icon-lg text-muted pb-3px" data-feather="more-horizontal"></i>
+                                                    </button>
+                                                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                                        <a class="dropdown-item d-flex align-items-center" href="#" onclick="CourseOptionDataEdit(@item.Id, '@item.Name', '@item.Duration', '@item.Amount', '@item.StartDate', '@item.EndDate')" data-toggle="modal" data-target="#priceOptionEditModal"><i data-feather="edit" class="icon-sm mr-2"></i> <span class="">Edit</span></a>
+
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+                <div>
+                    @if (Model != null && Model.CoursePriceOptionVM.CoursePriceOptionV.Count > 0)
+                    {
+                        <a class="btn btn-primary" onclick="CourseData(@Model.CoursePriceOptionVM.courseId, '@Model.CoursePriceOptionVM.courseName')" data-toggle="modal" data-target="#priceOptionModal" style="margin-top: 15px; background-color: #058383 !important "> New Price Option</a>
+                        <partial name="AddCoursePrice" />
+                        
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function CourseData(g, h) {
+        document.getElementById('courseId').value = g;
+        document.getElementById('courseName').value = h;
+
+    }
+
+
+    function CourseOptionDataEdit(g, h, i, j, k, l) {
+
+        document.getElementById('optionId').value = g;
+        document.getElementById('name').value = h;
+        document.getElementById('duration').value = i;
+        document.getElementById('amount').value = j;
+        document.getElementById('startDate').value = k;
+        document.getElementById('endDate').value = l;
+    }
+</script>
+
+

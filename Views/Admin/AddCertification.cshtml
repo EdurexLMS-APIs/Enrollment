@@ -1,0 +1,111 @@
+﻿@model CPEA.Utilities.ViewModel.CertificationsVM
+<div class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalCenterTitle">New Certification Details</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form asp-action="AddCertification">
+                    <div class="row">
+                        <div class="col-md-12 grid-margin">
+                            <div class="row">
+                                <!--<div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label class="control-label">Programs <span style="color:red">*</span></label>
+                                        <select class="js-example-basic-single w-100" data-width="100%" id="program" data-placeholder="Select an option" required >
+                                            <option value="">Select an option</option>
+                                        </select>
+                                    </div>
+                                </div>--><!-- Col -->
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label class="control-label">Short Code<span style="color:red">*</span></label>
+                                        <input type="text" asp-for="Certification.ShortCode" class="form-control" placeholder="Enter short code" required>
+                                    </div>
+                                </div><!-- Col -->
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label class="control-label">Category<span style="color:red">*</span></label>
+                                        <select class="js-example-basic-single w-100" asp-for="Certification.CategoryId" data-width="100%" id="category" data-placeholder="Select an option" required asp-items="@Model.programCatListz.Select(x => new SelectListItem() { Text = x.Name, Value = x.Id.ToString() }).ToList()">
+                                            <option value="">Select an option</option>
+                                        </select>
+                                    </div>
+                                </div><!-- Col -->
+                            </div><!-- Row -->
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div class="form-group">
+                                        <label class="control-label">Org. Name<span style="color:red">*</span></label>
+                                        <input type="text" asp-for="Certification.OrganisationName" class="form-control" placeholder="Enter organisation name" required>
+                                    </div>
+                                </div><!-- Col -->
+                            </div><!-- Row -->
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label class="control-label">Cert. Name<span style="color:red">*</span></label>
+                                        <input type="text" asp-for="Certification.Name" class="form-control" placeholder="Enter certificate name" required>
+                                    </div>
+                                </div><!-- Col -->
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label class="control-label">Type<span style="color:red">*</span></label>
+                                        <select class="js-example-basic-single w-100" data-width="100%" data-placeholder="Select an option" required asp-for="Certification.Mode">
+                                            <option label="empty" value=""></option>
+                                            <option value="1">Local</option>
+                                            <option value="2">Foreign</option>
+                                        </select>
+                                    </div>
+                                </div><!-- Col -->
+                            </div><!-- Row -->
+                            <!--<div class="row">
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label class="control-label">Currency<span style="color:red">*</span></label>
+                                        <select class="js-example-basic-single w-100" data-width="100%" data-placeholder="Select an option" required asp-for="Certification.Mode">
+                                            <option label="empty" value=""></option>
+                                            <option value="1">₦</option>
+                                            <option value="2">$</option>
+                                        </select>
+                                    </div>
+                                </div>--><!-- Col -->
+                                <!--<div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label class="control-label">Amount<span style="color:red">*</span></label>
+                                        <input type="number" asp-for="Certification.AmountDollar" class="form-control" placeholder="Enter Amount" required>
+                                    </div>
+                                </div>--><!-- Col -->
+                            <!--</div>--><!-- Row -->
+                        </div>
+                    </div>
+                    @*<div class="form-group">
+                        <label class="control-label">Program</label>
+                        <select class="js-example-basic-single w-100" data-width="100%" id="program" data-placeholder="Select an option" required asp-items="@Model.programListz.Select(x => new SelectListItem() { Text = x.Name, Value = x.Id.ToString() }).ToList()">
+                            <option value="">Select an option</option>
+                        </select>
+                        <label class="control-label">Course</label>
+                        <select class="js-example-basic-single w-100" asp-for="Certification.CategoryId" data-width="100%" id="category" data-placeholder="Select an option" required>
+                            <option value="">Select an option</option>
+                        </select>
+                        <label class="control-label">Name</label>
+                        <input type="text" asp-for="Certification.Name" class="form-control" placeholder="Enter name">
+                        <label class="control-label">Description</label>
+                        <textarea class="form-control" asp-for="Course.Description"></textarea>
+                        <label class="control-label">Start Date</label>
+                        <div class="input-group date datepicker" id="datePickerExample">
+                            <input type="text" asp-for="Course.StartDate" class="form-control"><span class="input-group-addon"><i data-feather="calendar"></i></span>
+                        </div>
+                    </div>*@
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary" style="margin-right: 10px; background-color: #058383 !important">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,96 @@
+﻿@model CPEA.Utilities.ViewModel.UserPaymentsVM
+
+<div class="d-flex justify-content-between align-items-center flex-wrap grid-margin">
+    <div>
+        <h4 class="mb-3 mb-md-0">Payment History</h4>
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg-12 col-xl-12 grid-margin stretch-card">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-baseline mb-2">
+                    <h6 class="card-title mb-0"></h6>
+                </div>
+                <div class="table-responsive">
+                    <table id="dataTableExample" class="table">
+                        <thead>
+                            <tr>
+                                <th class="pt-0">Transaction Id</th>
+                                <th class="pt-0">Amount</th>
+                                <th class="pt-0">Payment Date</th>
+                                <th class="pt-0">Status</th>
+                                <th class="pt-0">Payment Method</th>
+                                <th class="pt-0">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model != null && Model.UserPaymentList.Count > 0)
+                            {
+                                @foreach (var item in Model.UserPaymentList)
+                                {
+                                    <tr>
+                                        <td>@Html.DisplayFor(modelItem => item.PaymentRef)</td>
+                                        <td>@Html.DisplayFor(modelItem => item.Amount)</td>
+                                        <td>@Html.DisplayFor(modelItem => item.PaymentDate)</td>
+                                        <td>
+                                            @if (item.Status == CPEA.Utilities.PaymentStatusEnums.Paid)
+                                            {
+                                                <span class="badge badge-success">PAID</span>
+                                            }
+                                            else if (item.Status == CPEA.Utilities.PaymentStatusEnums.Initialized)
+                                            {
+                                                <span class="badge badge-warning">INITIALIZED</span>
+                                            }
+                                            else if (item.Status == CPEA.Utilities.PaymentStatusEnums.Pending)
+                                            {
+                                                <span class="badge badge-info-muted">PENDING</span>
+                                            }
+                                            else if (item.Status == CPEA.Utilities.PaymentStatusEnums.Failed)
+                                            {
+                                                <span class="badge badge-danger">FAILED</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            @if (item.PaymentMethod == CPEA.Utilities.PaymentMethodEnums.Card)
+                                            {
+                                                <span>DEBIT CARD</span>
+                                            }
+                                            else if (item.PaymentMethod == CPEA.Utilities.PaymentMethodEnums.Offline)
+                                            {
+                                                <span>OFFLINE</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            <div class="dropdown mb-2">
+                                                <button class="btn p-0" type="button" id="dropdownMenuButton2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                    <i class="icon-lg text-muted pb-3px" data-feather="more-horizontal"></i>
+                                                </button>
+                                                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton2">
+                                                    <a class="dropdown-item d-flex align-items-center" asp-controller="Home" asp-action="EachPayment" asp-route-paymentRef="@item.PaymentRef"><i data-feather="edit" class="icon-sm mr-2"></i> <span class="">View Payment</span></a>
+                                                    @if (item.Status == CPEA.Utilities.PaymentStatusEnums.Paid)
+                                                    {
+                                                        <a class="dropdown-item d-flex align-items-center" asp-controller="Home" asp-action="DownloadReceipt" asp-route-paymentRef="@item.PaymentRef"><i data-feather="download" class="icon-sm mr-2"></i> <span class="">Download Receipt</span></a>
+                                                    }
+
+                                                    @if (item.Status != CPEA.Utilities.PaymentStatusEnums.Paid && item.PaymentMethod != CPEA.Utilities.PaymentMethodEnums.Offline)
+                                                    {
+                                                        <a class="dropdown-item d-flex align-items-center" href="#"><i data-feather="edit" class="icon-sm mr-2"></i> <span class="">Requery</span></a>
+                                                    }
+
+                                                </div>
+                                            </div>
+                                            
+
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>

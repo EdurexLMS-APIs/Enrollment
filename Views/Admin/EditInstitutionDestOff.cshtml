@@ -1,0 +1,129 @@
+﻿@model CPEA.Utilities.DTO.InstitutionDestOffVM
+<div class="modal fade bd-example-modal-lg" id="deskOfficerEdit" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalCenterTitle">Edit Desk Officer</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form asp-action="EditInstitutionDestOff">
+                    <div class="row">
+                        <div class="col-md-12 grid-margin">
+                            <div class="row">
+                                <input type="hidden" asp-for="editDeskOfficer.Id" id="DeskOffId" />
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label class="control-label">Title</label>
+                                        <select class="form-control" id="exampleFormControlSelect1" style="width:372px; position:absolute;" onchange="this.nextElementSibling.value=this.value">
+                                            <option selected disabled>Select an option</option>
+                                            <option value="Mr">Mr</option>
+                                            <option value="Mrs">Mrs</option>
+                                            <option value="Miss">Miss</option>
+                                            <option value="Dr">Dr</option>
+                                            <option value="Prof">Prof</option>
+                                        </select>
+                                        <input class="form-control" id="titleEdit" style="width: 360px; position:relative; left:1px;" asp-for="editDeskOfficer.Title" value="" />
+                                    </div>
+                                </div><!-- Col -->
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label class="control-label">First Name</label>
+                                        <input type="text" asp-for="editDeskOfficer.FirstName" class="form-control" id="firstNameEdit" required>
+                                    </div>
+                                </div><!-- Col -->
+                            </div><!-- Row -->
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label class="control-label">Last Name</label>
+                                        <input type="text" asp-for="editDeskOfficer.LastName" class="form-control" id="lastnameEdit" required>
+                                    </div>
+                                </div><!-- Col -->
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label class="control-label">Phone Number</label>
+                                        <input type="text" asp-for="editDeskOfficer.Phone" class="form-control" id="phoneEdit" required>
+                                    </div>
+                                </div><!-- Col -->
+                            </div><!-- Row -->
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <div class="form-check">
+                                            <label class="form-check-label">
+                                                <input type="checkbox" id="CanLoginEdit" class="form-check-input" asp-for="editDeskOfficer.CanLogin">
+                                                Can Login?
+                                            </label>
+                                        </div>
+                                        @*<label class="container">Can Login?<input type="checkbox" asp-for="editDeskOfficer.CanLogin"><span class="checkmark"></span></label>*@
+                                    </div>
+                                </div><!-- Col -->
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        
+                                        
+                                    </div>
+                                </div><!-- Col -->
+
+                            </div><!-- Row -->
+                        </div>
+                    </div>
+                    <!--<div class="row">
+                        <input type="hidden" asp-for="editDeskOfficer.Id" id="DeskOffId" />
+
+                        <div class="col-md-12 grid-margin">
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label class="control-label">Title</label>
+                                        <select class="js-example-basic-single w-100 form-control" asp-for="editDeskOfficer.Title" data-width="100%" id="title" required>
+                                            <option value="Mr">Mr</option>
+                                            <option value="Mrs">Mrs</option>
+                                            <option value="Miss">Miss</option>
+                                            <option value="Dr">Dr</option>
+                                            <option value="Prof">Prof</option>
+                                        </select>
+                                    </div>
+                                </div>--><!-- Col -->
+                                <!--<div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label class="control-label">First Name</label>
+                                        <input type="text" asp-for="editDeskOfficer.FirstName" class="form-control" id="firstName" required>
+                                    </div>
+                                </div>--><!-- Col -->
+                            <!--</div>--><!-- Row -->
+                            <!--<div class="row">
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label class="control-label">Last Name</label>
+                                        <input type="text" asp-for="editDeskOfficer.LastName" class="form-control" id="lastname" required>
+                                    </div>
+                                </div>--><!-- Col -->
+                                <!--<div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label class="control-label">Phone Number</label>
+                                        <input type="text" asp-for="editDeskOfficer.Phone" class="form-control" id="phone" required>
+                                    </div>
+                                </div>--><!-- Col -->
+                            <!--</div>--><!-- Row -->
+                            <!--<div class="row">
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label class="container">Can Login?<input type="checkbox" asp-for="editDeskOfficer.CanLogin"><span class="checkmark"></span></label>
+                                    </div>
+                                </div>--><!-- Col -->
+                            <!--</div>--><!-- Row -->
+                        <!--</div>
+                    </div>-->
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary" style="margin-right: 10px; background-color: #058383 !important">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

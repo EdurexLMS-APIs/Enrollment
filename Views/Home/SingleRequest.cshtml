@@ -1,0 +1,60 @@
+﻿
+@model CPEA.Models.UserRequest
+<div class="row inbox-wrapper">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="row">                    
+                    <div class="col-lg-12 email-content">
+                        <div class="email-head">
+                            <div class="email-head-subject">
+                                <div class="title d-flex align-items-center justify-content-between">
+                                    <div class="d-flex align-items-center">
+                                        <a class="active" href="#"><span class="icon"><i data-feather="star" class="text-primary-muted"></i></span></a>
+                                        <span>@Model.Title</span>
+                                    </div>
+                                    <div class="icons">
+                                        @if (Model.Responded == true)
+                                        {
+                                            <span style="color:green">RESPONDED</span>
+                                        }
+                                        else
+                                        {
+                                            <span style="color:red">NOT RESPONDED</span>
+                                        }
+
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="email-head-sender d-flex align-items-center justify-content-between flex-wrap">
+                                <div class="d-flex align-items-center">
+                                    @*<div class="avatar">
+                                        <img src="https://via.placeholder.com/36x36" alt="Avatar" class="rounded-circle user-avatar-md">
+                                    </div>*@
+                                    <div class="sender d-flex align-items-center">
+                                        @*<a href="#">John Doe</a> <span>to</span><a href="#">me</a>*@
+                                        @*<div class="actions dropdown">
+                                            <a class="icon" href="#" data-toggle="dropdown"><i data-feather="chevron-down"></i></a>
+                                            <div class="dropdown-menu" role="menu">
+                                                <a class="dropdown-item" href="#">Mark as read</a>
+                                                <a class="dropdown-item" href="#">Mark as unread</a>
+                                                <a class="dropdown-item" href="#">Spam</a>
+                                                <div class="dropdown-divider"></div>
+                                                <a class="dropdown-item text-danger" href="#">Delete</a>
+                                            </div>
+                                        </div>*@
+                                    </div>
+                                </div>
+                                <div class="date">@Model.RequestDate.Date</div>
+                            </div>
+                        </div>
+                        <div class="email-body">                            
+                            <p>@Model.Request</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>

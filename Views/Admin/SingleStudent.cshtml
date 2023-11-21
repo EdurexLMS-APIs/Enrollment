@@ -1,0 +1,218 @@
+﻿@{
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+}
+
+@model CPEA.Utilities.DTO.StudentDetails
+
+    <nav class="page-breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="@Url.Action("RegisteredStudents","Admin")">Students</a></li>
+            <li class="breadcrumb-item active" aria-current="page">@Model.StudentNumber</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <div>
+                        <h4 class="mb-3 mb-md-0">Student Details</h4>
+                    </div>
+                    <br />
+                    <div class="container-fluid d-flex justify-content-between">
+                        <div class="col-lg-3 pl-0">
+                            <h5 class="mb-0 mt-3 font-weight-normal mb-2"><span class="text-muted">Student Number :</span><b>@Model.StudentNumber</b> </h5>
+                            <p>First Name : <b>@Model.FirstName</b></p>
+                            <p>Last Name : <b>@Model.LastName</b></p>
+                            <p>Reg. Date : <b>@Model.RegisteredDate</b></p>
+                            <p>Student Status : <b>@Model.Status</b></p>
+                        </div>
+                    </div>
+                    <hr />
+                    @if (Model != null && Model.StCourses != null && Model.StCourses.Count > 0)
+                    {
+                        <div class="container-fluid mt-5 d-flex justify-content-center w-100">
+                            <div class="table-responsive w-100">
+                                <div>
+                                    <h4 class="mb-3 mb-md-0">Registered Courses</h4>
+                                </div>
+                                <br />
+                                <table class="table table-hover mb-0 " id="dataTableExample">
+                                    <thead>
+                                        <tr>
+                                            <th class="pt-0">Course Name</th>
+                                            <th class="pt-0">Option Name</th>
+                                            <th class="pt-0">Option Price</th>
+                                            <th class="pt-0">Amount Paid</th>
+                                            <th class="pt-0">Payment Status</th>
+                                            <th class="pt-0">Registered Date</th>
+                                            <th class="pt-0">Course Start Status</th>
+                                            @*<th class="pt-0">Completed Date</th>*@
+                                            <th class="pt-0">Certificate Issued</th>
+                                            @*<th class="pt-0">Certificate Issued Date</th>*@
+
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+
+                                        @foreach (var item in Model.StCourses)
+                                        {
+                                            <tr>
+                                                <td>@Html.DisplayFor(modelItem => item.CourseName)</td>
+                                                <td>@Html.DisplayFor(modelItem => item.OptionName)</td>
+                                                <td>₦ @Html.DisplayFor(modelItem => item.Price)</td>
+                                                <td>₦ @Html.DisplayFor(modelItem => item.AmountPaid)</td>
+                                                <td>
+                                                    @if (item.PaymentStatus == CPEA.Utilities.UserProgramPaymentStatusEnums.Paid)
+                                                    {
+                                                        <span class="badge badge-success">@Html.DisplayFor(modelItem => item.PaymentStatus)</span>
+                                                    }
+                                                    else if (item.PaymentStatus == CPEA.Utilities.UserProgramPaymentStatusEnums.Deposited)
+                                                    {
+                                                        <span class="badge badge-warning">@Html.DisplayFor(modelItem => item.PaymentStatus)</span>
+                                                    }
+                                                </td>
+                                                <td>@Html.DisplayFor(modelItem => item.RegisteredDate)</td>
+
+                                                <td>
+                                                    @if (item.CourseStartStatus == CPEA.Utilities.UserCourseStatusEnums.Completed)
+                                                    {
+                                                        <span class="badge badge-success">@Html.DisplayFor(modelItem => item.CourseStartStatus)</span>
+                                                    }
+                                                    else if (item.CourseStartStatus == CPEA.Utilities.UserCourseStatusEnums.Pending)
+                                                    {
+                                                        <span class="badge badge-warning">@Html.DisplayFor(modelItem => item.CourseStartStatus)</span>
+                                                    }
+                                                    else if (item.CourseStartStatus == CPEA.Utilities.UserCourseStatusEnums.InProgress)
+                                                    {
+                                                        <span class="badge badge-info-muted">@Html.DisplayFor(modelItem => item.CourseStartStatus)</span>
+                                                    }
+                                                </td>
+                                                @*<td>
+                                        @if (item.CompletedDate != "01/01/0001")
+                                        {
+                                            @Html.DisplayFor(modelItem => item.CompletedDate)
+                                        }
+                                    </td>*@
+                                                <td>
+                                                    @if (item.CertificateIssued == true)
+                                                    {
+                                                        <span>True</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span>False</span>
+                                                    }
+                                                </td>
+                                                @*<td>
+                                        @if (item.CertificateIssuedDate != "01/01/0001")
+                                        {
+                                            @Html.DisplayFor(modelItem => item.CertificateIssuedDate)
+                                        }
+                                    </td>*@
+
+                                            </tr>
+                                        }
+
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    }
+                    <hr />
+                    @if (Model != null && Model.StCerts != null && Model.StCerts.Count > 0)
+                    {
+                        <div class="container-fluid mt-5 d-flex justify-content-center w-100">
+                            <div class="table-responsive w-100">
+                                <div>
+                                    <h4 class="mb-3 mb-md-0">Registered Certications</h4>
+                                </div>
+                                <br />
+                                <table class="table table-hover mb-0 myDataTable">
+                                    <thead>
+                                        <tr>
+                                            @*<th class="pt-0">Certification Id</th>
+                                <th class="pt-0">Category</th>*@
+                                            <th class="pt-0">Name</th>
+                                            <th class="pt-0">Exam Date</th>
+                                            <th class="pt-0">Option Price</th>
+                                            <th class="pt-0">Amount Paid</th>
+                                            <th class="pt-0">Payment Status</th>
+                                            <th class="pt-0">Registered Date</th>
+                                            <th class="pt-0">Org. Name</th>
+                                            <th class="pt-0">Mode</th>
+                                            <th class="pt-0">Short Code</th>
+                                            <th class="pt-0">Cert. Start Status</th>
+                                            @*<th class="pt-0">Completed Date</th>*@
+                                            <th class="pt-0">Cert. Issued</th>
+                                            @*<th class="pt-0">Certificate Issued Date</th>*@
+
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+
+                                        @foreach (var item in Model.StCerts)
+                                        {
+                                            <tr>
+                                                @*<td>@Html.DisplayFor(modelItem => item.CertificationId)</td>
+                                    <td>@Html.DisplayFor(modelItem => item.Program) - @Html.DisplayFor(modelItem => item.Category)</td>*@
+                                                <td>@Html.DisplayFor(modelItem => item.Name)</td>
+                                                <td>@Html.DisplayFor(modelItem => item.ExamDate)</td>
+                                                <td>@Html.DisplayFor(modelItem => item.Price)</td>
+                                                <td>@Html.DisplayFor(modelItem => item.AmountPaid)</td>
+                                                <td>
+                                                    @if (item.PaymentStatus == CPEA.Utilities.UserProgramPaymentStatusEnums.Paid)
+                                                    {
+                                                        <span class="badge badge-success">@Html.DisplayFor(modelItem => item.PaymentStatus)</span>
+                                                    }
+                                                    else if (item.PaymentStatus == CPEA.Utilities.UserProgramPaymentStatusEnums.Deposited)
+                                                    {
+                                                        <span class="badge badge-warning">@Html.DisplayFor(modelItem => item.PaymentStatus)</span>
+                                                    }
+                                                </td>
+                                                <td>@Html.DisplayFor(modelItem => item.RegisteredDate)</td>
+                                                <td>@Html.DisplayFor(modelItem => item.OrganisationName)</td>
+                                                <td>@Html.DisplayFor(modelItem => item.Mode)</td>
+                                                <td>@Html.DisplayFor(modelItem => item.ShortCode)</td>
+                                                <td>
+                                                    @if (item.CourseStartStatus == CPEA.Utilities.UserCourseStatusEnums.Completed)
+                                                    {
+                                                        <span class="badge badge-success">@Html.DisplayFor(modelItem => item.CourseStartStatus)</span>
+                                                    }
+                                                    else if (item.CourseStartStatus == CPEA.Utilities.UserCourseStatusEnums.Pending)
+                                                    {
+                                                        <span class="badge badge-warning">@Html.DisplayFor(modelItem => item.CourseStartStatus)</span>
+                                                    }
+                                                    else if (item.CourseStartStatus == CPEA.Utilities.UserCourseStatusEnums.InProgress)
+                                                    {
+                                                        <span class="badge badge-info-muted">@Html.DisplayFor(modelItem => item.CourseStartStatus)</span>
+                                                    }
+                                                </td>
+                                                <td>
+                                                    @if (item.CertificateIssued == true)
+                                                    {
+                                                        <span>True</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span>False</span>
+                                                    }
+                                                </td>
+
+                                            </tr>
+                                        }
+
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    }
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+

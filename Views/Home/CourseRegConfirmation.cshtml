@@ -1,0 +1,23 @@
+﻿@model CPEA.Utilities.ViewModel.StudentDashboardVM
+<div class="modal fade" id="regConfirm" tabindex="-1" role="dialog" aria-labelledby="regConfirmTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="regConfirmTitle">Course Registration Confirmation</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                
+                <form asp-action="CourseRegConfirmation">
+                    <input type="hidden" class="form-control form-control-sm" id="userRegCourseId" name="courseId" asp-for="CourseIdConfirmation">
+                    <input type="hidden" class="form-control form-control-sm" id="sourceRC" name="source" asp-for="SourceView">
+                    <span style="font-size:15px;">Select an option</span>
+                    @*<button type="submit" asp-controller="Home" asp-action="SendRegConfirmation" class="btn btn-primary float-center mt-4 ml-2" style="background-color: #058383 !important;"><i data-feather="mail" class="mr-3 icon-md"></i>Send to Email</button>*@
+                    <button type="submit" onclick="closeModal()" asp-controller="Home" asp-action="DownloadRegConfirmation" class="btn btn-secondary float-center mt-4 ml-2"><i data-feather="download" class="mr-3 icon-md"></i>Download</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

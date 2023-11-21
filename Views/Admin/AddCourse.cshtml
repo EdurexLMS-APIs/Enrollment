@@ -1,0 +1,75 @@
+﻿@model CPEA.Utilities.ViewModel.CoursesVM
+    <div class="modal fade bd-example-modal-lg" id="addCourse" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalCenterTitle">New Course</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form asp-action="AddCourse">
+                        <div class="row">
+                            <div class="col-md-12 grid-margin">
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        <div class="form-group">
+                                            <label class="control-label">Institution</label>
+                                            <select class="js-example-basic-single w-100" data-width="100%" id="program" data-placeholder="Select an option" required asp-items="@Model.institutionListz.Select(x => new SelectListItem() { Text = x.Name, Value = x.Id.ToString() }).ToList()">
+                                                <option value="">Select an option</option>
+                                            </select>
+                                        </div>
+                                    </div><!-- Col -->
+                                    <div class="col-sm-6">
+                                        <div class="form-group">
+                                            <label class="control-label">Category</label>
+                                            <select class="js-example-basic-single w-100" asp-for="Course.CategoryId" data-width="100%" id="category" data-placeholder="Select an option" required>
+                                                <option value="">Select an option</option>
+                                            </select>
+                                        </div>
+                                    </div><!-- Col -->
+                                </div><!-- Row -->
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        <div class="form-group">
+                                            <label class="control-label">Course Code</label>
+                                            <input type="text" asp-for="Course.CourseCode" class="form-control" placeholder="Enter course code">
+                                        </div>
+                                    </div><!-- Col -->
+                                    <div class="col-sm-6">
+                                        <div class="form-group">
+                                            <label class="control-label">Name</label>
+                                            <input type="text" asp-for="Course.Name" class="form-control" placeholder="Enter name">
+                                        </div>
+                                    </div><!-- Col -->
+                                </div><!-- Row -->
+                                <div class="row">
+                                    <div class="col-sm-12">
+                                        <div class="form-group">
+                                            <label class="control-label">Description</label>
+                                            <textarea class="form-control" asp-for="Course.Description"></textarea>
+                                        </div>
+                                    </div><!-- Col -->
+                                </div><!-- Row -->
+                                <!--<div class="row">
+                                    <div class="col-sm-12">
+                                        <div class="form-group">
+                                            <label class="control-label">Institution</label>
+                                            <select class="js-example-basic-single w-100" data-width="100%" id="institution" asp-for="Course.InstitutionId" data-placeholder="Select an option" required asp-items="@Model.institutionListz.Select(x => new SelectListItem() { Text = x.Name, Value = x.Id.ToString() }).ToList()">
+                                                <option value="">Select an option</option>
+                                            </select>
+                                        </div>
+                                    </div>--><!-- Col -->
+                                <!--</div>--><!-- Row -->
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary" style="margin-right: 10px; background-color: #058383 !important">Save</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>

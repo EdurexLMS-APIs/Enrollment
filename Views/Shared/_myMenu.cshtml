@@ -1,0 +1,48 @@
+﻿
+
+<nav class="bottom-navbar" style="z-index:978;">
+    <div class="container">
+        <ul class="nav page-navigation" style="justify-content:start !important">
+            <li class="nav-item" style="margin-right:30px;">
+                <a class="nav-link" href="@Url.Action("Dashboard","Home")">
+                    <i class="link-icon" data-feather="box"></i>
+                    <span class="menu-title">Dashboard</span>
+                </a>
+            </li>
+            <li class="nav-item" style="margin-right:30px;">
+                <a class="nav-link" href="@Url.Action("Courses","Home")">
+                    <i class="link-icon" data-feather="layout"></i>
+                    <span class="menu-title">Programs and Courses</span>
+                </a>
+            </li>
+            <li class="nav-item" style="margin-right:30px;">
+                <a class="nav-link" href="@Url.Action("Certifications","Home")">
+                    <i class="link-icon" data-feather="file"></i>
+                    <span class="menu-title">Certifications</span>
+                </a>
+            </li>
+            <li class="nav-item" style="margin-right:30px;">
+                <a class="nav-link" href="@Url.Action("Payment","Home")">
+                    <i class="link-icon" data-feather="credit-card"></i>
+                    <span class="menu-title">Invoices and Payment</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link">
+                    <i class="link-icon" data-feather="folder-plus"></i>
+                    <span class="menu-title">Extras</span>
+                    <i class="link-arrow"></i>
+                </a>
+                <div class="submenu">
+                    <ul class="submenu-item">
+                        <li class="nav-item"><a class="nav-link" href="@Url.Action("GetProfile","Home")">Student Profile</a></li>
+                        <li class="nav-item"><a class="nav-link" href="@Url.Action("SubscriptionDevices","Home")">Device and Subscriptions</a></li>
+                        <li class="nav-item"><a class="nav-link" href="@Url.Action("GetRequest","Home")">Submit Request</a></li>
+                        <li class="nav-item"><a class="nav-link" href="@Url.Action("GetWallet","Home")">Wallet Record</a></li>
+                    </ul>
+                </div>
+            </li>
+        </ul>
+        
+    </div>
+</nav>

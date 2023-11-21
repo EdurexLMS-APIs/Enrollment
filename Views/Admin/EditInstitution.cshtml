@@ -1,0 +1,78 @@
+﻿@model CPEA.Utilities.ViewModel.InstitutionVM
+<div class="modal fade bd-example-modal-lg" id="editInstitution" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalCenterTitle">Institution Details</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form asp-action="EditInstitution">
+                    <div class="row">
+                        <input type="hidden" id="institutionIdEdit" asp-for="institutionEdit.InstitutionId"/>
+                        <div class="col-md-12 grid-margin">
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label class="control-label">Short Name</label>
+                                        <input type="text" class="form-control" id="shortNameEdit" asp-for="institutionEdit.institutionEdit.ShortName">
+                                    </div>
+                                </div><!-- Col -->
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label class="control-label">Institution</label>
+                                        <input type="text" class="form-control" id="institutionEdit" asp-for="institutionEdit.institutionEdit.Name">
+                                    </div>
+                                </div><!-- Col -->
+                            </div><!-- Row -->
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label class="control-label">Type</label>
+                                        <select class="js-example-basic-single w-100" data-width="100%" asp-for="institutionEdit.institutionEdit.InstitutionTypeId" id="typeEdit" required asp-items="@Model.institutionTypesListz.Select(x => new SelectListItem() { Text = x.Name, Value = x.Id.ToString() }).ToList()">
+                                            <option value="">Select an option</option>
+                                        </select>
+                                    </div>
+                                </div><!-- Col -->
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label class="control-label">Country</label>
+                                        <select class="js-example-basic-single w-100" id="countryEdit" data-width="100%" required asp-items="@Model.countryListz.Select(x => new SelectListItem() { Text = x.Name, Value = x.Id.ToString() }).ToList()">
+                                            <option value="">Select an option</option>
+                                        </select>
+                                    </div>
+                                </div><!-- Col -->
+                            </div><!-- Row -->
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div class="form-group">
+                                        <label class="control-label">State</label>
+                                        <select class="js-example-basic-single w-100" id="stateEdit" data-width="100%" required asp-items="@Model.nigeriaStatesListz.Select(x => new SelectListItem() { Text = x.Name, Value = x.Id.ToString() }).ToList()">
+                                            <option value="">Select an option</option>
+                                        </select>
+                                    </div>
+                                </div><!-- Col -->
+                            </div><!-- Row -->
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div class="form-group">
+                                        <label class="control-label">City</label>
+                                        <select class="js-example-basic-single w-100" data-width="100%" id="cityEdit" asp-for="institutionEdit.institutionEdit.CityId" data-placeholder="Select an option" required>
+                                            <option value="">Select an option</option>
+                                        </select>
+                                    </div>
+                                </div><!-- Col -->
+                            </div><!-- Row -->
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary" style="margin-right: 10px; background-color: #058383 !important">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

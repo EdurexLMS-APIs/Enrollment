@@ -1,0 +1,173 @@
+﻿@model CPEA.Utilities.ViewModel.StudentDashboardVM
+<div class="d-flex justify-content-between align-items-center flex-wrap grid-margin">
+    <div>
+        <h4 class="mb-3 mb-md-0">My Courses</h4>
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg-12 col-xl-12 grid-margin stretch-card">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-baseline mb-2">
+                    <h6 class="card-title mb-0"></h6>
+                </div>
+                <div class="table-responsive">
+                    <table id="dataTableExample" class="table">
+                        <thead>
+                            <tr>
+                                <th class="pt-0">Code</th>
+                                <th class="pt-0">Name</th>
+                                <th class="pt-0">Institution</th>
+                                <th class="pt-0">Start Date</th>
+                                <th class="pt-0">Fee</th>
+                                <th class="pt-0">Owing</th>
+                                <th class="pt-0">Payment Status</th>
+                                <th class="pt-0">Status</th>
+                                <th class="pt-0">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model != null && Model.UserCoursesVM.UserCourseList.Count > 0)
+                            {
+                                @foreach (var item in Model.UserCoursesVM.UserCourseList)
+                                {
+                                    <tr>
+                                        <td>@Html.DisplayFor(modelItem => item.CourseCode)</td>
+                                        <td>@Html.DisplayFor(modelItem => item.Name)</td>
+                                        <td>@Html.DisplayFor(modelItem => item.InstitutionCode)</td>
+                                        <td>@Html.DisplayFor(modelItem => item.StartDate)</td>
+                                        <td>@Html.DisplayFor(modelItem => item.Price)</td>
+                                        <td>@Html.DisplayFor(modelItem => item.amountOwing)</td>
+                                        <td>
+                                            @if (item.ProgramPaymentStatus == CPEA.Utilities.UserProgramPaymentStatusEnums.Paid)
+                                            {
+                                                <span class="badge badge-success">PAID</span>
+                                            }
+                                            else if (item.ProgramPaymentStatus == CPEA.Utilities.UserProgramPaymentStatusEnums.Deposited)
+                                            {
+                                                <span class="badge badge-warning">PARTLY PAID</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge badge-danger">OUTSTANDING</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            @if (item.ProgramStatus == CPEA.Utilities.UserCourseStatusEnums.Completed)
+                                            {
+                                                <span class="badge badge-success">COMPLETED</span>
+                                            }
+                                            else if (item.ProgramStatus == CPEA.Utilities.UserCourseStatusEnums.InProgress)
+                                            {
+                                                <span class="badge badge-warning">IN PROGRESS</span>
+                                            }
+                                            else if (item.ProgramStatus == CPEA.Utilities.UserCourseStatusEnums.Pending)
+                                            {
+                                                <span class="badge badge-danger">REGISTERED</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            <partial name="MakePayment" />
+                                            <partial name="ChangeStartDate" />
+                                            <partial name="CourseRegConfirmation" />
+
+                                            <div class="dropdown mb-2">
+                                                <button class="btn p-0" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                    <i class="icon-lg text-muted pb-3px" data-feather="more-horizontal"></i>
+                                                </button>
+                                                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                                    <a asp-controller="Home" asp-action="SingleCourse" asp-route-id="@item.CourseId" class="dropdown-item d-flex align-items-center"><i data-feather="edit" class="icon-sm mr-2"></i> <span class="">View Course</span></a>
+                                                    @if (item.ProgramPaymentStatus != CPEA.Utilities.UserProgramPaymentStatusEnums.Paid)
+                                                    {
+                                                        <a class="dropdown-item d-flex align-items-center" onclick="userMakePId(@item.userCourseId, '@item.amountOwing')" href="#" data-toggle="modal" data-target="#exampleModalCenter"><i data-feather="edit" class="icon-sm mr-2"></i> <span class="">Make Payment</span></a>
+                                                    }
+                                                    @if (item.ProgramStatus == CPEA.Utilities.UserCourseStatusEnums.Pending)
+                                                    {
+                                                        <a class="dropdown-item d-flex align-items-center" onclick="userChangeCourse(@item.userCourseId, '@item.Price', '@item.StartDate', '@item.Name', @item.CourseId)" href="#" data-toggle="modal" data-target="#ChangeCourseDateModal"><i data-feather="plus-square" class="icon-sm mr-2"></i> <span class="">Change Start Date</span></a>
+
+                                                    }
+                                                    <a class="dropdown-item d-flex align-items-center" onclick="userRegConfId(@item.userCourseId)" href="#" data-toggle="modal" data-target="#regConfirm"><i data-feather="file" class="icon-sm mr-2"></i> <span class="">Reg. Confirmation</span></a>
+
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+<div style=" text-align:right">
+    <a asp-controller="Enrollment" asp-action="Register2" class="btn btn-primary" style="margin-top: 15px; background-color: #058383 !important ">Register New Course</a>
+    @*<partial name="NewProgram" />*@
+</div>
+
+
+<script>
+    function userRegConfId(id) {
+        if (id != null) {
+            document.getElementById('userRegCourseId').value = id;
+            document.getElementById('sourceRC').value = "Courses";
+        }
+    }
+    function userMakePId(id, amountOMP) {
+        if (id != null) {
+            document.getElementById('userCIdMP').value = id;
+            document.getElementById('amountOwingMP').innerHTML = amountOMP;
+            document.getElementById('sourceMP').value = "Courses";
+        }
+    }
+
+    function userChangeCourse(id, Cfee, cDate, cName, courseId) {
+        if (id != null) {
+
+            document.getElementById('userCIdCSD').value = id;
+            document.getElementById('currentCFee').value = Cfee;
+            document.getElementById('courseNameCSP').innerHTML = cName;
+            document.getElementById('courseDateCSP').innerHTML = cDate;
+            document.getElementById('amountCSP').innerHTML = Cfee;
+            document.getElementById('sourceCSD').value = "Courses";
+
+            $("#divCourseOptionDates").empty();
+            $("#divCourseOptions").empty();
+
+            $("#institutionD").css("display", "block");
+            $("#courseOptions").css("display", "block");
+            $("#coursePrices").css("display", "none")
+            $("#divCourseFee").css("display", "none");
+            $("#divPayment").css("display", "none");
+            $("#divPaymentDetails").css("display", "none");
+
+           // var url = '/Home/GetInstitutionbyCourseId';
+
+
+            //$.post(url, { CourseId: courseId }, function (data) {
+
+            //    document.getElementById("institution").innerHTML = data.bold();
+            //});
+
+
+            let divCO = $("#divCourseOptionDates");
+
+            //Load Course Price Options
+            //-------------------------
+            var urlSubjects = '/Home/GetCourseOptionsDatesbyCourseId';
+
+            $.post(urlSubjects, { CourseId: courseId }, function (data) {
+
+                $("#divCourseOptionDates").empty();
+
+                $.each(data, function (i, response) {
+                    let myHtml = '<div style="display: inline-flex;align-items: center;margin-right: 0.75rem;"><label class="container">' + response.text + '<input type = "radio" id="DateClicked" name="optionsRadiosDate" value="' + response.value + '"><span class="checkmark"></span></label></div>';
+                    divCO.append(myHtml);
+                });
+            });
+        }
+    }
+
+</script>

@@ -1,0 +1,67 @@
+﻿@model CPEA.Utilities.ViewModel.CoursesVM
+<div class="modal fade bd-example-modal-lg" id="priceOptionModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalCenterTitle">New Price Option</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form asp-action="AddCoursePrice">
+                    
+                    <div class="row">
+                        <div class="col-md-12 grid-margin">
+                            <input type="hidden" class="form-control" id="courseId" asp-for="NewPriceOption.CourseId" readonly>
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <label class="control-label">Course Name</label>
+                                    <input type="text" class="form-control" id="courseName" readonly>
+                                </div><!-- Col -->
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label class="control-label">Option Name</label>
+                                        <input type="text" asp-for="NewPriceOption.Name" class="form-control" placeholder="Enter price option">
+                                    </div>
+                                </div><!-- Col -->
+                            </div><!-- Row -->
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label class="control-label">Duration</label>
+                                        <input type="text" asp-for="NewPriceOption.Duration" class="form-control" placeholder="Enter duration">
+                                    </div>
+                                </div><!-- Col -->
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label class="control-label">Amount</label>
+                                        <input type="number" step="0.01" asp-for="NewPriceOption.Amount" class="form-control" placeholder="Enter amount">
+                                    </div>
+                                </div><!-- Col -->
+                            </div><!-- Row -->
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label class="control-label">Start Date</label>
+                                        <input class="form-control mb-4 mb-md-0" asp-for="NewPriceOption.StartDate" data-inputmask="'alias': 'date'" data-inputmask-inputformat="dd/mm/yyyy" />                                        
+                                    </div>
+                                </div><!-- Col -->
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label class="control-label">End Date</label>
+                                        <input class="form-control mb-4 mb-md-0" asp-for="NewPriceOption.EndDate" data-inputmask="'alias': 'date'" data-inputmask-inputformat="dd/mm/yyyy" />
+                                    </div>
+                                </div><!-- Col -->
+                            </div><!-- Row -->
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary" style="margin-right: 10px; background-color: #058383 !important">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

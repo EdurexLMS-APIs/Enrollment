@@ -1,0 +1,52 @@
+﻿
+<nav class="navbar top-navbar" style="height:80px!important">
+    <div class="container">
+        <div class="navbar-content">
+
+            <div style="height:120px; width:220px; margin-top:20px;" >
+                <img src="~/assets/images/EdurexAcademy.png" style="max-width:100%; height:auto;" />
+            </div>
+            <ul class="navbar-nav">
+                @if (CPEA.Utilities.GeneralClass.email != "")
+                {
+                    <li class="nav-item dropdown nav-profile" style="margin-top: -60px; ">
+                        <a class="nav-link dropdown-toggle" href="#" id="profileDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="margin-top: 15px; color: #058383 !important ">
+                            <i data-feather="user"></i><span class="font-weight-medium ml-1 mr-1 d-none d-md-inline-block">@CPEA.Utilities.GeneralClass.FullName - @CPEA.Utilities.GeneralClass.stNumber</span>
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="profileDropdown">
+                            <div class="dropdown-header d-flex flex-column align-items-center">
+                                <div class="figure mb-3">
+                                    <img src="~/assets/images/Default.jpg" width="30" height="30" alt="">
+                                </div>
+                                <div class="info text-center">
+                                    <p class="name font-weight-bold mb-0">@CPEA.Utilities.GeneralClass.FullName</p>
+                                    <p class="email text-muted mb-3">@CPEA.Utilities.GeneralClass.email</p>
+                                    <p class="email text-muted mb-3">@CPEA.Utilities.GeneralClass.stNumber</p>
+                                </div>
+                            </div>
+                            <div class="dropdown-body">
+                                <ul class="profile-nav p-0 pt-3">
+                                    <li class="nav-item">
+                                        <a href="@Url.Action("GetProfile","Home")" class="nav-link">
+                                            <i data-feather="user"></i>
+                                            <span>Profile</span>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="@Url.Action("Logout","Home")" class="nav-link">
+                                            <i data-feather="log-out"></i>
+                                            <span>Log Out</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </li>
+                }
+            </ul>
+            <button class="navbar-toggler navbar-toggler-right d-lg-none align-self-center" type="button" style="margin-top: -50px; color: #058383 !important " data-toggle="horizontal-menu-toggle">
+                <i data-feather="menu"></i>
+            </button>
+        </div>
+    </div>
+</nav>

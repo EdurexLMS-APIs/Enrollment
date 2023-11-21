@@ -1,0 +1,97 @@
+﻿@{
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+}
+
+@model CPEA.Utilities.ViewModel.CoursesVM
+<nav class="page-breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="@Url.Action("Institutions","Admin")">Institutions</a></li>
+        <li class="breadcrumb-item"><a href="@Url.Action("ProgramCategories","Admin")">Categories</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Courses</li>
+    </ol>
+</nav>
+@*<div class="d-flex justify-content-between align-items-center flex-wrap grid-margin">
+    <div>
+        <h4 class="mb-3 mb-md-0">Courses</h4>
+    </div>
+</div>*@
+<div class="row">
+    <div class="col-lg-12 col-xl-12 grid-margin stretch-card">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-baseline mb-2">
+                    <h6 class="card-title mb-0"></h6>
+                </div>
+                <div style="float:right; margin-bottom:20px;">
+                    <a asp-controller="Admin" asp-action="AddCourse" class="btn btn-primary" data-toggle="modal" data-target="#addCourse" style="margin-top: 15px; background-color: #058383 !important "> New Course</a>
+                    <partial name="AddCourse" />
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0 " id="dataTableExample">
+                        <thead>
+                            <tr>
+                                @*<th class="pt-0">Id</th>*@
+                                <th class="pt-0">Course Code</th>
+                                <th class="pt-0">Name</th>
+                                @*<th class="pt-0">Program</th>
+                        <th class="pt-0">Category</th>*@
+                                <th class="pt-0">Description</th>
+                                <th class="pt-0">Institution Code</th>
+                                <th class="pt-0">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model != null && Model.Courses.Count > 0)
+                            {
+                                @foreach (var item in Model.Courses)
+                                {
+                                    <tr>
+                                        <td>@Html.DisplayFor(modelItem => item.CourseCode)</td>
+                                        <td>@Html.DisplayFor(modelItem => item.Name)</td>
+                                        <td>@Html.DisplayFor(modelItem => item.Description)</td>
+                                        <td>@Html.DisplayFor(modelItem => item.InstitutionCode)</td>
+                                        <td>
+                                            <partial name="AddCoursePrice" />
+                                            <partial name="EditCourse" />
+
+                                            <div class="dropdown mb-2">
+                                                <button class="btn p-0" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                    <i class="icon-lg text-muted pb-3px" data-feather="more-horizontal"></i>
+                                                </button>
+                                                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                                    <a class="dropdown-item d-flex align-items-center" href="#" onclick="CourseDataEdit(@item.Id, '@item.Name', '@item.CourseCode', '@item.InstitutionId', '@item.CategoryId', '@item.Description')" data-toggle="modal" data-target="#editCourse"><i data-feather="edit" class="icon-sm mr-2"></i> <span class="">Edit</span></a>
+                                                    <a class="dropdown-item d-flex align-items-center" asp-controller="Admin" asp-action="CourseOptions" asp-route-CourseId="@item.Id"><i data-feather="list" class="icon-sm mr-2"></i> <span class="">Price Options</span></a>
+                                                    <a class="dropdown-item d-flex align-items-center" href="#" onclick="CourseData(@item.Id, '@item.Name')" data-toggle="modal" data-target="#priceOptionModal"><i data-feather="plus-square" class="icon-sm mr-2"></i> <span class="">Add Price Option</span></a>
+
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    function CourseData(g, h) {
+        document.getElementById('courseId').value = g;
+        document.getElementById('courseName').value = h;
+
+    }
+
+    function CourseDataEdit(g, h, i, k, l) {
+        document.getElementById('courseIdEdit').value = g;
+        document.getElementById('courseNameEdit').value = h;
+        document.getElementById('courseCode').value = i;
+        //document.getElementById('institutionId').value = j;
+        document.getElementById('categoryId').value = k;
+        document.getElementById('description').value = l;
+    }
+</script>

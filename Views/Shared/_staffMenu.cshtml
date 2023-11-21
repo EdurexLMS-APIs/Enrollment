@@ -1,0 +1,76 @@
+﻿
+
+<ul class="nav">
+    <li class="nav-item">
+        <a href="@Url.Action("Dashboard","Admin")" class="nav-link">
+            <i class="link-icon" data-feather="box"></i>
+            <span class="link-title">Dashboard</span>
+        </a>
+    </li>
+    <li class="nav-item">
+        <a href="@Url.Action("Institutions","Admin")" class="nav-link">
+            <i class="link-icon" data-feather="box"></i>
+            <span class="link-title">Institutions</span>
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" data-toggle="collapse" href="#programCourses" role="button" aria-expanded="false" aria-controls="programCourses">
+            <i class="link-icon" data-feather="layout"></i>
+            <span class="link-title">Program and Courses</span>
+            <i class="link-arrow" data-feather="chevron-down"></i>
+        </a>
+        <div class="collapse" id="programCourses">
+            <ul class="nav sub-menu">
+                @*<li class="nav-item">
+                <a href="@Url.Action("Programs","Admin")" class="nav-link">Programs</a>
+                </li>*@
+                <li class="nav-item">
+                    <a href="@Url.Action("ProgramCategories","Admin")" class="nav-link">Categories</a>
+                </li>
+                <li class="nav-item">
+                    <a href="@Url.Action("Courses","Admin")" class="nav-link">Courses</a>
+                </li>
+                <li class="nav-item">
+                    <a href="@Url.Action("Certifications","Admin")" class="nav-link">Certifications</a>
+                </li>
+            </ul>
+        </div>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" data-toggle="collapse" href="#studentManager" role="button" aria-expanded="false" aria-controls="studentManager">
+            <i class="link-icon" data-feather="book-open"></i>
+            <span class="link-title">Student Manager</span>
+            <i class="link-arrow" data-feather="chevron-down"></i>
+        </a>
+        <div class="collapse" id="studentManager">
+            <ul class="nav sub-menu">
+                <li class="nav-item">
+                    <a href="@Url.Action("RegisteredStudents","Admin")" class="nav-link">All Students</a>
+                </li>
+                <li class="nav-item">
+                    <a href="@Url.Action("CompletedEnrollment","Admin")" class="nav-link">Complete Enrollment</a>
+                </li>
+                <li class="nav-item">
+                    <a href="@Url.Action("PartialEnrollment","Admin")" class="nav-link">Partial Enrollment</a>
+                </li>
+                <li class="nav-item">
+                    <a href="@Url.Action("BlockedStudents","Admin")" class="nav-link">Blocked Students</a>
+                </li>
+            </ul>
+        </div>
+    </li>    
+    <li class="nav-item">
+        <a href="@Url.Action("RegisteredAffiliates","Admin")" class="nav-link">
+            <i class="link-icon" data-feather="box"></i>
+            <span class="link-title">Affiliates</span>
+        </a>
+    </li>
+    <li class="nav-item">
+        <a href="@Url.Action("Logout","Admin")" class="nav-link">
+            <i class="link-icon" data-feather="log-out"></i>
+            <span class="link-title">Log Out</span>
+        </a>
+    </li>
+
+</ul>
+

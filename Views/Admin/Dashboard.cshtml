@@ -1,0 +1,351 @@
+﻿@{
+    Layout = "_adminLayout";
+}
+
+@model CPEA.Utilities.ViewModel.DashboardVM
+
+<div class="d-flex justify-content-between align-items-center flex-wrap grid-margin">
+    <div>
+        <h4 class="mb-3 mb-md-0">Welcome to Dashboard</h4>
+    </div>
+
+</div>
+
+<div class="row">
+    <div class="col-lg-5 col-xl-4 grid-margin stretch-card">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-baseline mb-2">
+                    <h6 class="card-title mb-0">Today</h6>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th class="pt-0"></th>
+                                <th class="pt-0">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Registered Students</td>
+                                <td>@Model.today.RegisteredStudents</td>
+                            </tr>
+                            <tr>
+                                <td>Without Courses</td>
+                                <td>@Model.today.WithoutCourses</td>
+                            </tr>
+                            <tr>
+                                <td>With courses</td>
+                                <td>@Model.today.WithCourses</td>
+                            </tr>
+                            <tr>
+                                <td>Amount Paid</td>
+                                <td>₦ @Model.today.AmountPaid</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-5 col-xl-4 grid-margin stretch-card">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-baseline mb-2">
+                    <h6 class="card-title mb-0">This Week</h6>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th class="pt-0"></th>
+                                <th class="pt-0">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Registered Students</td>
+                                <td>@Model.thisWeek.RegisteredStudents</td>
+                            </tr>
+                            <tr>
+                                <td>Without Courses</td>
+                                <td>@Model.thisWeek.WithoutCourses</td>
+                            </tr>
+                            <tr>
+                                <td>With courses</td>
+                                <td>@Model.thisWeek.WithCourses</td>
+                            </tr>
+                            <tr>
+                                <td>Amount Paid</td>
+                                <td>₦ @Model.thisWeek.AmountPaid</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-5 col-xl-4 grid-margin stretch-card">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-baseline mb-2">
+                    <h6 class="card-title mb-0">This Month</h6>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th class="pt-0"></th>
+                                <th class="pt-0">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Registered Students</td>
+                                <td>@Model.thisMonth.RegisteredStudents</td>
+                            </tr>
+                            <tr>
+                                <td>Without Courses</td>
+                                <td>@Model.thisMonth.WithoutCourses</td>
+                            </tr>
+                            <tr>
+                                <td>With courses</td>
+                                <td>@Model.thisMonth.WithCourses</td>
+                            </tr>
+                            <tr>
+                                <td>Amount Paid</td>
+                                <td>₦ @Model.thisMonth.AmountPaid</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div> <!-- row -->
+
+<div class="row">
+    <div class="col-lg-5 col-xl-6 grid-margin stretch-card">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-baseline mb-2">
+                    <h6 class="card-title mb-0">Programs</h6>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th class="pt-0"></th>
+                                <th class="pt-0">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Programs</td>
+                                <td>@Model.totalPrograms</td>
+                            </tr>
+                            <tr>
+                                <td>Categories</td>
+                                <td>@Model.totalCategories</td>
+                            </tr>
+                            <tr>
+                                <td>Courses</td>
+                                <td>@Model.totalCourses</td>
+                            </tr>
+                            <tr>
+                                <td>Certifications</td>
+                                <td>@Model.totalCertifications</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-5 col-xl-6 grid-margin stretch-card">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-baseline mb-2">
+                    <h6 class="card-title mb-0">Students</h6>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th class="pt-0"></th>
+                                <th class="pt-0">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Registered Students</td>
+                                <td>@Model.studentBlock.RegisteredStudents</td>
+                            </tr>
+                            <tr>
+                                <td>Without Courses</td>
+                                <td>@Model.studentBlock.WithoutCourses</td>
+                            </tr>
+                            <tr>
+                                <td>With Courses</td>
+                                <td>@Model.studentBlock.WithCourses</td>
+                            </tr>
+                            <tr>
+                                <td>Blocked</td>
+                                <td>@Model.studentBlock.BlockedStudent</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+<div class="row">
+    <div class="col-lg-5 col-xl-6 grid-margin stretch-card">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-baseline mb-2">
+                    <h6 class="card-title mb-0">Users by Roles</h6>
+
+                </div>
+                <div id="doughNutChart" style="width: 500px; height: 400px;">
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-5 col-xl-6 grid-margin stretch-card">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-baseline mb-2">
+                    <div style="width: 60%; float:left">
+                        <h6 class="card-title mb-0" style="margin-top:-10px;" id="enrollmentChartLabel">Enrollment by Programs</h6>
+
+                    </div>
+                    <div style="width: 10%">
+                        <label style="margin-top: 5px;">Select</label>
+                    </div>
+                    <div style="width: 30%; float:right">
+                        <select class="form-control mb-3" id="enrollmentParam">
+                            <option value="Program" selected>Programs</option>
+                            <option value="Category">Categories</option>
+                            <option value="Course">Courses</option>
+                            <option value="Certification">Certifications</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="piechart" style="width: 500px; height: 400px;">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- row -->
+
+
+<div class="row">
+
+    <div class="col-lg-12 col-xl-12 stretch-card">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-baseline mb-2">
+                    <h6 class="card-title mb-0">Recent 10 Login Record</h6>
+
+                </div>
+                <br />
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th class="pt-0">Email</th>
+                                <th class="pt-0">Full Name</th>
+                                <th class="pt-0">Log Time</th>
+                                <th class="pt-0">IP</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model != null && Model.logRecord.Count > 0)
+                            {
+                                @foreach (var item in Model.logRecord)
+                                {
+                            <tr>
+                                <td>@Html.DisplayFor(modelItem => item.email)</td>
+                                <td>@Html.DisplayFor(modelItem => item.fullName)</td>
+                                <td>@Html.DisplayFor(modelItem => item.log)</td>
+                                <td>@Html.DisplayFor(modelItem => item.Ip)</td>
+                            </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div> <!-- row -->
+
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+<script type="text/javascript">
+    google.load("visualization", "1", { packages: ["corechart"] });
+    google.setOnLoadCallback(drawChart);
+    google.setOnLoadCallback(drawDoughNutChart);
+
+    function drawChart() {
+
+        var t = document.getElementById("enrollmentParam");
+        var paramValue = t.options[t.selectedIndex].text;
+        
+        var urlOptions = '/Admin/chartEnrollmentbyQueryString';
+
+        $.post(urlOptions, { param: paramValue }, function (r) {
+            
+            var data = google.visualization.arrayToDataTable(r);
+
+            //Pie
+            var options = {
+                title: ''
+            };
+            var chart = new google.visualization.PieChart($("#piechart")[0]);
+            chart.draw(data, options);
+
+            document.getElementById("enrollmentChartLabel").innerHTML = 'Enrollment by ' + paramValue;
+        });
+
+    }
+    $('#enrollmentParam').on('change', function () {
+        
+        google.load("visualization", "1", { packages: ["corechart"] });
+        google.setOnLoadCallback(drawChart);
+    });
+
+    function drawDoughNutChart() {
+       // alert('hi');
+        $.ajax({
+            type: "POST",
+            url: "/Admin/chartUserbyRole",
+            data: '{}',
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (r) {
+                /*alert(JSON.stringify(r));*/
+                var data = google.visualization.arrayToDataTable(r);
+                
+                //Doughnut
+                var options = {
+                    title: '',
+                    pieHole: 0.5
+                };
+                var chart = new google.visualization.PieChart($("#doughNutChart")[0]);
+                chart.draw(data, options);
+            },
+            failure: function (r) {
+                alert(r.d);
+            },
+            error: function (r) {
+                alert(r.d);
+            }
+        });
+    }
+</script>

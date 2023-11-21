@@ -1,0 +1,32 @@
+﻿@model CPEA.Utilities.ViewModel.ProgramCategoryVM
+<div class="modal fade" id="AddProgramCategory" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalCenterTitle">New Category Details</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form asp-action="AddProgramCategory">
+
+                    <div class="form-group">
+                        <label class="control-label">Institutions</label>
+                        <select class="js-example-basic-single w-100" asp-for="NewCategory.InstitutionId" data-width="100%" id="program" data-placeholder="Select an option" required asp-items="@Model.institutionListz.Select(x => new SelectListItem() { Text = x.Name, Value = x.Id.ToString() }).ToList()">
+                            <option value="">Select an option</option>
+                        </select>
+                        <label class="control-label">Name</label>
+                        <input type="text" asp-for="NewCategory.Name" class="form-control" placeholder="Enter name">
+                        <label class="control-label">Description</label>
+                        <textarea class="form-control" asp-for="NewCategory.Description"></textarea>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary" style="margin-right: 10px; background-color: #058383 !important">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,91 @@
+﻿@model CPEA.Utilities.ViewModel.GenInvoice
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="container-fluid d-flex justify-content-between">
+                    <div class="col-lg-3 pl-0">
+                        <a href="https://edurex.academy" class="noble-ui-logo d-block mt-3">
+                            <div style="height:60px; width:200px;">
+                                <img src="~/assets/images/EdurexAcademy.png" style="max-width:100%; height:auto;" />
+                            </div>
+                        </a>
+                        @*<p class="mt-1 mb-1"><b>@Model.Institutions.Name</b></p>*@
+                        <p>20 Awolowo Avenue,<br> Bodija, Ibadan.<br>Oyo. <br />NIGERIA</p>
+                        <h5 class="mt-5 mb-2 text-muted">Invoice to :</h5>
+                        <p><span class="text-muted">Student Number : </span>StudentNumber,<br> <span class="text-muted">Name : </span>FirstName LastName</p>
+                    </div>
+                    <div class="col-lg-3 pr-0">
+                        <h4 class="font-weight-medium text-uppercase text-right mt-4 mb-2">receipt</h4>
+                        <h6 class="text-right mb-5 pb-4"># ReceiptNum</h6>
+                        @*<p class="text-right mb-1">Balance Due</p>
+                        <h4 class="text-right font-weight-normal">$ 72,420.00</h4>*@
+                        <h6 class="text-right font-weight-normal"><span class="text-muted">Transaction Ref. : </span> paymentRef</h6>
+                        <h6 class="mb-0 mt-3 text-right font-weight-normal mb-2"><span class="text-muted">Payment Date : </span> paymentDate</h6>
+                        @*<h6 class="text-right font-weight-normal"><span class="text-muted">Due Date :</span> 12th Jul 2021</h6>*@
+                    </div>
+                </div>
+                <div class="container-fluid mt-5 d-flex justify-content-center w-100">
+                    <div class="table-responsive w-100">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Description</th>
+                                    <th class="text-right">Amount Paid</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="text-right">
+                                    <td class="text-left">1</td>
+                                    <td class="text-left">paymentForName</td>
+                                    <td>Amount</td>
+
+                                </tr>
+                                <tr class="text-right">
+                                    <td class="text-left">2</td>
+                                    <td class="text-left">paymentForName</td>
+                                    <td>Amount</td>
+
+                                </tr>
+                                @*@if (Model != null && Model.PaymentRecord.Count > 0)
+        {
+            int count = 0;
+            @foreach (var item in Model.PaymentRecord)
+            {
+                count += 1;
+                <tr class="text-right">
+                    <td class="text-left">@count</td>
+                    <td class="text-left">@Html.DisplayFor(modelItem => item.paymentForName)</td>
+                    <td>@Html.DisplayFor(modelItem => item.Amount)</td>
+
+                </tr>
+            }
+        }*@
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="container-fluid mt-5 w-100">
+                    <div class="row">
+                        <div class="col-md-6 ml-auto">
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <tbody>
+                                        <tr>
+                                            <td>Sub Total</td>
+                                            <td class="text-right"> totalPayment</td>
+                                        </tr>                                        
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="container-fluid w-100">
+                    @*<a class="btn btn-outline-primary float-right mt-4"  asp-controller="Home" asp-action="DownloadReceipt" asp-route-paymentRef="@Model.paymentRef" style="background-color: #058383 !important; color:white"><i data-feather="printer" class="mr-2 icon-md"></i>Download PDF</a>*@
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

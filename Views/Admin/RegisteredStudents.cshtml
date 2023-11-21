@@ -1,0 +1,231 @@
+﻿@{
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+}
+<style>
+    .search {
+        color: #aaa;
+        font-size: 16px;
+    }
+
+    .form-element {
+        position: relative;
+    }
+
+    .search .fa-eye {
+        position: absolute;
+        top: -1.5px;
+        right: 10px;
+        bottom: 0;
+    }
+</style>
+@model CPEA.Utilities.ViewModel.RegisteredStudentsVM
+<div class="d-flex justify-content-between align-items-center flex-wrap grid-margin">
+    <div>
+        <h4 class="mb-3 mb-md-0">All Students</h4>
+    </div>
+</div>
+@if (CPEA.Utilities.GeneralClass.role == "Admin")
+{
+    <div class="row">
+        <div class="col-lg-12 col-xl-12 grid-margin stretch-card">
+            <div class="card">
+                <div class="card-body">
+
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0 " id="dataTableExample">
+                            <thead>
+                                <tr>
+                                    <th class="pt-0">Student Id</th>
+                                    <th class="pt-0">Full Name</th>
+                                    @*<th class="pt-0">Last Name</th>*@
+                                    <th class="pt-0">Email</th>
+                                    <th class="pt-0">Phone</th>
+                                    <th class="pt-0">Status</th>
+                                    <th class="pt-0">Reg. Date</th>
+                                    <th class="pt-0">Last Login</th>
+                                    <th class="pt-0">Total Courses</th>
+                                    <th class="pt-0">Total Certs</th>
+                                    <th class="pt-0">Action</th>
+
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model != null && Model.RegisteredStudents.Count > 0)
+                                {
+                                    @foreach (var item in Model.RegisteredStudents)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <a asp-controller="Admin" asp-action="SingleStudent" asp-route-email="@item.Email"> @Html.DisplayFor(modelItem => item.StudentNumber)</a>
+                                            </td>
+                                            <td>@Html.DisplayFor(modelItem => item.FirstName) @Html.DisplayFor(modelItem => item.LastName)</td>
+                                            @*<td>@Html.DisplayFor(modelItem => item.LastName)</td>*@
+                                            <td>
+                                                <a asp-controller="Admin" asp-action="SingleStudent" asp-route-email="@item.Email"> @Html.DisplayFor(modelItem => item.Email)</a>
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.Phone)
+                                            </td>
+                                            <td>
+                                                @if (item.Status == CPEA.Utilities.UserStatusEnums.Active)
+                                                {
+                                                    <span class="badge badge-success">@Html.DisplayFor(modelItem => item.Status)</span>
+                                                }
+                                                else if (item.Status == CPEA.Utilities.UserStatusEnums.Inactive)
+                                                {
+                                                    <span class="badge badge-warning">@Html.DisplayFor(modelItem => item.Status)</span>
+                                                }
+                                                @*else if (item.Status == CPEA.Utilities.UserStatusEnums.Deposited)
+                                    {
+                                    <span class="badge badge-info-muted">@Html.DisplayFor(modelItem => item.Status)</span>
+                                    }*@
+                                                else if (item.Status == CPEA.Utilities.UserStatusEnums.Blocked)
+                                                {
+                                                    <span class="badge badge-danger">@Html.DisplayFor(modelItem => item.Status)</span>
+                                                }
+                                                @*else if (item.Status == CPEA.Utilities.UserStatusEnums.Completed)
+                                    {
+                                    <span class="badge badge-info-muted">@Html.DisplayFor(modelItem => item.Status)</span>
+                                    }*@
+                                            </td>
+                                            <td>@Html.DisplayFor(modelItem => item.RegisteredDate)</td>
+                                            <td>
+                                                @if (item.LastLogin != new DateTime())
+                                                {
+                                                    @Html.DisplayFor(modelItem => item.LastLogin)
+                                                }
+                                            </td>
+                                            <td>@Html.DisplayFor(modelItem => item.TotalCourses)</td>
+                                            <td>@Html.DisplayFor(modelItem => item.TotalCertifications)</td>
+                                            <td>
+                                                <partial name="BlockStudent" />
+                                                <partial name="ResetStudentPassword" />
+                                                <div class="dropdown mb-2">
+                                                    <button class="btn p-0" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                        <i class="icon-lg text-muted pb-3px" data-feather="more-horizontal"></i>
+                                                    </button>
+                                                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                                        <a class="dropdown-item d-flex align-items-center" href="#" onclick="BlockUser('@item.Email', '@item.StudentNumber', '@item.FirstName @item.LastName')"><i data-feather="edit-2" class="icon-sm mr-2"></i> <span class="">Edit</span></a>
+                                                        <a class="dropdown-item d-flex align-items-center" href="#" onclick="BlockUser('@item.Email', '@item.StudentNumber', '@item.FirstName @item.LastName')" data-toggle="modal" data-target="#blockStudentModal"><i data-feather="user-x" class="icon-sm mr-2"></i> <span class="">Block</span></a>
+                                                        <a class="dropdown-item d-flex align-items-center" href="#" onclick="BlockUser('@item.Email', '@item.StudentNumber', '@item.FirstName @item.LastName')" data-toggle="modal" data-target="#resetStudentModal"><i data-feather="trash" class="icon-sm mr-2"></i> <span class="">Reset Password</span></a>
+
+                                                    </div>
+                                                </div>
+                                                @*<a onclick="BlockUser('@item.Email')" class="btn btn-secondary" style="background-color: #058383 !important"> Edit</a>
+                                    <a onclick="BlockUser('@item.Email')" class="btn btn-warning" data-toggle="modal" data-target="#blockStudentModal">Block</a>
+                                    <a onclick="BlockUser('@item.Email')" class="btn btn-secondary" data-toggle="modal" data-target="#resetStudentModal"> Reset Password</a>*@
+                                                @*<a asp-controller="Admin" class="btn btn-secondary" data-toggle="modal" data-target="#exampleModalCenter"> Edit User</a>
+                                    <a asp-controller="Admin" class="btn btn-secondary" data-toggle="modal" data-target="#exampleModalCenter"> Reset Password</a>*@
+
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+}
+else
+{
+    <div class="row">
+        <div class="col-lg-12 col-xl-12 grid-margin stretch-card">
+            <div class="card">
+                <div class="card-body">
+
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0 " id="dataTableExample">
+                            <thead>
+                                <tr>
+                                    <th class="pt-0">Student Id</th>
+                                    <th class="pt-0">Full Name</th>
+                                    @*<th class="pt-0">Last Name</th>*@
+                                    <th class="pt-0">Email</th>
+                                    <th class="pt-0">Phone</th>
+                                    <th class="pt-0">Status</th>
+                                    <th class="pt-0">Reg. Date</th>
+                                    <th class="pt-0">Last Login</th>
+                                    <th class="pt-0">Total Courses</th>
+                                    <th class="pt-0">Total Certs</th>
+
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model != null && Model.RegisteredStudents.Count > 0)
+                                {
+                                    @foreach (var item in Model.RegisteredStudents)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <a asp-controller="Admin" asp-action="SingleStudent" asp-route-email="@item.Email"> @Html.DisplayFor(modelItem => item.StudentNumber)</a>
+                                            </td>
+                                            <td>@Html.DisplayFor(modelItem => item.FirstName) @Html.DisplayFor(modelItem => item.LastName)</td>
+                                            @*<td>@Html.DisplayFor(modelItem => item.LastName)</td>*@
+                                            <td>
+                                                <a asp-controller="Admin" asp-action="SingleStudent" asp-route-email="@item.Email"> @Html.DisplayFor(modelItem => item.Email)</a>
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.Phone)
+                                            </td>
+                                            <td>
+                                                @if (item.Status == CPEA.Utilities.UserStatusEnums.Active)
+                                                {
+                                                    <span class="badge badge-success">@Html.DisplayFor(modelItem => item.Status)</span>
+                                                }
+                                                else if (item.Status == CPEA.Utilities.UserStatusEnums.Inactive)
+                                                {
+                                                    <span class="badge badge-warning">@Html.DisplayFor(modelItem => item.Status)</span>
+                                                }
+                                                @*else if (item.Status == CPEA.Utilities.UserStatusEnums.Deposited)
+                                    {
+                                    <span class="badge badge-info-muted">@Html.DisplayFor(modelItem => item.Status)</span>
+                                    }*@
+                                                else if (item.Status == CPEA.Utilities.UserStatusEnums.Blocked)
+                                                {
+                                                    <span class="badge badge-danger">@Html.DisplayFor(modelItem => item.Status)</span>
+                                                }
+                                                @*else if (item.Status == CPEA.Utilities.UserStatusEnums.Completed)
+                                    {
+                                    <span class="badge badge-info-muted">@Html.DisplayFor(modelItem => item.Status)</span>
+                                    }*@
+                                            </td>
+                                            <td>@Html.DisplayFor(modelItem => item.RegisteredDate)</td>
+                                            <td>
+                                                @if (item.LastLogin != new DateTime())
+                                                {
+                                                    @Html.DisplayFor(modelItem => item.LastLogin)
+                                                }
+                                            </td>
+                                            <td>@Html.DisplayFor(modelItem => item.TotalCourses)</td>
+                                            <td>@Html.DisplayFor(modelItem => item.TotalCertifications)</td>
+                                            
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+}
+
+
+<script>
+    function BlockUser(g, h, i) {
+
+        document.getElementById('studentEmail').value = g;
+        document.getElementById('studentNumber').value = h;
+        document.getElementById('studentName').value = i;
+
+        document.getElementById('studentEmailR').value = g;
+        document.getElementById('studentNumberR').value = h;
+        document.getElementById('studentNameR').value = i;
+    }
+</script>

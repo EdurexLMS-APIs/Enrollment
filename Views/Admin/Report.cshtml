@@ -1,0 +1,247 @@
+﻿@{
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+}
+
+@model CPEA.Utilities.ViewModel.ReportVM
+<div class="d-flex justify-content-between align-items-center flex-wrap grid-margin">
+    <div>
+        <h4 class="mb-3 mb-md-0">Reports</h4>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12 grid-margin stretch-card">
+        <div class="card">
+            <div class="card-body">
+                <form asp-action="ReportDateR">
+                    <div style="width: 20%; float:left">
+                        <div style="width: 20%; float:left">
+                            <label>Select</label>
+                        </div>
+                        <div style="width: 80%; float:left">
+                            <select id="ReportSelectionParam" onchange="ChangeParam()">
+                                <option value="All" selected>All</option>
+                                <option value="Date Range">Date Range</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div style="width: 20%;">
+                    </div>
+                    <div style="width: 60%; float:right; display:none" id="divDateRange">
+                        <div style="width: 40%; float:left">
+                            <div style="width: 20%; float:left; text-align:right">
+                                <label>From</label>
+                            </div>
+                            <div style="width: 80%; float:right">
+                                <input class="form-control mb-4 mb-md-0" asp-for="dto.From" data-inputmask="'alias': 'date'" data-inputmask-inputformat="dd/mm/yyyy" />
+                                @*<div class="input-group date datepicker dashboard-date mr-2 mb-2 mb-md-0 d-md-none d-xl-flex" id="dashboardDate">
+                                    <input type="text" class="form-control">
+                                    <span class="input-group-addon bg-transparent"><i data-feather="calendar" class=" text-primary"></i></span>
+                                </div>*@
+                                @*<div class="input-group date datepicker" id="datePickerExample">
+            <input type="text" class="form-control" asp-for="dto.From"><span class="input-group-addon"><i data-feather="calendar"></i></span>
+        </div>*@
+                            </div>
+                        </div>
+                        <div style="width: 60%; float:right">
+                            <div style="width: 70%; float:left">
+                                <div style="width: 20%; float: left; text-align: right">
+                                    <label>To</label>
+                                </div>
+                                <div style="width: 80%; float:right">
+                                    <input class="form-control mb-4 mb-md-0" asp-for="dto.To" data-inputmask="'alias': 'date'" data-inputmask-inputformat="dd/mm/yyyy" />
+                                    @*<div class="input-group date datepicker dashboard-date mr-2 mb-2 mb-md-0 d-md-none d-xl-flex" id="datePickerExample">
+            <input type="text" class="form-control">
+            <span class="input-group-addon bg-transparent"><i data-feather="calendar" class=" text-primary"></i></span>
+        </div>*@
+                                    @*<div class="input-group date datepicker" id="datePickerTo">
+            <input type="text" class="form-control" asp-for="dto.To"><span class="input-group-addon"><i data-feather="calendar"></i></span>
+        </div>*@
+                                </div>
+                            </div>
+                            <div style="width: 10%"></div>
+                            <div style="width: 20%; float: right">
+                                <button type="submit" class="btn btn-primary" style="margin-right: 10px; background-color: #058383 !important">Load</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-12 col-xl-12 grid-margin stretch-card">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="mb-3 mb-md-0">Programs</h4>
+                <br />
+
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0 " id="dataTableExample1">
+                        <thead>
+                            <tr>
+                                <th class="pt-0">Name</th>
+                                <th class="pt-0">Total Students</th>
+                                <th class="pt-0">Total Active</th>
+                                <th class="pt-0">Total Inctive</th>
+                                <th class="pt-0">Total Payment</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model != null && Model.RPrograms.Count > 0)
+                            {
+                                @foreach (var item in Model.RPrograms)
+                                {
+                                    <tr>
+                                        <td>@Html.DisplayFor(modelItem => item.Name)</td>
+                                        <td>@Html.DisplayFor(modelItem => item.TotalStudent)</td>
+                                        <td>@Html.DisplayFor(modelItem => item.TotalActive)</td>
+                                        <td>@Html.DisplayFor(modelItem => item.TotalInactive)</td>
+                                        <td>₦ @Html.DisplayFor(modelItem => item.TotalAmountPaid)</td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+</div>
+<div class="row">
+    <div class="col-lg-12 col-xl-12 grid-margin stretch-card">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="mb-3 mb-md-0">Categories</h4>
+                <br />
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0 myDataTable">
+                        <thead>
+                            <tr>
+                                <th class="pt-0">Name</th>
+                                <th class="pt-0">Total Students</th>
+                                <th class="pt-0">Total Active</th>
+                                <th class="pt-0">Total Inctive</th>
+                                <th class="pt-0">Total Payment</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model != null && Model.RCategories.Count > 0)
+                            {
+                                @foreach (var item in Model.RCategories)
+                                {
+                                    <tr>
+                                        <td>@Html.DisplayFor(modelItem => item.Name)</td>
+                                        <td>@Html.DisplayFor(modelItem => item.TotalStudent)</td>
+                                        <td>@Html.DisplayFor(modelItem => item.TotalActive)</td>
+                                        <td>@Html.DisplayFor(modelItem => item.TotalInactive)</td>
+                                        <td>₦ @Html.DisplayFor(modelItem => item.TotalAmountPaid)</td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+</div>
+<div class="row">
+    <div class="col-lg-12 col-xl-12 grid-margin stretch-card">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="mb-3 mb-md-0">Courses</h4>
+                <br />
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0 " id="dataTableExample">
+                        <thead>
+                            <tr>
+                                <th class="pt-0">Name</th>
+                                <th class="pt-0">Total Students</th>
+                                <th class="pt-0">Total Active</th>
+                                <th class="pt-0">Total Inctive</th>
+                                <th class="pt-0">Total Payment</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model != null && Model.RCourses.Count > 0)
+                            {
+                                @foreach (var item in Model.RCourses)
+                                {
+                                    <tr>
+                                        <td>@Html.DisplayFor(modelItem => item.Name)</td>
+                                        <td>@Html.DisplayFor(modelItem => item.TotalStudent)</td>
+                                        <td>@Html.DisplayFor(modelItem => item.TotalActive)</td>
+                                        <td>@Html.DisplayFor(modelItem => item.TotalInactive)</td>
+                                        <td>₦ @Html.DisplayFor(modelItem => item.TotalAmountPaid)</td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+</div>
+<div class="row">
+    <div class="col-lg-12 col-xl-12 grid-margin stretch-card">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="mb-3 mb-md-0">Certifications</h4>
+                <br />
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0 myDataTable">
+                        <thead>
+                            <tr>
+                                <th class="pt-0">Name</th>
+                                <th class="pt-0">Total Students</th>
+                                <th class="pt-0">Total Active</th>
+                                <th class="pt-0">Total Inctive</th>
+                                <th class="pt-0">Total Payment</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model != null && Model.RCertifications.Count > 0)
+                            {
+                                @foreach (var item in Model.RCertifications)
+                                {
+                                    <tr>
+                                        <td>@Html.DisplayFor(modelItem => item.Name)</td>
+                                        <td>@Html.DisplayFor(modelItem => item.TotalStudent)</td>
+                                        <td>@Html.DisplayFor(modelItem => item.TotalActive)</td>
+                                        <td>@Html.DisplayFor(modelItem => item.TotalInactive)</td>
+                                        <td>₦ @Html.DisplayFor(modelItem => item.TotalAmountPaid)</td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    function ChangeParam() {
+
+        $("#divDateRange").css("display", "none");
+        var t = document.getElementById("ReportSelectionParam");
+        var selectedText = t.options[t.selectedIndex].text;
+
+        if (selectedText == "Date Range") {
+            $("#divDateRange").css("display", "block");
+        };
+    }
+
+</script>

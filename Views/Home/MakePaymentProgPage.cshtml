@@ -1,0 +1,31 @@
+﻿@model CPEA.Utilities.ViewModel.DashboardVM
+<div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalCenterTitle">Program Payment</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form asp-action="MakePayment">
+                    <input type="hidden" class="form-control form-control-sm" asp-for="paymentDTO.userProgramOptionId" id="userPId">
+                    <div class="form-group">
+                        <label for="colFormLabelSm">Amount</label>
+                        <input type="text" class="form-control form-control-sm" asp-for="paymentDTO.Amount" id="amount" placeholder="Enter amount">
+                    </div>
+                    <div class="form-group">
+                        <label for="colFormLabel">Select payment method</label><br />
+                        <input type="submit" value="Card" id="cardButton" class="btn btn-primary disableButton submit" asp-action="CardMakePayment" style="margin-right: 10px; background-color: #058383 !important" />
+                        <input type="submit" value="Account Transfer" id="transferButton" class="btn btn-secondary disableButton submit" asp-action="TransferMakePayment" style="margin-right: 10px;" />
+                        <input type="submit" value="Bank Connect" id="bankButton" class="btn btn-info disableButton submit" asp-action="BankConnectMakePayment" style="margin-right: 10px;" />
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

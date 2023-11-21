@@ -1,0 +1,40 @@
+﻿@model CPEA.Utilities.ViewModel.CertificationsVM
+<div class="modal fade" id="CertpriceOptionModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalCenterTitle">New Price Option</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form asp-action="AddCertPrice">
+
+                    <div class="form-group">
+                        <input type="hidden" class="form-control" id="certId" asp-for="NewPriceOption.CertificationId" readonly>
+
+                        <label class="control-label">Certification</label>
+                        <input type="text" class="form-control" id="certName" readonly>
+                        <label class="control-label">Exam Date</label>
+                        <div class="input-group date datepicker" id="datePickerExample">
+                            <input type="text" class="form-control" asp-for="NewPriceOption.ExamDate"><span class="input-group-addon"><i data-feather="calendar"></i></span>
+                        </div>
+                        <label class="control-label">Currency</label>
+                        <select class="form-control" style="color:black" required asp-items="@Model.currencyListz.Select(x => new SelectListItem() { Text = x.name, Value = x.Id.ToString() }).ToList()" asp-for="NewPriceOption.Currency">
+                            
+                        </select>
+                        <label class="control-label">Amount</label>
+                        <input type="number" step="0.01" asp-for="NewPriceOption.Amount" class="form-control" placeholder="Enter amount">
+                        <label class="control-label">Charges</label>
+                        <input type="number" step="0.01" asp-for="NewPriceOption.Charges" class="form-control" placeholder="Enter charges">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary" style="margin-right: 10px; background-color: #058383 !important">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

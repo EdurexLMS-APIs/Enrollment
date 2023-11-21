@@ -1,0 +1,87 @@
+﻿@model CPEA.Utilities.ViewModel.UserProfileVM
+
+<div class="profile-page tx-13">
+    <div class="row">
+        <div class="col-12 grid-margin">
+            <div class="profile-header">
+                <div class="cover">
+                    <div class="col-sm-10" style="float:left">
+                        <h4 class="mb-3 mb-md-0">My Profile</h4>
+                    </div>
+                    <div class="col-sm-2" style="float:right">
+                        <button class="btn btn-primary btn-icon-text btn-edit-profile" id="btnEditProfile" style="background-color: #058383 !important ">
+                            <i data-feather="edit" class="btn-icon-prepend"></i> Edit profile
+                        </button>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row profile-body">
+        <!-- left wrapper start -->
+        <div class="d-none d-md-block col-md-12 col-xl-12 left-wrapper">
+            <div class="card rounded">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <h6 class="card-title mb-0"></h6>
+                        <img class="profile-pic" src="~/assets/images/Default.jpg" width="120" height="120" alt="profile">
+                    </div>
+                    @if (Model.User.PassportPath == null || Model.User.PassportPath == "")
+                    {
+                        <div>
+                            <div class="col-sm-10" style="float:left">
+
+                            </div>
+                            <div class="col-sm-2" style="float:right">
+                                <input type="file" />
+                            </div>
+                        </div>
+                     }
+                    <div class="mt-3">
+                        <div class="col-sm-2" style="float:left">
+                            <label class="tx-11 font-weight-bold mb-0 text-uppercase">First Name:</label>
+                        </div>
+                        <div class="col-sm-10">
+                            <p class="text-muted" id="editFirstname">@Model.User.FirstName</p>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <div class="col-sm-2" style="float:left">
+                            <label class="tx-11 font-weight-bold mb-0 text-uppercase">Last Name:</label>
+                        </div>
+                        <div class="col-sm-10">
+                            <p class="text-muted" id="editLastname">@Model.User.LastName</p>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <div class="col-sm-2" style="float:left">
+                            <label class="tx-11 font-weight-bold mb-0 text-uppercase">Email:</label>
+                        </div>
+                        <div class="col-sm-10">
+                            <p class="text-muted" id="editEmail">@Model.User.Email</p>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <div class="col-sm-2" style="float:left">
+                            <label class="tx-11 font-weight-bold mb-0 text-uppercase">Phone Number:</label>
+                        </div>
+                        <div class="col-sm-10">
+                            <p class="text-muted" id="editPhone">@Model.User.PhoneNumber</p>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <div class="col-sm-2" style="float:left">
+                            <label class="tx-11 font-weight-bold mb-0 text-uppercase">Alternate Phone Number:</label>
+                        </div>
+                        <div class="col-sm-10">
+                            <p class="text-muted" id="editAltPhone">@Model.User.AlternatePhone</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- left wrapper end -->
+        
+    </div>
+</div>

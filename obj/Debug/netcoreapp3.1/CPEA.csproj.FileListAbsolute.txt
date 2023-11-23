@@ -11,6 +11,8 @@ C:\Users\CAROLINE\source\repos\CPEA\CPEA\bin\Debug\netcoreapp3.1\CPEA.Views.dll
 C:\Users\CAROLINE\source\repos\CPEA\CPEA\bin\Debug\netcoreapp3.1\CPEA.Views.pdb
 C:\Users\CAROLINE\source\repos\CPEA\CPEA\bin\Debug\netcoreapp3.1\AspNetCoreHero.ToastNotification.Views.dll
 C:\Users\CAROLINE\source\repos\CPEA\CPEA\bin\Debug\netcoreapp3.1\AspNetCoreHero.ToastNotification.dll
+C:\Users\CAROLINE\source\repos\CPEA\CPEA\bin\Debug\netcoreapp3.1\BouncyCastle.Crypto.dll
+C:\Users\CAROLINE\source\repos\CPEA\CPEA\bin\Debug\netcoreapp3.1\itextsharp.dll
 C:\Users\CAROLINE\source\repos\CPEA\CPEA\bin\Debug\netcoreapp3.1\System.Net.Http.Formatting.dll
 C:\Users\CAROLINE\source\repos\CPEA\CPEA\bin\Debug\netcoreapp3.1\System.Web.Http.dll
 C:\Users\CAROLINE\source\repos\CPEA\CPEA\bin\Debug\netcoreapp3.1\Microsoft.AspNetCore.Cryptography.Internal.dll
@@ -73,6 +75,7 @@ C:\Users\CAROLINE\source\repos\CPEA\CPEA\bin\Debug\netcoreapp3.1\runtimes\win\li
 C:\Users\CAROLINE\source\repos\CPEA\CPEA\bin\Debug\netcoreapp3.1\runtimes\unix\lib\netcoreapp2.0\System.Runtime.Caching.dll
 C:\Users\CAROLINE\source\repos\CPEA\CPEA\bin\Debug\netcoreapp3.1\runtimes\win\lib\netcoreapp2.0\System.Runtime.Caching.dll
 C:\Users\CAROLINE\source\repos\CPEA\CPEA\bin\Debug\netcoreapp3.1\runtimes\win\lib\netstandard2.0\System.Security.Cryptography.ProtectedData.dll
+C:\Users\CAROLINE\source\repos\CPEA\CPEA\obj\Debug\netcoreapp3.1\CPEA.csproj.AssemblyReference.cache
 C:\Users\CAROLINE\source\repos\CPEA\CPEA\obj\Debug\netcoreapp3.1\CPEA.GeneratedMSBuildEditorConfig.editorconfig
 C:\Users\CAROLINE\source\repos\CPEA\CPEA\obj\Debug\netcoreapp3.1\CPEA.AssemblyInfoInputs.cache
 C:\Users\CAROLINE\source\repos\CPEA\CPEA\obj\Debug\netcoreapp3.1\CPEA.AssemblyInfo.cs
@@ -97,6 +100,7 @@ C:\Users\CAROLINE\source\repos\CPEA\CPEA\obj\Debug\netcoreapp3.1\Razor\Views\Adm
 C:\Users\CAROLINE\source\repos\CPEA\CPEA\obj\Debug\netcoreapp3.1\Razor\Views\Admin\AddProgramCategory.cshtml.g.cs
 C:\Users\CAROLINE\source\repos\CPEA\CPEA\obj\Debug\netcoreapp3.1\Razor\Views\Admin\AddProgramOption.cshtml.g.cs
 C:\Users\CAROLINE\source\repos\CPEA\CPEA\obj\Debug\netcoreapp3.1\Razor\Views\Admin\AddRole.cshtml.g.cs
+C:\Users\CAROLINE\source\repos\CPEA\CPEA\obj\Debug\netcoreapp3.1\Razor\Views\Admin\AllReferred.cshtml.g.cs
 C:\Users\CAROLINE\source\repos\CPEA\CPEA\obj\Debug\netcoreapp3.1\Razor\Views\Admin\BlockedStudents.cshtml.g.cs
 C:\Users\CAROLINE\source\repos\CPEA\CPEA\obj\Debug\netcoreapp3.1\Razor\Views\Admin\BlockedUsers.cshtml.g.cs
 C:\Users\CAROLINE\source\repos\CPEA\CPEA\obj\Debug\netcoreapp3.1\Razor\Views\Admin\BlockStudent.cshtml.g.cs
@@ -104,6 +108,7 @@ C:\Users\CAROLINE\source\repos\CPEA\CPEA\obj\Debug\netcoreapp3.1\Razor\Views\Adm
 C:\Users\CAROLINE\source\repos\CPEA\CPEA\obj\Debug\netcoreapp3.1\Razor\Views\Admin\CertificationOptions.cshtml.g.cs
 C:\Users\CAROLINE\source\repos\CPEA\CPEA\obj\Debug\netcoreapp3.1\Razor\Views\Admin\Certifications.cshtml.g.cs
 C:\Users\CAROLINE\source\repos\CPEA\CPEA\obj\Debug\netcoreapp3.1\Razor\Views\Admin\CompletedEnrollment.cshtml.g.cs
+C:\Users\CAROLINE\source\repos\CPEA\CPEA\obj\Debug\netcoreapp3.1\Razor\Views\Admin\ConfirmPayment.cshtml.g.cs
 C:\Users\CAROLINE\source\repos\CPEA\CPEA\obj\Debug\netcoreapp3.1\Razor\Views\Admin\CourseOptions.cshtml.g.cs
 C:\Users\CAROLINE\source\repos\CPEA\CPEA\obj\Debug\netcoreapp3.1\Razor\Views\Admin\Courses.cshtml.g.cs
 C:\Users\CAROLINE\source\repos\CPEA\CPEA\obj\Debug\netcoreapp3.1\Razor\Views\Admin\Dashboard.cshtml.g.cs
@@ -123,6 +128,7 @@ C:\Users\CAROLINE\source\repos\CPEA\CPEA\obj\Debug\netcoreapp3.1\Razor\Views\Adm
 C:\Users\CAROLINE\source\repos\CPEA\CPEA\obj\Debug\netcoreapp3.1\Razor\Views\Admin\ProgramOptions.cshtml.g.cs
 C:\Users\CAROLINE\source\repos\CPEA\CPEA\obj\Debug\netcoreapp3.1\Razor\Views\Admin\Programs.cshtml.g.cs
 C:\Users\CAROLINE\source\repos\CPEA\CPEA\obj\Debug\netcoreapp3.1\Razor\Views\Admin\Register2.cshtml.g.cs
+C:\Users\CAROLINE\source\repos\CPEA\CPEA\obj\Debug\netcoreapp3.1\Razor\Views\Admin\RegisteredAffiliates.cshtml.g.cs
 C:\Users\CAROLINE\source\repos\CPEA\CPEA\obj\Debug\netcoreapp3.1\Razor\Views\Admin\RegisteredStudents.cshtml.g.cs
 C:\Users\CAROLINE\source\repos\CPEA\CPEA\obj\Debug\netcoreapp3.1\Razor\Views\Admin\RegisteredUsers.cshtml.g.cs
 C:\Users\CAROLINE\source\repos\CPEA\CPEA\obj\Debug\netcoreapp3.1\Razor\Views\Admin\Report.cshtml.g.cs
@@ -133,12 +139,14 @@ C:\Users\CAROLINE\source\repos\CPEA\CPEA\obj\Debug\netcoreapp3.1\Razor\Views\Adm
 C:\Users\CAROLINE\source\repos\CPEA\CPEA\obj\Debug\netcoreapp3.1\Razor\Views\Admin\TransactionLog.cshtml.g.cs
 C:\Users\CAROLINE\source\repos\CPEA\CPEA\obj\Debug\netcoreapp3.1\Razor\Views\Admin\UnBlockStudent.cshtml.g.cs
 C:\Users\CAROLINE\source\repos\CPEA\CPEA\obj\Debug\netcoreapp3.1\Razor\Views\Admin\UnBlockUser.cshtml.g.cs
+C:\Users\CAROLINE\source\repos\CPEA\CPEA\obj\Debug\netcoreapp3.1\Razor\Views\Enrollment\NYSCRegister.cshtml.g.cs
 C:\Users\CAROLINE\source\repos\CPEA\CPEA\obj\Debug\netcoreapp3.1\Razor\Views\Enrollment\Register.cshtml.g.cs
 C:\Users\CAROLINE\source\repos\CPEA\CPEA\obj\Debug\netcoreapp3.1\Razor\Views\Enrollment\Register2.cshtml.g.cs
 C:\Users\CAROLINE\source\repos\CPEA\CPEA\obj\Debug\netcoreapp3.1\Razor\Views\Home\AllPrograms.cshtml.g.cs
 C:\Users\CAROLINE\source\repos\CPEA\CPEA\obj\Debug\netcoreapp3.1\Razor\Views\Home\bulkPO.cshtml.g.cs
 C:\Users\CAROLINE\source\repos\CPEA\CPEA\obj\Debug\netcoreapp3.1\Razor\Views\Home\Certifications.cshtml.g.cs
 C:\Users\CAROLINE\source\repos\CPEA\CPEA\obj\Debug\netcoreapp3.1\Razor\Views\Home\ChangeStartDate.cshtml.g.cs
+C:\Users\CAROLINE\source\repos\CPEA\CPEA\obj\Debug\netcoreapp3.1\Razor\Views\Home\CourseRegConfirmation.cshtml.g.cs
 C:\Users\CAROLINE\source\repos\CPEA\CPEA\obj\Debug\netcoreapp3.1\Razor\Views\Home\Courses.cshtml.g.cs
 C:\Users\CAROLINE\source\repos\CPEA\CPEA\obj\Debug\netcoreapp3.1\Razor\Views\Home\Dashboard.cshtml.g.cs
 C:\Users\CAROLINE\source\repos\CPEA\CPEA\obj\Debug\netcoreapp3.1\Razor\Views\Home\DiscountUsage.cshtml.g.cs
@@ -158,6 +166,7 @@ C:\Users\CAROLINE\source\repos\CPEA\CPEA\obj\Debug\netcoreapp3.1\Razor\Views\Hom
 C:\Users\CAROLINE\source\repos\CPEA\CPEA\obj\Debug\netcoreapp3.1\Razor\Views\Home\ReferralUsage.cshtml.g.cs
 C:\Users\CAROLINE\source\repos\CPEA\CPEA\obj\Debug\netcoreapp3.1\Razor\Views\Home\Register.cshtml.g.cs
 C:\Users\CAROLINE\source\repos\CPEA\CPEA\obj\Debug\netcoreapp3.1\Razor\Views\Home\RegisterNew.cshtml.g.cs
+C:\Users\CAROLINE\source\repos\CPEA\CPEA\obj\Debug\netcoreapp3.1\Razor\Views\Home\ResetPassword.cshtml.g.cs
 C:\Users\CAROLINE\source\repos\CPEA\CPEA\obj\Debug\netcoreapp3.1\Razor\Views\Home\SingleCourse.cshtml.g.cs
 C:\Users\CAROLINE\source\repos\CPEA\CPEA\obj\Debug\netcoreapp3.1\Razor\Views\Home\SingleRequest.cshtml.g.cs
 C:\Users\CAROLINE\source\repos\CPEA\CPEA\obj\Debug\netcoreapp3.1\Razor\Views\Home\SubscriptionDevices.cshtml.g.cs
@@ -172,6 +181,7 @@ C:\Users\CAROLINE\source\repos\CPEA\CPEA\obj\Debug\netcoreapp3.1\Razor\Views\Sha
 C:\Users\CAROLINE\source\repos\CPEA\CPEA\obj\Debug\netcoreapp3.1\Razor\Views\Shared\_myHeader.cshtml.g.cs
 C:\Users\CAROLINE\source\repos\CPEA\CPEA\obj\Debug\netcoreapp3.1\Razor\Views\Shared\_myLayout.cshtml.g.cs
 C:\Users\CAROLINE\source\repos\CPEA\CPEA\obj\Debug\netcoreapp3.1\Razor\Views\Shared\_myMenu.cshtml.g.cs
+C:\Users\CAROLINE\source\repos\CPEA\CPEA\obj\Debug\netcoreapp3.1\Razor\Views\Shared\_staffMenu.cshtml.g.cs
 C:\Users\CAROLINE\source\repos\CPEA\CPEA\obj\Debug\netcoreapp3.1\Razor\Views\Shared\_ValidationScriptsPartial.cshtml.g.cs
 C:\Users\CAROLINE\source\repos\CPEA\CPEA\obj\Debug\netcoreapp3.1\Razor\Views\_ViewImports.cshtml.g.cs
 C:\Users\CAROLINE\source\repos\CPEA\CPEA\obj\Debug\netcoreapp3.1\Razor\Views\_ViewStart.cshtml.g.cs
@@ -182,13 +192,4 @@ C:\Users\CAROLINE\source\repos\CPEA\CPEA\obj\Debug\netcoreapp3.1\CPEA.csproj.Cop
 C:\Users\CAROLINE\source\repos\CPEA\CPEA\obj\Debug\netcoreapp3.1\CPEA.dll
 C:\Users\CAROLINE\source\repos\CPEA\CPEA\obj\Debug\netcoreapp3.1\CPEA.pdb
 C:\Users\CAROLINE\source\repos\CPEA\CPEA\obj\Debug\netcoreapp3.1\CPEA.genruntimeconfig.cache
-C:\Users\CAROLINE\source\repos\CPEA\CPEA\obj\Debug\netcoreapp3.1\Razor\Views\Enrollment\NYSCRegister.cshtml.g.cs
-C:\Users\CAROLINE\source\repos\CPEA\CPEA\bin\Debug\netcoreapp3.1\BouncyCastle.Crypto.dll
-C:\Users\CAROLINE\source\repos\CPEA\CPEA\bin\Debug\netcoreapp3.1\itextsharp.dll
-C:\Users\CAROLINE\source\repos\CPEA\CPEA\obj\Debug\netcoreapp3.1\Razor\Views\Home\CourseRegConfirmation.cshtml.g.cs
-C:\Users\CAROLINE\source\repos\CPEA\CPEA\obj\Debug\netcoreapp3.1\CPEA.csproj.AssemblyReference.cache
-C:\Users\CAROLINE\source\repos\CPEA\CPEA\obj\Debug\netcoreapp3.1\Razor\Views\Shared\_staffMenu.cshtml.g.cs
-C:\Users\CAROLINE\source\repos\CPEA\CPEA\obj\Debug\netcoreapp3.1\Razor\Views\Home\ResetPassword.cshtml.g.cs
-C:\Users\CAROLINE\source\repos\CPEA\CPEA\obj\Debug\netcoreapp3.1\Razor\Views\Admin\AllReferred.cshtml.g.cs
-C:\Users\CAROLINE\source\repos\CPEA\CPEA\obj\Debug\netcoreapp3.1\Razor\Views\Admin\RegisteredAffiliates.cshtml.g.cs
-C:\Users\CAROLINE\source\repos\CPEA\CPEA\obj\Debug\netcoreapp3.1\Razor\Views\Admin\ConfirmPayment.cshtml.g.cs
+C:\Users\CAROLINE\source\repos\CPEA\CPEA\obj\Debug\netcoreapp3.1\Razor\Views\Home\StudentDashboard.cshtml.g.cs

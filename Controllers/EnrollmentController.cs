@@ -57,6 +57,8 @@ namespace CPEA.Controllers
         [HttpGet]
         public async Task<IActionResult> Register(string code)
         {
+            HttpContext.Session.Clear();
+
             var response = await _projectServices.GetRegister();
             if (code != null && code != "")
             {
@@ -94,6 +96,8 @@ namespace CPEA.Controllers
             var paymentResponse = await _projectServices.Enrollment(dto.registerz,url );
             if(paymentResponse.Successful == true )
             {
+                HttpContext.Session.SetString(SessionUsername, paymentResponse.Data.UserName.ToString());
+
                 _notyfService.Success("Registration Successful", 10);
                 //var response2 = await _projectServices.GetRegisterNew(paymentResponse.Data.Id);
                 //response2.phoneNumber = paymentResponse.Data.PhoneNumber;
@@ -111,6 +115,8 @@ namespace CPEA.Controllers
         [HttpGet]
         public async Task<IActionResult> NYSCRegister()
         {
+            HttpContext.Session.Clear();
+
             var response = await _projectServices.GetRegister();
             return View(response);
         }
@@ -138,6 +144,8 @@ namespace CPEA.Controllers
             var paymentResponse = await _projectServices.Enrollment(dto.registerz, url);
             if (paymentResponse.Successful == true)
             {
+                HttpContext.Session.SetString(SessionUsername, paymentResponse.Data.UserName.ToString());
+
                 _notyfService.Success("Registration Successful", 10);
                 //var response2 = await _projectServices.GetRegisterNew(paymentResponse.Data.Id);
                 //response2.phoneNumber = paymentResponse.Data.PhoneNumber;

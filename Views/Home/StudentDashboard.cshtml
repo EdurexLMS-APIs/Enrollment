@@ -1,0 +1,514 @@
+﻿@model CPEA.Utilities.ViewModel.StudentDashboardVM
+@*<div class="d-flex justify-content-between align-items-center flex-wrap grid-margin">
+        <div>
+            <h4 class="mb-3 mb-md-0"></h4>
+        </div>
+        <div class="d-flex align-items-center flex-wrap text-nowrap">
+            <h4 class="mb-3 mb-md-0">Your Number : @Model.studentNumber</h4>
+        </div>
+    </div>*@
+
+<div class="d-flex justify-content-between align-items-center flex-wrap grid-margin">
+    <div class="col-sm-11">
+        <h4 class="mb-3 mb-md-0">My Courses</h4>
+    </div>
+    <div class="col-sm-1">
+        <h4 class="mb-3 mb-md-0"><a href="@Url.Action("Courses","Home")" class="btn p-0"> View All</a></h4>
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg-12 col-xl-12 grid-margin stretch-card">
+        <div class="card">
+            <div class="card-body">
+                @*<div class="d-flex justify-content-between align-items-baseline">
+            <h6 class="card-title mb-0"></h6>
+            <div class="dropdown mb-2">
+                <a href="@Url.Action("Payment","Home")" class="btn p-0"> View All</a>
+            </div>
+        </div>*@
+                <!--<div style=" text-align:right">
+        <a onclick="sourceView()" class="btn btn-primary" data-toggle="modal" data-target="#NewProgram" style="margin-top: 15px; background-color: #058383 !important "> Register New Program</a>-->
+                @*<partial name="NewProgram" />*@
+                <!--</div>-->
+                <br />
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th class="pt-0" >Code</th>
+                                <th class="pt-0">Name</th>
+                                <th class="pt-0">Institution</th>
+                                <th class="pt-0">Start Date</th>
+                                <th class="pt-0">Course Fee</th>
+                                <th class="pt-0">Status</th>
+                                <th class="pt-0">Course Status</th>
+                                <th class="pt-0">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model != null && Model.UserCoursesVM.UserCourseList.Count > 0)
+                            {
+                                @foreach (var item in Model.UserCoursesVM.UserCourseList)
+                                {
+                                            <tr>
+                                                <td>@Html.DisplayFor(modelItem => item.CourseCode)</td>
+                                                <td>@Html.DisplayFor(modelItem => item.Name)</td>
+                                                <td>@Html.DisplayFor(modelItem => item.InstitutionCode)</td>
+                                                <td>@Html.DisplayFor(modelItem => item.StartDate)</td>
+                                                <td>@Html.DisplayFor(modelItem => item.Price)</td>
+                                                <td>
+                                            @if (item.ProgramPaymentStatus == CPEA.Utilities.UserProgramPaymentStatusEnums.Paid)
+                                            {
+                                                            <span class="badge badge-success">PAID</span>
+                                            }
+                                            else if (item.ProgramPaymentStatus == CPEA.Utilities.UserProgramPaymentStatusEnums.Deposited)
+                                            {
+                                                            <span class="badge badge-warning">PARTLY PAID</span>
+                                            }
+                                            else
+                                            {
+                                                            <span class="badge badge-danger">OUTSTANDING</span>
+                                            }
+                                                </td>
+                                                <td>
+                                            @if (item.ProgramStatus == CPEA.Utilities.UserCourseStatusEnums.Completed)
+                                            {
+                                                            <span class="badge badge-success">COMPLETED</span>
+                                            }
+                                            else if (item.ProgramStatus == CPEA.Utilities.UserCourseStatusEnums.InProgress)
+                                            {
+                                                            <span class="badge badge-warning">IN PROGRESS</span>
+                                            }
+                                            else if (item.ProgramStatus == CPEA.Utilities.UserCourseStatusEnums.Pending)
+                                            {
+                                                            <span class="badge badge-danger">REGISTERED</span>
+                                            }
+                                                </td>
+                                                <td>
+                                                    <partial name="MakePayment" />
+                                                    <partial name="CourseRegConfirmation" />
+                                                    <partial name="ChangeStartDate" />
+                                                    <div class="dropdown mb-2">
+                                                        <button class="btn p-0" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                            <i class="icon-lg text-muted pb-3px" data-feather="more-horizontal"></i>
+                                                        </button>
+                                                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                                            <a asp-controller="Home" asp-action="SingleCourse" asp-route-id="@item.CourseId" class="dropdown-item d-flex align-items-center"><i data-feather="edit" class="icon-sm mr-2"></i> <span class="">View Course</span></a>
+                                                    @if (item.ProgramPaymentStatus != CPEA.Utilities.UserProgramPaymentStatusEnums.Paid)
+                                                    {
+                                                                    <a class="dropdown-item d-flex align-items-center" onclick="userMakePId(@item.userCourseId, '@item.amountOwing')" href="#" data-toggle="modal" data-target="#exampleModalCenter"><i data-feather="edit" class="icon-sm mr-2"></i> <span class="">Make Payment</span></a>
+                                                    }
+                                                    @if (item.ProgramStatus == CPEA.Utilities.UserCourseStatusEnums.Pending)
+                                                    {
+                                                                    <a class="dropdown-item d-flex align-items-center" onclick="userChangeCourse(@item.userCourseId, '@item.Price', '@item.StartDate', '@item.Name', @item.CourseId)" href="#" data-toggle="modal" data-target="#ChangeCourseDateModal"><i data-feather="plus-square" class="icon-sm mr-2"></i> <span class="">Change Start Date</span></a>
+
+                                                    }
+                                                            <a class="dropdown-item d-flex align-items-center" onclick="userRegConfId(@item.userCourseId)" href="#" data-toggle="modal" data-target="#regConfirm"><i data-feather="file" class="icon-sm mr-2"></i> <span class="">Reg. Confirmation</span></a>
+                                                    @*@if (item.ProgramPaymentStatus != CPEA.Utilities.UserProgramPaymentStatusEnums.Paid)
+        {
+            <a class="dropdown-item d-flex align-items-center" href="#"><i data-feather="edit" class="icon-sm mr-2"></i> <span class="">Make Payment</span></a>
+        }
+        <a class="dropdown-item d-flex align-items-center" href="#"><i data-feather="download" class="icon-sm mr-2"></i> <span class="">Learning Portal</span></a>
+        <a class="dropdown-item d-flex align-items-center" href="#"><i data-feather="plus-square" class="icon-sm mr-2"></i> <span class="">Submit Request</span></a>*@
+
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div style=" text-align:right">
+    <a asp-controller="Enrollment" asp-action="Register2" class="btn btn-primary" style="margin-top: 15px; background-color: #058383 !important "> Register New Course</a>   
+</div>
+<br />
+<div class="d-flex justify-content-between align-items-center flex-wrap grid-margin">
+    <div class="col-sm-11">
+        <h4 class="mb-3 mb-md-0">My Certifications</h4>
+    </div>
+    <div class="col-sm-1">
+        <h4 class="mb-3 mb-md-0"><a href="@Url.Action("Certifications","Home")" class="btn p-0"> View All</a></h4>
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg-12 col-xl-12 grid-margin stretch-card">
+        <div class="card">
+            <div class="card-body">
+                @*<div class="d-flex justify-content-between align-items-baseline">
+                        <h6 class="card-title mb-0"></h6>
+                        <div class="dropdown mb-2">
+                            <a href="@Url.Action("Payment","Home")" class="btn p-0"> View All</a>
+                        </div>
+                    </div>*@
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th class="pt-0">Short Code</th>
+                                <th class="pt-0">Cert. Name</th>
+                                <th class="pt-0">Provider</th>
+                                <th class="pt-0">Price</th>
+                                <th class="pt-0">ExamDate</th>
+                                <th class="pt-0">Status</th>
+                                <th class="pt-0">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model != null && Model.UserCertificationsList.Count > 0)
+                            {
+                                @foreach (var item in Model.UserCertificationsList)
+                                {
+                                            <tr>
+                                                <td>@Html.DisplayFor(modelItem => item.ShortCode)</td>
+                                                <td>@Html.DisplayFor(modelItem => item.Name)</td>
+                                                <td>@Html.DisplayFor(modelItem => item.provider)</td>
+                                                <td>₦ @Html.DisplayFor(modelItem => item.Price)</td>
+                                                <td>@Html.DisplayFor(modelItem => item.ExamDate)</td>
+                                                <td>
+                                            @if (item.ProgramStatus == CPEA.Utilities.UserCourseStatusEnums.Completed)
+                                            {
+                                                            <span class="badge badge-success">COMPLETED</span>
+                                            }
+                                            else if (item.ProgramStatus == CPEA.Utilities.UserCourseStatusEnums.InProgress)
+                                            {
+                                                            <span class="badge badge-warning">IN PROGRESS</span>
+                                            }
+                                            else if (item.ProgramStatus == CPEA.Utilities.UserCourseStatusEnums.Pending)
+                                            {
+                                                            <span class="badge badge-danger">REGISTERED</span>
+                                            }
+                                                </td>
+                                                <td>
+                                                    <div class="dropdown mb-2">
+                                                        <button class="btn p-0" type="button" id="dropdownMenuButton1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                            <i class="icon-lg text-muted pb-3px" data-feather="more-horizontal"></i>
+                                                        </button>
+                                                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                                                            <a class="dropdown-item d-flex align-items-center" href="#"><i data-feather="edit" class="icon-sm mr-2"></i> <span class="">Print Registration</span></a>
+                                                            <a class="dropdown-item d-flex align-items-center" href="#"><i data-feather="download" class="icon-sm mr-2"></i> <span class="">Download Guide</span></a>
+                                                            <a class="dropdown-item d-flex align-items-center" href="#"><i data-feather="plus-square" class="icon-sm mr-2"></i> <span class="">Change Exam Date</span></a>
+
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div style=" text-align:right">
+    <a asp-controller="Home" asp-action="OnlyCertifications" class="btn btn-primary" style="margin-top: 15px; background-color: #058383 !important "> Register New Certification</a>
+    @*<partial name="NewProgram" />*@
+</div>
+<br />
+<div class="d-flex justify-content-between align-items-center flex-wrap grid-margin">
+    <div class="col-sm-11">
+        <h4 class="mb-3 mb-md-0">Subscriptions</h4>
+    </div>
+    <div class="col-sm-1">
+        <h4 class="mb-3 mb-md-0"><a href="@Url.Action("SubscriptionDevices","Home")" class="btn p-0"> View All</a></h4>
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg-12 col-xl-12 grid-margin stretch-card">
+        <div class="card">
+            <div class="card-body">
+                @*<div class="d-flex justify-content-between align-items-baseline">
+                        <h6 class="card-title mb-0"></h6>
+                        <div class="dropdown mb-2">
+                            <a href="@Url.Action("Payment","Home")" class="btn p-0"> View All</a>
+                        </div>
+                    </div>*@
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th class="pt-0">Network</th>
+                                <th class="pt-0">Bundle</th>
+                                <th class="pt-0">Start Date</th>
+                                <th class="pt-0">End Date</th>
+                                <th class="pt-0">Validity</th>
+                                <th class="pt-0">Amount</th>
+                                <th class="pt-0">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model != null && Model.UserDataList.Count > 0)
+                            {
+                                @foreach (var item in Model.UserDataList)
+                                {
+                                            <tr>
+                                                <td>@Html.DisplayFor(modelItem => item.NetworkProvider)</td>
+                                                <td>@Html.DisplayFor(modelItem => item.Bundle)</td>
+                                                <td>@Html.DisplayFor(modelItem => item.StartDate)</td>
+                                                <td>@Html.DisplayFor(modelItem => item.EndDate)</td>
+                                                <td>@Html.DisplayFor(modelItem => item.Validity)</td>
+                                                <td>@Html.DisplayFor(modelItem => item.Amount)</td>
+                                                <td>
+                                            @if (item.Status == "Active")
+                                            {
+                                                            <span class="badge badge-success">ACTIVE</span>
+                                            }
+                                            else
+                                            {
+                                                            <span class="badge badge-danger">EXPIRED</span>
+                                            }
+                                                </td>
+                                            </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div style=" text-align:right">
+    <a asp-controller="Home" asp-action="NewProgram" onclick="sourceView()" class="btn btn-primary" data-toggle="modal" data-target="#NewProgram" style="margin-top: 15px; background-color: #058383 !important "> Buy Data</a>
+    @*<partial name="NewProgram" />*@
+</div>
+<br />
+<div class="d-flex justify-content-between align-items-center flex-wrap grid-margin">
+    <div class="col-sm-11">
+        <h4 class="mb-3 mb-md-0">Devices</h4>
+    </div>
+    <div class="col-sm-1">
+        <h4 class="mb-3 mb-md-0"><a href="@Url.Action("SubscriptionDevices","Home")" class="btn p-0"> View All</a></h4>
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg-12 col-xl-12 grid-margin stretch-card">
+        <div class="card">
+            <div class="card-body">
+                @*<div class="d-flex justify-content-between align-items-baseline">
+                        <h6 class="card-title mb-0"></h6>
+                        <div class="dropdown mb-2">
+                            <a href="@Url.Action("Payment","Home")" class="btn p-0"> View All</a>
+                        </div>
+                    </div>*@
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th class="pt-0">Type</th>
+                                <th class="pt-0">Description</th>
+                                <th class="pt-0">Manufacturer</th>
+                                <th class="pt-0">Purchase Date</th>
+                                <th class="pt-0">Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model != null && Model.UserDevicesList.Count > 0)
+                            {
+                                @foreach (var item in Model.UserDevicesList)
+                                {
+                                            <tr>
+                                                <td>@Html.DisplayFor(modelItem => item.Type)</td>
+                                                <td>@Html.DisplayFor(modelItem => item.Description)</td>
+                                                <td>@Html.DisplayFor(modelItem => item.Manufacturer)</td>
+                                                <td>@Html.DisplayFor(modelItem => item.PurchaseDate )</td>
+                                                <td>@Html.DisplayFor(modelItem => item.Amount)</td>
+                                            </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div style=" text-align:right">
+    <a asp-controller="Home" asp-action="NewProgram" onclick="sourceView()" class="btn btn-primary" data-toggle="modal" data-target="#NewProgram" style="margin-top: 15px; background-color: #058383 !important "> Purchase New</a>
+    @*<partial name="NewProgram" />*@
+</div>
+<br />
+<div class="d-flex justify-content-between align-items-center flex-wrap grid-margin">
+    <div class="col-sm-11">
+        <h4 class="mb-3 mb-md-0">Payment History</h4>
+    </div>
+    <div class="col-sm-1">
+        <h4 class="mb-3 mb-md-0"><a href="@Url.Action("Payment","Home")" class="btn p-0"> View All</a></h4>
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg-12 col-xl-12 grid-margin stretch-card">
+        <div class="card">
+            <div class="card-body">
+                @*<div class="d-flex justify-content-between align-items-baseline">
+                        <h6 class="card-title mb-0"></h6>
+                        <div class="dropdown mb-2">
+                            <a href="@Url.Action("Payment","Home")" class="btn p-0"> View All</a>
+                        </div>
+                    </div>*@
+
+                <br />
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th class="pt-0">Transaction Id</th>
+                                <th class="pt-0">Amount</th>
+                                <th class="pt-0">Payment Date</th>
+                                <th class="pt-0">Status</th>
+                                <th class="pt-0">Payment Method</th>
+                                <th class="pt-0">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model != null && Model.PaymentRecord.Count > 0)
+                            {
+                                @foreach (var item in Model.PaymentRecord)
+                                {
+                                            <tr>
+                                                <td>@Html.DisplayFor(modelItem => item.PaymentRef)</td>
+                                                <td>@Html.DisplayFor(modelItem => item.Amount)</td>
+                                                <td>@Html.DisplayFor(modelItem => item.PaymentDate)</td>
+                                                <td>
+                                            @if (item.Status == CPEA.Utilities.PaymentStatusEnums.Paid)
+                                            {
+                                                            <span class="badge badge-success">PAID</span>
+                                            }
+                                            else if (item.Status == CPEA.Utilities.PaymentStatusEnums.Initialized)
+                                            {
+                                                            <span class="badge badge-warning">INITIALIZED</span>
+                                            }
+                                            else if (item.Status == CPEA.Utilities.PaymentStatusEnums.Pending)
+                                            {
+                                                            <span class="badge badge-info-muted">PENDING</span>
+                                            }
+                                            else if (item.Status == CPEA.Utilities.PaymentStatusEnums.Failed)
+                                            {
+                                                            <span class="badge badge-danger">FAILED</span>
+                                            }
+                                                </td>
+                                                <td>
+                                            @if (item.PaymentMethod == CPEA.Utilities.PaymentMethodEnums.Card)
+                                            {
+                                                            <span>DEBIT CARD</span>
+                                            }
+                                            else if (item.PaymentMethod == CPEA.Utilities.PaymentMethodEnums.Offline)
+                                            {
+                                                            <span>OFFLINE</span>
+                                            }
+                                                </td>
+                                                <td>
+                                                    <div class="dropdown mb-2">
+                                                        <button class="btn p-0" type="button" id="dropdownMenuButton2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                            <i class="icon-lg text-muted pb-3px" data-feather="more-horizontal"></i>
+                                                        </button>
+                                                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton2">
+                                                    @if (item.Status != CPEA.Utilities.PaymentStatusEnums.Paid && item.PaymentMethod != CPEA.Utilities.PaymentMethodEnums.Offline)
+                                                    {
+                                                                    <a asp-controller="Home" asp-action="QueryPaymentStatus" asp-route-paymentReference="@item.PaymentRef" class="dropdown-item d-flex align-items-center" onclick="userRequeryId()"><i data-feather="edit" class="icon-sm mr-2"></i> <span class="">Requery</span></a>
+                                                    }
+                                                    @if (item.Status == CPEA.Utilities.PaymentStatusEnums.Paid)
+                                                    {
+                                                                    <a class="dropdown-item d-flex align-items-center" asp-controller="Home" asp-action="DownloadReceipt" asp-route-paymentRef="@item.PaymentRef"><i data-feather="download" class="icon-sm mr-2"></i> <span class="">Download Receipt</span></a>
+                                                    }
+                                                        </div>
+                                                    </div>
+
+
+                                                </td>
+                                            </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    function closeModal() {
+        $('#regConfirm').modal('toggle');
+    }
+    function userRequeryId() {
+        document.getElementById('source').value = "StudentDashboard";
+    }
+    function userMakePId(id, amountOMP) {
+        if (id != null) {
+            document.getElementById('userCIdMP').value = id;
+            document.getElementById('amountOwingMP').innerHTML = amountOMP;
+            document.getElementById('sourceMP').value = "StudentDashboard";
+        }
+    }
+    function userRegConfId(id) {
+        if (id != null) {
+            document.getElementById('userRegCourseId').value = id;
+            document.getElementById('sourceRC').value = "StudentDashboard";
+        }
+    }
+    function sourceView() {
+        document.getElementById('sourceProgram').value = "StudentDashboard";
+    }
+    function DeleteCourse(id) {
+        if (confirm("Do you want to delete this course?")) {
+             window.location.href = '@Url.Action("DeleteProgram", "Home")/' + id;
+        }
+
+    }
+    function userChangeCourse(id, Cfee, cDate, cName, courseId) {
+        if (id != null) {
+
+            document.getElementById('userCIdCSD').value = id;
+            document.getElementById('currentCFee').value = Cfee;
+            document.getElementById('courseNameCSP').innerHTML = cName;
+            document.getElementById('courseDateCSP').innerHTML = cDate;
+            document.getElementById('amountCSP').innerHTML = Cfee;
+            document.getElementById('sourceCSD').value = "StudentDashboard";
+
+            $("#divCourseOptionDates").empty();
+            $("#divCourseOptions").empty();
+
+            $("#institutionD").css("display", "block");
+            $("#courseOptions").css("display", "block");
+            $("#coursePrices").css("display", "none")
+            $("#divCourseFee").css("display", "none");
+            $("#divPayment").css("display", "none");
+            $("#divPaymentDetails").css("display", "none");
+
+            //var url = '/Home/GetInstitutionbyCourseId';
+
+
+            //$.post(url, { CourseId: courseId }, function (data) {
+
+            //    document.getElementById("institution").innerHTML = data.bold();
+            //});
+
+
+            let divCO = $("#divCourseOptionDates");
+
+            //Load Course Price Options
+            //-------------------------
+            var urlSubjects = '/Home/GetCourseOptionsDatesbyCourseId';
+
+            $.post(urlSubjects, { CourseId: courseId }, function (data) {
+
+                $("#divCourseOptionDates").empty();
+
+                $.each(data, function (i, response) {
+                    let myHtml = '<div style="display: inline-flex;align-items: center;margin-right: 0.75rem;"><label class="container">' + response.text + '<input type = "radio" id="DateClicked" name="optionsRadiosDate" value="' + response.value + '"><span class="checkmark"></span></label></div>';
+                    divCO.append(myHtml);
+                });
+            });
+        }
+    }
+
+</script>

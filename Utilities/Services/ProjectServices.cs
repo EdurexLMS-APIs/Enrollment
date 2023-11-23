@@ -3556,7 +3556,7 @@ namespace CPEA.Utilities.Services
                     return new Tuple<Users, string, string>(existingUser, "Incomplete", "");
                     // Enum.GetName(typeof(UserRolesEnums), existingUser.Role) ;
                 }
-                return new Tuple<Users, string, string>(existingUser, "Cannot login", "");
+                return new Tuple<Users, string, string>(existingUser, "Wrong Details", "");
 
             }
         }

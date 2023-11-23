@@ -40,8 +40,9 @@ namespace CPEA
         {
             //services.AddSingleton(typeof(IConverter), new SynchronizedConverter(new PdfTools()));
             //services.AddMvc().AddXmlSerializerFormatters();
-            services.AddSession(options => {
-                options.IdleTimeout = TimeSpan.FromMinutes(5);
+            services.AddSession(options =>
+            {
+                options.IdleTimeout = TimeSpan.FromMinutes(10);
             });
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(

@@ -136,13 +136,13 @@ namespace CPEA.Controllers
         }
         public async Task<IActionResult> CourseRegConfirmation()
         {
-            if (HttpContext.Session.GetString(SessionUsername) == null)
+            var sessionValue = HttpContext.Session.GetString(SessionUsername);
+            if (sessionValue == null)
             {
-                _notyfService.Error("Session time out", 5);
+                _notyfService.Error("Kindly Login", 5);
                 return RedirectToAction("Login", "Home", new { area = "" });
             }
-            var sessionUsername = HttpContext.Session.GetString(SessionUsername);
-            var user = await _userManager.FindByNameAsync(sessionUsername);
+            var user = await _userManager.FindByNameAsync(sessionValue);
             if (user == null)
             {
                 _notyfService.Error("Invalid user", 5);
@@ -154,13 +154,13 @@ namespace CPEA.Controllers
         [HttpPost("SendRegConfirmation")]
         public async Task<IActionResult> SendRegConfirmation(int courseId, string source)
         {
-            if (HttpContext.Session.GetString(SessionUsername) == null)
+            var sessionValue = HttpContext.Session.GetString(SessionUsername);
+            if (sessionValue == null)
             {
-                _notyfService.Error("Session time out", 5);
+                _notyfService.Error("Kindly Login", 5);
                 return RedirectToAction("Login", "Home", new { area = "" });
             }
-            var sessionUsername = HttpContext.Session.GetString(SessionUsername);
-            var user = await _userManager.FindByNameAsync(sessionUsername);
+            var user = await _userManager.FindByNameAsync(sessionValue);
             if (user == null)
             {
                 _notyfService.Error("Invalid user", 5);
@@ -210,8 +210,9 @@ namespace CPEA.Controllers
 
         public FileResult DownloadRegConfirmation(int courseId, string source)
         {
-
-            var user = _userManager.Users.Where(x => x.UserName == HttpContext.Session.GetString(SessionUsername)).FirstOrDefault();
+            var sessionValue = HttpContext.Session.GetString(SessionUsername);
+            
+            var user = _userManager.Users.Where(x => x.UserName == sessionValue).FirstOrDefault();
 
             string Mode = "Download";
             var response = _projectServices.DownloadRegConfirmation(user.Id, courseId, Mode);
@@ -504,13 +505,13 @@ namespace CPEA.Controllers
         {
             //var email = GeneralClass.email;
             GeneralClass.source = "AllPrograms";
-            if (HttpContext.Session.GetString(SessionUsername) == null)
+            var sessionValue = HttpContext.Session.GetString(SessionUsername);
+            if (sessionValue == null)
             {
-                _notyfService.Error("Session time out", 5);
+                _notyfService.Error("Kindly Login", 5);
                 return RedirectToAction("Login", "Home", new { area = "" });
             }
-            var sessionUsername = HttpContext.Session.GetString(SessionUsername);
-            var user = await _userManager.FindByNameAsync(sessionUsername);
+            var user = await _userManager.FindByNameAsync(sessionValue);
             if (user == null)
             {
                 _notyfService.Error("Invalid user", 5);
@@ -527,13 +528,13 @@ namespace CPEA.Controllers
         }
         public async Task<IActionResult> ReferralUsage()
         {
-            if (HttpContext.Session.GetString(SessionUsername) == null)
+            var sessionValue = HttpContext.Session.GetString(SessionUsername);
+            if (sessionValue == null)
             {
-                _notyfService.Error("Session time out", 5);
+                _notyfService.Error("Kindly Login", 5);
                 return RedirectToAction("Login", "Home", new { area = "" });
             }
-            var sessionUsername = HttpContext.Session.GetString(SessionUsername);
-            var user = await _userManager.FindByNameAsync(sessionUsername);
+            var user = await _userManager.FindByNameAsync(sessionValue);
             if (user == null)
             {
                 _notyfService.Error("Invalid user", 5);
@@ -545,13 +546,13 @@ namespace CPEA.Controllers
         }
         public async Task<IActionResult> DiscountUsage(string code)
         {
-            if (HttpContext.Session.GetString(SessionUsername) == null)
+            var sessionValue = HttpContext.Session.GetString(SessionUsername);
+            if (sessionValue == null)
             {
-                _notyfService.Error("Session time out", 5);
+                _notyfService.Error("Kindly Login", 5);
                 return RedirectToAction("Login", "Home", new { area = "" });
             }
-            var sessionUsername = HttpContext.Session.GetString(SessionUsername);
-            var user = await _userManager.FindByNameAsync(sessionUsername);
+            var user = await _userManager.FindByNameAsync(sessionValue);
             if (user == null)
             {
                 _notyfService.Error("Invalid user", 5);
@@ -563,13 +564,13 @@ namespace CPEA.Controllers
         }
         public async Task<IActionResult> Payment()
         {
-            if (HttpContext.Session.GetString(SessionUsername) == null)
+            var sessionValue = HttpContext.Session.GetString(SessionUsername);
+            if (sessionValue == null)
             {
-                _notyfService.Error("Session time out", 5);
+                _notyfService.Error("Kindly Login", 5);
                 return RedirectToAction("Login", "Home", new { area = "" });
             }
-            var sessionUsername = HttpContext.Session.GetString(SessionUsername);
-            var user = await _userManager.FindByNameAsync(sessionUsername);
+            var user = await _userManager.FindByNameAsync(sessionValue);
             if (user == null)
             {
                 _notyfService.Error("Invalid user", 5);
@@ -583,13 +584,13 @@ namespace CPEA.Controllers
         }
         public async Task<IActionResult> EachPayment(string paymentRef)
         {
-            if (HttpContext.Session.GetString(SessionUsername) == null)
+            var sessionValue = HttpContext.Session.GetString(SessionUsername);
+            if (sessionValue == null)
             {
-                _notyfService.Error("Session time out", 5);
+                _notyfService.Error("Kindly Login", 5);
                 return RedirectToAction("Login", "Home", new { area = "" });
             }
-            var sessionUsername = HttpContext.Session.GetString(SessionUsername);
-            var user = await _userManager.FindByNameAsync(sessionUsername);
+            var user = await _userManager.FindByNameAsync(sessionValue);
             if (user == null)
             {
                 _notyfService.Error("Invalid user", 5);
@@ -627,7 +628,9 @@ namespace CPEA.Controllers
 
         public FileResult DownloadReceipt(string paymentRef)
         {
-            var user = _userManager.Users.Where(x=>x.UserName == HttpContext.Session.GetString(SessionUsername)).FirstOrDefault();
+            var sessionValue = HttpContext.Session.GetString(SessionUsername);
+            
+            var user = _userManager.Users.Where(x=>x.UserName == sessionValue).FirstOrDefault();
 
             var response = _projectServices.GenerateInvoice(user.Id, paymentRef);
 
@@ -993,13 +996,13 @@ namespace CPEA.Controllers
         }
         public async Task<IActionResult> GetRequest()
         {
-            if (HttpContext.Session.GetString(SessionUsername) == null)
+            var sessionValue = HttpContext.Session.GetString(SessionUsername);
+            if (sessionValue == null)
             {
-                _notyfService.Error("Session time out", 5);
+                _notyfService.Error("Kindly Login", 5);
                 return RedirectToAction("Login", "Home", new { area = "" });
             }
-            var sessionUsername = HttpContext.Session.GetString(SessionUsername);
-            var user = await _userManager.FindByNameAsync(sessionUsername);
+            var user = await _userManager.FindByNameAsync(sessionValue);
             if (user == null)
             {
                 _notyfService.Error("Invalid user", 5);
@@ -1011,13 +1014,13 @@ namespace CPEA.Controllers
         }
         public async Task<IActionResult> NewRequest()
         {
-            if (HttpContext.Session.GetString(SessionUsername) == null)
+            var sessionValue = HttpContext.Session.GetString(SessionUsername);
+            if (sessionValue == null)
             {
-                _notyfService.Error("Session time out", 5);
+                _notyfService.Error("Kindly Login", 5);
                 return RedirectToAction("Login", "Home", new { area = "" });
             }
-            var sessionUsername = HttpContext.Session.GetString(SessionUsername);
-            var user = await _userManager.FindByNameAsync(sessionUsername);
+            var user = await _userManager.FindByNameAsync(sessionValue);
             if (user == null)
             {
                 _notyfService.Error("Invalid user", 5);
@@ -1031,13 +1034,13 @@ namespace CPEA.Controllers
         [HttpPost]
         public async Task<IActionResult> NewRequest(UserRequest dto)
         {
-            if (HttpContext.Session.GetString(SessionUsername) == null)
+            var sessionValue = HttpContext.Session.GetString(SessionUsername);
+            if (sessionValue == null)
             {
-                _notyfService.Error("Session time out", 5);
+                _notyfService.Error("Kindly Login", 5);
                 return RedirectToAction("Login", "Home", new { area = "" });
             }
-            var sessionUsername = HttpContext.Session.GetString(SessionUsername);
-            var user = await _userManager.FindByNameAsync(sessionUsername);
+            var user = await _userManager.FindByNameAsync(sessionValue);
             if (user == null)
             {
                 _notyfService.Error("Invalid user", 5);
@@ -1049,13 +1052,13 @@ namespace CPEA.Controllers
         }
         public async Task<IActionResult> SingleRequest(int reqId)
         {
-            if (HttpContext.Session.GetString(SessionUsername) == null)
+            var sessionValue = HttpContext.Session.GetString(SessionUsername);
+            if (sessionValue == null)
             {
-                _notyfService.Error("Session time out", 5);
+                _notyfService.Error("Kindly Login", 5);
                 return RedirectToAction("Login", "Home", new { area = "" });
             }
-            var sessionUsername = HttpContext.Session.GetString(SessionUsername);
-            var user = await _userManager.FindByNameAsync(sessionUsername);
+            var user = await _userManager.FindByNameAsync(sessionValue);
             if (user == null)
             {
                 _notyfService.Error("Invalid user", 5);
@@ -1067,13 +1070,13 @@ namespace CPEA.Controllers
         }
         public async Task<IActionResult> ChangeStartDate()
         {
-            if (HttpContext.Session.GetString(SessionUsername) == null)
+            var sessionValue = HttpContext.Session.GetString(SessionUsername);
+            if (sessionValue == null)
             {
-                _notyfService.Error("Session time out", 5);
+                _notyfService.Error("Kindly Login", 5);
                 return RedirectToAction("Login", "Home", new { area = "" });
             }
-            var sessionUsername = HttpContext.Session.GetString(SessionUsername);
-            var user = await _userManager.FindByNameAsync(sessionUsername);
+            var user = await _userManager.FindByNameAsync(sessionValue);
             if (user == null)
             {
                 _notyfService.Error("Invalid user", 5);
@@ -1086,13 +1089,13 @@ namespace CPEA.Controllers
         [HttpPost]
         public async Task<IActionResult> ChangeStartDate(StudentDashboardVM dto)
         {
-            if (HttpContext.Session.GetString(SessionUsername) == null)
+            var sessionValue = HttpContext.Session.GetString(SessionUsername);
+            if (sessionValue == null)
             {
-                _notyfService.Error("Session time out", 5);
+                _notyfService.Error("Kindly Login", 5);
                 return RedirectToAction("Login", "Home", new { area = "" });
             }
-            var sessionUsername = HttpContext.Session.GetString(SessionUsername);
-            var user = await _userManager.FindByNameAsync(sessionUsername);
+            var user = await _userManager.FindByNameAsync(sessionValue);
             if (user == null)
             {
                 _notyfService.Error("Invalid user", 5);
@@ -1166,13 +1169,13 @@ namespace CPEA.Controllers
         }
         public async Task<IActionResult> MakePayment()
         {
-            if (HttpContext.Session.GetString(SessionUsername) == null)
+            var sessionValue = HttpContext.Session.GetString(SessionUsername);
+            if (sessionValue == null)
             {
-                _notyfService.Error("Session time out", 5);
+                _notyfService.Error("Kindly Login", 5);
                 return RedirectToAction("Login", "Home", new { area = "" });
             }
-            var sessionUsername = HttpContext.Session.GetString(SessionUsername);
-            var user = await _userManager.FindByNameAsync(sessionUsername);
+            var user = await _userManager.FindByNameAsync(sessionValue);
             if (user == null)
             {
                 _notyfService.Error("Invalid user", 5);
@@ -1184,13 +1187,13 @@ namespace CPEA.Controllers
         [HttpPost]
         public async Task<IActionResult> MakePayment(StudentDashboardVM dto)
         {
-            if (HttpContext.Session.GetString(SessionUsername) == null)
+            var sessionValue = HttpContext.Session.GetString(SessionUsername);
+            if (sessionValue == null)
             {
-                _notyfService.Error("Session time out", 5);
+                _notyfService.Error("Kindly Login", 5);
                 return RedirectToAction("Login", "Home", new { area = "" });
             }
-            var sessionUsername = HttpContext.Session.GetString(SessionUsername);
-            var user = await _userManager.FindByNameAsync(sessionUsername);
+            var user = await _userManager.FindByNameAsync(sessionValue);
             if (user == null)
             {
                 _notyfService.Error("Invalid user", 5);
@@ -1295,7 +1298,7 @@ namespace CPEA.Controllers
         public async Task<IActionResult> Logout()
         {
             var res =await  _projectServices.Logout();
-            HttpContext.Session.Clear();
+            HttpContext.Session.Remove(SessionUsername);
 
             return RedirectToAction("Login", "Home", new { area = "" });
 
@@ -1303,7 +1306,7 @@ namespace CPEA.Controllers
         }
         public IActionResult Login()
         {
-            HttpContext.Session.Clear();
+            HttpContext.Session.Remove(SessionUsername);
             return View();
         }
         [HttpPost]
@@ -1314,12 +1317,16 @@ namespace CPEA.Controllers
             {
                 HttpContext.Session.SetString(SessionUsername, userLogin.Item1.UserName.ToString());
 
-                _notyfService.Success("Welcome back, " + userLogin.Item1.Email, 10);
+                //_notyfService.Success("Welcome back, " + userLogin.Item1.Email, 10);
+                //GeneralClass.email = userLogin.Item1.Email;
+
                 return RedirectToAction("Dashboard", "Home", new { area = "" });
 
             }
             else if(userLogin.Item2 == "Incomplete")
             {
+                HttpContext.Session.SetString(SessionUsername, userLogin.Item1.UserName.ToString());
+
                 _notyfService.Success("Welcome back, " + userLogin.Item1.Email, 10);
 
                 return RedirectToAction("Register2", "Enrollment", new { area = "" });
@@ -1338,17 +1345,90 @@ namespace CPEA.Controllers
             }
                      
         }
+        [HttpGet]
+        public async Task<IActionResult> StudentDashboard()
+        {
+            var sessionValue = HttpContext.Session.GetString(SessionUsername);
+            if (sessionValue == null)
+            {
+                _notyfService.Error("Kindly Login", 5);
+                return RedirectToAction("Login", "Home", new { area = "" });
+            }
+            var user = await _userManager.FindByNameAsync(sessionValue);
+            if (user == null)
+            {
+                _notyfService.Error("Invalid user", 5);
+                return RedirectToAction("Login", "Home", new { area = "" });
 
+            }
+            GeneralClass.source = "StudentDashboard";
+            //GeneralClass.email = user.Email;
+
+            var dashboardRecord = new StudentDashboardVM();
+            //var user = await _userManager.FindByNameAsync(User.Identity.Name);
+
+            var pRef = GeneralClass.pRef;
+            var userId = user.Id;
+            IPAddress remoteIpAddress = Request.HttpContext.Connection.RemoteIpAddress;
+            string result = "";
+            if (remoteIpAddress != null)
+            {
+                // If we got an IPV6 address, then we need to ask the network for the IPV4 address 
+                // This usually only happens when the browser is on the same machine as the server.
+                if (remoteIpAddress.AddressFamily == System.Net.Sockets.AddressFamily.InterNetworkV6)
+                {
+                    remoteIpAddress = System.Net.Dns.GetHostEntry(remoteIpAddress).AddressList
+            .First(x => x.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork);
+                }
+                result = remoteIpAddress.ToString();
+            }
+            if (pRef != null && pRef != "")
+            {
+                var response2 = await _projectServices.QueryBankCOnnectPayment(pRef);
+                var record = await _projectServices.DashboardRe(userId, result);
+                if (record != null)
+                {
+                    dashboardRecord.fullName = record.fullName;
+                    dashboardRecord.studentNumber = record.studentNumber;
+                    dashboardRecord.PaymentRecord = record.PaymentRecord;
+                    dashboardRecord.UserCertificationsList = record.UserCertificationsList;
+                    dashboardRecord.UserCoursesVM = record.UserCoursesVM;
+                    dashboardRecord.UserDataList = record.UserDataList;
+                    dashboardRecord.UserDevicesList = record.UserDevicesList;
+                    dashboardRecord.programListz = record.programListz;
+
+                }
+                return View(dashboardRecord);
+
+            }
+            else
+            {
+                var record = await _projectServices.DashboardRe(userId, result);
+                if (record != null)
+                {
+                    dashboardRecord.fullName = record.fullName;
+                    dashboardRecord.studentNumber = record.studentNumber;
+                    dashboardRecord.PaymentRecord = record.PaymentRecord;
+                    dashboardRecord.UserCertificationsList = record.UserCertificationsList;
+                    dashboardRecord.UserCoursesVM = record.UserCoursesVM;
+                    dashboardRecord.UserDataList = record.UserDataList;
+                    dashboardRecord.UserDevicesList = record.UserDevicesList;
+                    dashboardRecord.programListz = record.programListz;
+
+                }
+                return View(dashboardRecord);
+            }
+        }
         [HttpGet]
         public async Task<IActionResult> Dashboard()
         {
-            if (HttpContext.Session.GetString(SessionUsername) == null)
+            var sessionValue = HttpContext.Session.GetString(SessionUsername);
+            if (sessionValue == null)
             {
-                _notyfService.Error("Session time out", 5);
+                _notyfService.Error("Kindly Login", 5);
                 return RedirectToAction("Login", "Home", new { area = "" });
             }
-            var sessionUsername = HttpContext.Session.GetString(SessionUsername);
-            var user = await _userManager.FindByNameAsync(sessionUsername);
+            var user = await _userManager.FindByNameAsync(sessionValue);
             if (user == null)
             {
                 _notyfService.Error("Invalid user", 5);
@@ -1415,15 +1495,16 @@ namespace CPEA.Controllers
         }
         public async  Task<IActionResult> Courses()
         {
-            if (User.Identity.Name == null)
+            var sessionValue = HttpContext.Session.GetString(SessionUsername);
+            if (sessionValue == null)
             {
+                _notyfService.Error("Kindly Login", 5);
                 return RedirectToAction("Login", "Home", new { area = "" });
             }
-            var user = await _userManager.FindByNameAsync(User.Identity.Name);
+            var user = await _userManager.FindByNameAsync(sessionValue);
             if (user == null)
             {
-                _notyfService.Error("Invalid user", 10);
-
+                _notyfService.Error("Invalid user", 5);
                 return RedirectToAction("Login", "Home", new { area = "" });
 
             }
@@ -1445,13 +1526,13 @@ namespace CPEA.Controllers
         }
         public async Task<IActionResult> SingleCourse(int id)
         {
-            if (HttpContext.Session.GetString(SessionUsername) == null)
+            var sessionValue = HttpContext.Session.GetString(SessionUsername);
+            if (sessionValue == null)
             {
-                _notyfService.Error("Session time out", 5);
+                _notyfService.Error("Kindly Login", 5);
                 return RedirectToAction("Login", "Home", new { area = "" });
             }
-            var sessionUsername = HttpContext.Session.GetString(SessionUsername);
-            var user = await _userManager.FindByNameAsync(sessionUsername);
+            var user = await _userManager.FindByNameAsync(sessionValue);
             if (user == null)
             {
                 _notyfService.Error("Invalid user", 5);
@@ -1463,13 +1544,13 @@ namespace CPEA.Controllers
         }
         public async Task<IActionResult> Certifications()
         {
-            if (HttpContext.Session.GetString(SessionUsername) == null)
+            var sessionValue = HttpContext.Session.GetString(SessionUsername);
+            if (sessionValue == null)
             {
-                _notyfService.Error("Session time out", 5);
+                _notyfService.Error("Kindly Login", 5);
                 return RedirectToAction("Login", "Home", new { area = "" });
             }
-            var sessionUsername = HttpContext.Session.GetString(SessionUsername);
-            var user = await _userManager.FindByNameAsync(sessionUsername);
+            var user = await _userManager.FindByNameAsync(sessionValue);
             if (user == null)
             {
                 _notyfService.Error("Invalid user", 5);
@@ -1485,13 +1566,13 @@ namespace CPEA.Controllers
         }
         public async Task<IActionResult> SubscriptionDevices()
         {
-            if (HttpContext.Session.GetString(SessionUsername) == null)
+            var sessionValue = HttpContext.Session.GetString(SessionUsername);
+            if (sessionValue == null)
             {
-                _notyfService.Error("Session time out", 5);
+                _notyfService.Error("Kindly Login", 5);
                 return RedirectToAction("Login", "Home", new { area = "" });
             }
-            var sessionUsername = HttpContext.Session.GetString(SessionUsername);
-            var user = await _userManager.FindByNameAsync(sessionUsername);
+            var user = await _userManager.FindByNameAsync(sessionValue);
             if (user == null)
             {
                 _notyfService.Error("Invalid user", 5);
@@ -1504,13 +1585,13 @@ namespace CPEA.Controllers
         }
         public async Task<IActionResult> GetProfile()
         {
-            if (HttpContext.Session.GetString(SessionUsername) == null)
+            var sessionValue = HttpContext.Session.GetString(SessionUsername);
+            if (sessionValue == null)
             {
-                _notyfService.Error("Session time out", 5);
+                _notyfService.Error("Kindly Login", 5);
                 return RedirectToAction("Login", "Home", new { area = "" });
             }
-            var sessionUsername = HttpContext.Session.GetString(SessionUsername);
-            var user = await _userManager.FindByNameAsync(sessionUsername);
+            var user = await _userManager.FindByNameAsync(sessionValue);
             if (user == null)
             {
                 _notyfService.Error("Invalid user", 5);
@@ -1527,13 +1608,13 @@ namespace CPEA.Controllers
         }
         public async Task<IActionResult> GetWallet()
         {
-            if (HttpContext.Session.GetString(SessionUsername) == null)
+            var sessionValue = HttpContext.Session.GetString(SessionUsername);
+            if (sessionValue == null)
             {
-                _notyfService.Error("Session time out", 5);
+                _notyfService.Error("Kindly Login", 5);
                 return RedirectToAction("Login", "Home", new { area = "" });
             }
-            var sessionUsername = HttpContext.Session.GetString(SessionUsername);
-            var user = await _userManager.FindByNameAsync(sessionUsername);
+            var user = await _userManager.FindByNameAsync(sessionValue);
             if (user == null)
             {
                 _notyfService.Error("Invalid user", 5);
@@ -1578,13 +1659,13 @@ namespace CPEA.Controllers
         }
         public async Task<IActionResult> QueryPaymentStatus(string paymentReference)
         {
-            if (HttpContext.Session.GetString(SessionUsername) == null)
+            var sessionValue = HttpContext.Session.GetString(SessionUsername);
+            if (sessionValue == null)
             {
-                _notyfService.Error("Session time out", 5);
+                _notyfService.Error("Kindly Login", 5);
                 return RedirectToAction("Login", "Home", new { area = "" });
             }
-            var sessionUsername = HttpContext.Session.GetString(SessionUsername);
-            var user = await _userManager.FindByNameAsync(sessionUsername);
+            var user = await _userManager.FindByNameAsync(sessionValue);
             if (user == null)
             {
                 _notyfService.Error("Invalid user", 5);
@@ -1614,13 +1695,13 @@ namespace CPEA.Controllers
         [HttpPost("RegisterCard")]
         public async Task<IActionResult> RegisterCard(RegisterVM dto)
         {
-            if (HttpContext.Session.GetString(SessionUsername) == null)
+            var sessionValue = HttpContext.Session.GetString(SessionUsername);
+            if (sessionValue == null)
             {
-                _notyfService.Error("Session time out", 5);
+                _notyfService.Error("Kindly Login", 5);
                 return RedirectToAction("Login", "Home", new { area = "" });
             }
-            var sessionUsername = HttpContext.Session.GetString(SessionUsername);
-            var user = await _userManager.FindByNameAsync(sessionUsername);
+            var user = await _userManager.FindByNameAsync(sessionValue);
             if (user == null)
             {
                 _notyfService.Error("Invalid user", 5);
@@ -1652,13 +1733,13 @@ namespace CPEA.Controllers
         [HttpPost("RegisterTransfer")]
         public async Task<IActionResult> RegisterTransfer(RegisterVM dto)
         {
-            if (HttpContext.Session.GetString(SessionUsername) == null)
+            var sessionValue = HttpContext.Session.GetString(SessionUsername);
+            if (sessionValue == null)
             {
-                _notyfService.Error("Session time out", 5);
+                _notyfService.Error("Kindly Login", 5);
                 return RedirectToAction("Login", "Home", new { area = "" });
             }
-            var sessionUsername = HttpContext.Session.GetString(SessionUsername);
-            var user = await _userManager.FindByNameAsync(sessionUsername);
+            var user = await _userManager.FindByNameAsync(sessionValue);
             if (user == null)
             {
                 _notyfService.Error("Invalid user", 5);
@@ -1692,13 +1773,13 @@ namespace CPEA.Controllers
         [HttpPost("RegisterBankConnect")]
         public async Task<IActionResult> RegisterBankConnect(RegisterVM dto)
         {
-            if (HttpContext.Session.GetString(SessionUsername) == null)
+            var sessionValue = HttpContext.Session.GetString(SessionUsername);
+            if (sessionValue == null)
             {
-                _notyfService.Error("Session time out", 5);
+                _notyfService.Error("Kindly Login", 5);
                 return RedirectToAction("Login", "Home", new { area = "" });
             }
-            var sessionUsername = HttpContext.Session.GetString(SessionUsername);
-            var user = await _userManager.FindByNameAsync(sessionUsername);
+            var user = await _userManager.FindByNameAsync(sessionValue);
             if (user == null)
             {
                 _notyfService.Error("Invalid user", 5);
@@ -1959,13 +2040,13 @@ namespace CPEA.Controllers
 
         public async Task<IActionResult> DeleteProgram(int Id)
         {
-            if (HttpContext.Session.GetString(SessionUsername) == null)
+            var sessionValue = HttpContext.Session.GetString(SessionUsername);
+            if (sessionValue == null)
             {
-                _notyfService.Error("Session time out", 5);
+                _notyfService.Error("Kindly Login", 5);
                 return RedirectToAction("Login", "Home", new { area = "" });
             }
-            var sessionUsername = HttpContext.Session.GetString(SessionUsername);
-            var user = await _userManager.FindByNameAsync(sessionUsername);
+            var user = await _userManager.FindByNameAsync(sessionValue);
             if (user == null)
             {
                 _notyfService.Error("Invalid user", 5);

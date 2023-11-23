@@ -192,3 +192,4 @@ C:\Users\CAROLINE\source\repos\CPEA\CPEA\obj\Release\netcoreapp3.1\Razor\Views\H
 C:\Users\CAROLINE\source\repos\CPEA\CPEA\obj\Release\netcoreapp3.1\Razor\Views\Admin\AllReferred.cshtml.g.cs
 C:\Users\CAROLINE\source\repos\CPEA\CPEA\obj\Release\netcoreapp3.1\Razor\Views\Admin\RegisteredAffiliates.cshtml.g.cs
 C:\Users\CAROLINE\source\repos\CPEA\CPEA\obj\Release\netcoreapp3.1\Razor\Views\Admin\ConfirmPayment.cshtml.g.cs
+C:\Users\CAROLINE\source\repos\CPEA\CPEA\obj\Release\netcoreapp3.1\Razor\Views\Home\StudentDashboard.cshtml.g.cs

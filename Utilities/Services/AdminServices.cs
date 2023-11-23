@@ -2606,6 +2606,7 @@ namespace CPEA.Utilities.Services
                             StudentNumber = user.StudentNumber,
                             Email = user.Email,
                             TotalCourses = v.Count,
+                            Phone = user.PhoneNumber,
                             TotalCertifications = _context.UserCertifications.Where(x => x.UserId == v.Value).Count(),
                             LastLogin = _context.LoginTrail.Where(x => x.UserId == v.Value).OrderByDescending(x => x.Id).Select(x => x.LogTime).FirstOrDefault()
 
@@ -2681,6 +2682,7 @@ namespace CPEA.Utilities.Services
                                 StudentNumber = user.StudentNumber,
                                 Email = user.Email,
                                 TotalCourses = 0,
+                                Phone =user.PhoneNumber,
                                 TotalCertifications = _context.UserCertifications.Where(x => x.UserId == user.Id).Count(),
                                 LastLogin = _context.LoginTrail.Where(x => x.UserId == user.Id).OrderByDescending(x => x.Id).Select(x => x.LogTime).FirstOrDefault()
 

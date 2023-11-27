@@ -27,11 +27,56 @@ namespace CPEA.Migrations
                     Id = table.Column<string>(nullable: false),
                     Name = table.Column<string>(maxLength: 256, nullable: true),
                     NormalizedName = table.Column<string>(maxLength: 256, nullable: true),
-                    ConcurrencyStamp = table.Column<string>(nullable: true)
+                    ConcurrencyStamp = table.Column<string>(nullable: true),
+                    Discriminator = table.Column<string>(nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AspNetRoles", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AspNetUsers",
+                columns: table => new
+                {
+                    Id = table.Column<string>(nullable: false),
+                    UserName = table.Column<string>(maxLength: 256, nullable: true),
+                    NormalizedUserName = table.Column<string>(maxLength: 256, nullable: true),
+                    Email = table.Column<string>(maxLength: 256, nullable: true),
+                    NormalizedEmail = table.Column<string>(maxLength: 256, nullable: true),
+                    EmailConfirmed = table.Column<bool>(nullable: false),
+                    PasswordHash = table.Column<string>(nullable: true),
+                    SecurityStamp = table.Column<string>(nullable: true),
+                    ConcurrencyStamp = table.Column<string>(nullable: true),
+                    PhoneNumber = table.Column<string>(nullable: true),
+                    PhoneNumberConfirmed = table.Column<bool>(nullable: false),
+                    TwoFactorEnabled = table.Column<bool>(nullable: false),
+                    LockoutEnd = table.Column<DateTimeOffset>(nullable: true),
+                    LockoutEnabled = table.Column<bool>(nullable: false),
+                    AccessFailedCount = table.Column<int>(nullable: false),
+                    Discriminator = table.Column<string>(nullable: false),
+                    FirstName = table.Column<string>(nullable: true),
+                    MiddleName = table.Column<string>(nullable: true),
+                    LastName = table.Column<string>(nullable: true),
+                    DateOfBirth = table.Column<DateTime>(nullable: true),
+                    ReferralCode = table.Column<string>(nullable: true),
+                    CityId = table.Column<int>(nullable: true),
+                    Address = table.Column<string>(nullable: true),
+                    Status = table.Column<int>(nullable: true),
+                    RegisteredDate = table.Column<DateTime>(nullable: true),
+                    Gender = table.Column<string>(nullable: true),
+                    PIN = table.Column<string>(nullable: true),
+                    AlternatePhone = table.Column<string>(nullable: true),
+                    StudentNumber = table.Column<string>(nullable: true),
+                    heardAboutUs = table.Column<string>(nullable: true),
+                    PassportPath = table.Column<string>(nullable: true),
+                    DefaultRole = table.Column<string>(nullable: true),
+                    NYSC = table.Column<bool>(nullable: true),
+                    StaffDep = table.Column<int>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AspNetUsers", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -163,6 +208,24 @@ namespace CPEA.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Promo",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(nullable: true),
+                    StartDate = table.Column<DateTime>(nullable: false),
+                    EndDate = table.Column<DateTime>(nullable: false),
+                    PromoPercentage = table.Column<int>(nullable: false),
+                    Category = table.Column<int>(nullable: false),
+                    Code = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Promo", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Receipts",
                 columns: table => new
                 {
@@ -209,54 +272,6 @@ namespace CPEA.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "AspNetUsers",
-                columns: table => new
-                {
-                    Id = table.Column<string>(nullable: false),
-                    UserName = table.Column<string>(maxLength: 256, nullable: true),
-                    NormalizedUserName = table.Column<string>(maxLength: 256, nullable: true),
-                    Email = table.Column<string>(maxLength: 256, nullable: true),
-                    NormalizedEmail = table.Column<string>(maxLength: 256, nullable: true),
-                    EmailConfirmed = table.Column<bool>(nullable: false),
-                    PasswordHash = table.Column<string>(nullable: true),
-                    SecurityStamp = table.Column<string>(nullable: true),
-                    ConcurrencyStamp = table.Column<string>(nullable: true),
-                    PhoneNumber = table.Column<string>(nullable: true),
-                    PhoneNumberConfirmed = table.Column<bool>(nullable: false),
-                    TwoFactorEnabled = table.Column<bool>(nullable: false),
-                    LockoutEnd = table.Column<DateTimeOffset>(nullable: true),
-                    LockoutEnabled = table.Column<bool>(nullable: false),
-                    AccessFailedCount = table.Column<int>(nullable: false),
-                    Discriminator = table.Column<string>(nullable: false),
-                    FirstName = table.Column<string>(nullable: true),
-                    MiddleName = table.Column<string>(nullable: true),
-                    LastName = table.Column<string>(nullable: true),
-                    DateOfBirth = table.Column<DateTime>(nullable: true),
-                    ReferralCode = table.Column<string>(nullable: true),
-                    CityId = table.Column<int>(nullable: true),
-                    Address = table.Column<string>(nullable: true),
-                    Status = table.Column<int>(nullable: true),
-                    RegisteredDate = table.Column<DateTime>(nullable: true),
-                    Gender = table.Column<string>(nullable: true),
-                    PIN = table.Column<string>(nullable: true),
-                    AlternatePhone = table.Column<string>(nullable: true),
-                    StudentNumber = table.Column<string>(nullable: true),
-                    heardAboutUs = table.Column<string>(nullable: true),
-                    PassportPath = table.Column<string>(nullable: true),
-                    RoleId = table.Column<int>(nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AspNetUsers", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_AspNetUsers_AllUserRoles_RoleId",
-                        column: x => x.RoleId,
-                        principalTable: "AllUserRoles",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "AspNetRoleClaims",
                 columns: table => new
                 {
@@ -275,98 +290,6 @@ namespace CPEA.Migrations
                         principalTable: "AspNetRoles",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "States",
-                columns: table => new
-                {
-                    Id = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    CountryId = table.Column<int>(nullable: false),
-                    Name = table.Column<string>(nullable: true),
-                    CourierFee = table.Column<float>(nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_States", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_States_Countries_CountryId",
-                        column: x => x.CountryId,
-                        principalTable: "Countries",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "CurrencyConversion",
-                columns: table => new
-                {
-                    Id = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    CurrencyId = table.Column<int>(nullable: false),
-                    ConversionRate = table.Column<float>(nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_CurrencyConversion", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_CurrencyConversion_Currency_CurrencyId",
-                        column: x => x.CurrencyId,
-                        principalTable: "Currency",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Institutions",
-                columns: table => new
-                {
-                    Id = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(nullable: true),
-                    ShortName = table.Column<string>(nullable: true),
-                    InstitutionTypeId = table.Column<int>(nullable: false),
-                    CityId = table.Column<int>(nullable: false),
-                    Status = table.Column<int>(nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Institutions", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Institutions_InstitutionType_InstitutionTypeId",
-                        column: x => x.InstitutionTypeId,
-                        principalTable: "InstitutionType",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "AffiliateUserAccount",
-                columns: table => new
-                {
-                    Id = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    BankId = table.Column<int>(nullable: false),
-                    AccountName = table.Column<string>(nullable: true),
-                    AccountNumber = table.Column<string>(nullable: true),
-                    UserId = table.Column<string>(nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AffiliateUserAccount", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_AffiliateUserAccount_Banks_BankId",
-                        column: x => x.BankId,
-                        principalTable: "Banks",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_AffiliateUserAccount_AspNetUsers_UserId",
-                        column: x => x.UserId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -435,11 +358,20 @@ namespace CPEA.Migrations
                 columns: table => new
                 {
                     UserId = table.Column<string>(nullable: false),
-                    RoleId = table.Column<string>(nullable: false)
+                    RoleId = table.Column<string>(nullable: false),
+                    Discriminator = table.Column<string>(nullable: false),
+                    StudentId = table.Column<string>(nullable: true),
+                    UsersId = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AspNetUserRoles", x => new { x.UserId, x.RoleId });
+                    table.ForeignKey(
+                        name: "FK_AspNetUserRoles_AspNetUsers_UsersId",
+                        column: x => x.UsersId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_AspNetUserRoles_AspNetRoles_RoleId",
                         column: x => x.RoleId,
@@ -495,33 +427,6 @@ namespace CPEA.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "BusinessesUsers",
-                columns: table => new
-                {
-                    Id = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    BusinessId = table.Column<int>(nullable: false),
-                    UserRole = table.Column<string>(nullable: true),
-                    UserId = table.Column<string>(nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_BusinessesUsers", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_BusinessesUsers_Businesses_BusinessId",
-                        column: x => x.BusinessId,
-                        principalTable: "Businesses",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_BusinessesUsers_AspNetUsers_UserId",
-                        column: x => x.UserId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "InterswitchPaymentHistory",
                 columns: table => new
                 {
@@ -561,35 +466,6 @@ namespace CPEA.Migrations
                     table.PrimaryKey("PK_LoginTrail", x => x.Id);
                     table.ForeignKey(
                         name: "FK_LoginTrail_AspNetUsers_UserId",
-                        column: x => x.UserId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "UserData",
-                columns: table => new
-                {
-                    Id = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    DataId = table.Column<int>(nullable: false),
-                    UserId = table.Column<string>(nullable: true),
-                    RegisteredDate = table.Column<DateTime>(nullable: false),
-                    PhoneNumber = table.Column<string>(nullable: true),
-                    PaymentStatus = table.Column<int>(nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_UserData", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_UserData_tblData_DataId",
-                        column: x => x.DataId,
-                        principalTable: "tblData",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_UserData_AspNetUsers_UserId",
                         column: x => x.UserId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
@@ -673,6 +549,34 @@ namespace CPEA.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "UserReferred",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ReferralId = table.Column<string>(nullable: true),
+                    ReferredUserId = table.Column<string>(nullable: true),
+                    ReferralDiscount = table.Column<int>(nullable: false),
+                    ReferredDiscount = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserReferred", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_UserReferred_AspNetUsers_ReferralId",
+                        column: x => x.ReferralId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_UserReferred_AspNetUsers_ReferredUserId",
+                        column: x => x.ReferredUserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "UserRequest",
                 columns: table => new
                 {
@@ -717,6 +621,102 @@ namespace CPEA.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "AffiliateUserAccount",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    BankId = table.Column<int>(nullable: false),
+                    AccountName = table.Column<string>(nullable: true),
+                    AccountNumber = table.Column<string>(nullable: true),
+                    UserId = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AffiliateUserAccount", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_AffiliateUserAccount_Banks_BankId",
+                        column: x => x.BankId,
+                        principalTable: "Banks",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_AffiliateUserAccount_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "BusinessesUsers",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    BusinessId = table.Column<int>(nullable: false),
+                    UserRole = table.Column<string>(nullable: true),
+                    UserId = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_BusinessesUsers", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_BusinessesUsers_Businesses_BusinessId",
+                        column: x => x.BusinessId,
+                        principalTable: "Businesses",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_BusinessesUsers_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "States",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    CountryId = table.Column<int>(nullable: false),
+                    Name = table.Column<string>(nullable: true),
+                    CourierFee = table.Column<float>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_States", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_States_Countries_CountryId",
+                        column: x => x.CountryId,
+                        principalTable: "Countries",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "CurrencyConversion",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    CurrencyId = table.Column<int>(nullable: false),
+                    ConversionRate = table.Column<float>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CurrencyConversion", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_CurrencyConversion_Currency_CurrencyId",
+                        column: x => x.CurrencyId,
+                        principalTable: "Currency",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "UserWallet",
                 columns: table => new
                 {
@@ -748,6 +748,85 @@ namespace CPEA.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Institutions",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    LogoPath = table.Column<string>(nullable: true),
+                    Name = table.Column<string>(nullable: true),
+                    ShortName = table.Column<string>(nullable: true),
+                    InstitutionTypeId = table.Column<int>(nullable: false),
+                    CityId = table.Column<int>(nullable: false),
+                    Status = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Institutions", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Institutions_InstitutionType_InstitutionTypeId",
+                        column: x => x.InstitutionTypeId,
+                        principalTable: "InstitutionType",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "PromoUsageHistory",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserId = table.Column<string>(nullable: true),
+                    PromoId = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PromoUsageHistory", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_PromoUsageHistory_Promo_PromoId",
+                        column: x => x.PromoId,
+                        principalTable: "Promo",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_PromoUsageHistory_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "UserData",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    DataId = table.Column<int>(nullable: false),
+                    UserId = table.Column<string>(nullable: true),
+                    RegisteredDate = table.Column<DateTime>(nullable: false),
+                    PhoneNumber = table.Column<string>(nullable: true),
+                    PaymentStatus = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserData", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_UserData_tblData_DataId",
+                        column: x => x.DataId,
+                        principalTable: "tblData",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_UserData_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Cities",
                 columns: table => new
                 {
@@ -763,6 +842,28 @@ namespace CPEA.Migrations
                         name: "FK_Cities_States_StateId",
                         column: x => x.StateId,
                         principalTable: "States",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "UserWalletHistory",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    WalletId = table.Column<int>(nullable: false),
+                    TransactionType = table.Column<int>(nullable: false),
+                    Amount = table.Column<decimal>(nullable: false),
+                    PaymentDate = table.Column<DateTime>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserWalletHistory", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_UserWalletHistory_UserWallet_WalletId",
+                        column: x => x.WalletId,
+                        principalTable: "UserWallet",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -810,28 +911,6 @@ namespace CPEA.Migrations
                         name: "FK_ProgramCategory_Institutions_InstitutionId",
                         column: x => x.InstitutionId,
                         principalTable: "Institutions",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "UserWalletHistory",
-                columns: table => new
-                {
-                    Id = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    WalletId = table.Column<int>(nullable: false),
-                    TransactionType = table.Column<int>(nullable: false),
-                    Amount = table.Column<decimal>(nullable: false),
-                    PaymentDate = table.Column<DateTime>(nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_UserWalletHistory", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_UserWalletHistory_UserWallet_WalletId",
-                        column: x => x.WalletId,
-                        principalTable: "UserWallet",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -1146,34 +1225,6 @@ namespace CPEA.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "UserReferred",
-                columns: table => new
-                {
-                    Id = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    ReferralId = table.Column<string>(nullable: true),
-                    PaymentRef = table.Column<string>(nullable: true),
-                    ReferredUserProgramOptionId = table.Column<int>(nullable: false),
-                    Earnings = table.Column<float>(nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_UserReferred", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_UserReferred_AspNetUsers_ReferralId",
-                        column: x => x.ReferralId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_UserReferred_UserProgramOption_ReferredUserProgramOptionId",
-                        column: x => x.ReferredUserProgramOptionId,
-                        principalTable: "UserProgramOption",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "UserCourseDateChanged",
                 columns: table => new
                 {
@@ -1205,6 +1256,35 @@ namespace CPEA.Migrations
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "UserReferralPaymentHistory",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserReferId = table.Column<int>(nullable: false),
+                    UserCourseId = table.Column<int>(nullable: false),
+                    PaymentRef = table.Column<string>(nullable: true),
+                    Amount = table.Column<float>(nullable: false),
+                    Earning = table.Column<float>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserReferralPaymentHistory", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_UserReferralPaymentHistory_UserCourses_UserCourseId",
+                        column: x => x.UserCourseId,
+                        principalTable: "UserCourses",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_UserReferralPaymentHistory_UserReferred_UserReferId",
+                        column: x => x.UserReferId,
+                        principalTable: "UserReferred",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
@@ -1245,13 +1325,13 @@ namespace CPEA.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_AspNetUserRoles_RoleId",
+                name: "IX_AspNetUserRoles_UsersId",
                 table: "AspNetUserRoles",
-                column: "RoleId");
+                column: "UsersId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_AspNetUsers_RoleId",
-                table: "AspNetUsers",
+                name: "IX_AspNetUserRoles_RoleId",
+                table: "AspNetUserRoles",
                 column: "RoleId");
 
             migrationBuilder.CreateIndex(
@@ -1357,6 +1437,16 @@ namespace CPEA.Migrations
                 column: "CategoryId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_PromoUsageHistory_PromoId",
+                table: "PromoUsageHistory",
+                column: "PromoId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PromoUsageHistory_UserId",
+                table: "PromoUsageHistory",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_States_CountryId",
                 table: "States",
                 column: "CountryId");
@@ -1457,14 +1547,24 @@ namespace CPEA.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_UserReferralPaymentHistory_UserCourseId",
+                table: "UserReferralPaymentHistory",
+                column: "UserCourseId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserReferralPaymentHistory_UserReferId",
+                table: "UserReferralPaymentHistory",
+                column: "UserReferId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_UserReferred_ReferralId",
                 table: "UserReferred",
                 column: "ReferralId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_UserReferred_ReferredUserProgramOptionId",
+                name: "IX_UserReferred_ReferredUserId",
                 table: "UserReferred",
-                column: "ReferredUserProgramOptionId");
+                column: "ReferredUserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_UserRequest_UserId",
@@ -1499,6 +1599,9 @@ namespace CPEA.Migrations
 
             migrationBuilder.DropTable(
                 name: "AffiliateUserProgram");
+
+            migrationBuilder.DropTable(
+                name: "AllUserRoles");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoleClaims");
@@ -1549,6 +1652,9 @@ namespace CPEA.Migrations
                 name: "Marketers");
 
             migrationBuilder.DropTable(
+                name: "PromoUsageHistory");
+
+            migrationBuilder.DropTable(
                 name: "Receipts");
 
             migrationBuilder.DropTable(
@@ -1576,7 +1682,7 @@ namespace CPEA.Migrations
                 name: "UserPaymentHistory");
 
             migrationBuilder.DropTable(
-                name: "UserReferred");
+                name: "UserReferralPaymentHistory");
 
             migrationBuilder.DropTable(
                 name: "UserRequest");
@@ -1600,7 +1706,13 @@ namespace CPEA.Migrations
                 name: "States");
 
             migrationBuilder.DropTable(
+                name: "UserProgramOption");
+
+            migrationBuilder.DropTable(
                 name: "UserDiscount");
+
+            migrationBuilder.DropTable(
+                name: "Promo");
 
             migrationBuilder.DropTable(
                 name: "CertificationPriceOptions");
@@ -1609,13 +1721,13 @@ namespace CPEA.Migrations
                 name: "Programs");
 
             migrationBuilder.DropTable(
-                name: "UserCourses");
-
-            migrationBuilder.DropTable(
                 name: "tblData");
 
             migrationBuilder.DropTable(
-                name: "UserProgramOption");
+                name: "UserCourses");
+
+            migrationBuilder.DropTable(
+                name: "UserReferred");
 
             migrationBuilder.DropTable(
                 name: "UserWallet");
@@ -1624,13 +1736,13 @@ namespace CPEA.Migrations
                 name: "Countries");
 
             migrationBuilder.DropTable(
+                name: "ProgramOptions");
+
+            migrationBuilder.DropTable(
                 name: "Certifications");
 
             migrationBuilder.DropTable(
                 name: "CoursePriceOptions");
-
-            migrationBuilder.DropTable(
-                name: "ProgramOptions");
 
             migrationBuilder.DropTable(
                 name: "Currency");
@@ -1640,9 +1752,6 @@ namespace CPEA.Migrations
 
             migrationBuilder.DropTable(
                 name: "Courses");
-
-            migrationBuilder.DropTable(
-                name: "AllUserRoles");
 
             migrationBuilder.DropTable(
                 name: "ProgramCategory");

@@ -478,6 +478,9 @@ namespace CPEA.Migrations
                     b.Property<int>("InstitutionTypeId")
                         .HasColumnType("int");
 
+                    b.Property<string>("LogoPath")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
@@ -671,6 +674,58 @@ namespace CPEA.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Programs");
+                });
+
+            modelBuilder.Entity("CPEA.Models.Promo", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("Category")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Code")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("EndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("PromoPercentage")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Promo");
+                });
+
+            modelBuilder.Entity("CPEA.Models.PromoUsageHistory", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("PromoId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PromoId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("PromoUsageHistory");
                 });
 
             modelBuilder.Entity("CPEA.Models.Receipts", b =>
@@ -1052,6 +1107,37 @@ namespace CPEA.Migrations
                     b.ToTable("UserProgramOption");
                 });
 
+            modelBuilder.Entity("CPEA.Models.UserReferralPaymentHistory", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<float>("Amount")
+                        .HasColumnType("real");
+
+                    b.Property<float>("Earning")
+                        .HasColumnType("real");
+
+                    b.Property<string>("PaymentRef")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("UserCourseId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UserReferId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserCourseId");
+
+                    b.HasIndex("UserReferId");
+
+                    b.ToTable("UserReferralPaymentHistory");
+                });
+
             modelBuilder.Entity("CPEA.Models.UserReferred", b =>
                 {
                     b.Property<int>("Id")
@@ -1059,23 +1145,23 @@ namespace CPEA.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<float>("Earnings")
-                        .HasColumnType("real");
-
-                    b.Property<string>("PaymentRef")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("ReferralDiscount")
+                        .HasColumnType("int");
 
                     b.Property<string>("ReferralId")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<int>("ReferredUserProgramOptionId")
+                    b.Property<int>("ReferredDiscount")
                         .HasColumnType("int");
+
+                    b.Property<string>("ReferredUserId")
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("ReferralId");
 
-                    b.HasIndex("ReferredUserProgramOptionId");
+                    b.HasIndex("ReferredUserId");
 
                     b.ToTable("UserReferred");
                 });
@@ -1252,6 +1338,10 @@ namespace CPEA.Migrations
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Discriminator")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(256)")
                         .HasMaxLength(256);
@@ -1268,6 +1358,8 @@ namespace CPEA.Migrations
                         .HasFilter("[NormalizedName] IS NOT NULL");
 
                     b.ToTable("AspNetRoles");
+
+                    b.HasDiscriminator<string>("Discriminator").HasValue("IdentityRole");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -1419,11 +1511,17 @@ namespace CPEA.Migrations
                     b.Property<string>("RoleId")
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<string>("Discriminator")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("UserId", "RoleId");
 
                     b.HasIndex("RoleId");
 
                     b.ToTable("AspNetUserRoles");
+
+                    b.HasDiscriminator<string>("Discriminator").HasValue("IdentityUserRole<string>");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
@@ -1445,6 +1543,13 @@ namespace CPEA.Migrations
                     b.ToTable("AspNetUserTokens");
                 });
 
+            modelBuilder.Entity("CPEA.Models.Role", b =>
+                {
+                    b.HasBaseType("Microsoft.AspNetCore.Identity.IdentityRole");
+
+                    b.HasDiscriminator().HasValue("Role");
+                });
+
             modelBuilder.Entity("CPEA.Models.Users", b =>
                 {
                     b.HasBaseType("Microsoft.AspNetCore.Identity.IdentityUser");
@@ -1461,6 +1566,9 @@ namespace CPEA.Migrations
                     b.Property<DateTime>("DateOfBirth")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("DefaultRole")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("FirstName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -1475,6 +1583,9 @@ namespace CPEA.Migrations
                     b.Property<string>("MiddleName")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("NYSC")
+                        .HasColumnType("bit");
+
                     b.Property<string>("PIN")
                         .HasColumnType("nvarchar(max)");
 
@@ -1487,7 +1598,7 @@ namespace CPEA.Migrations
                     b.Property<DateTime>("RegisteredDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("RoleId")
+                    b.Property<int>("StaffDep")
                         .HasColumnType("int");
 
                     b.Property<int>("Status")
@@ -1499,9 +1610,22 @@ namespace CPEA.Migrations
                     b.Property<string>("heardAboutUs")
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasIndex("RoleId");
-
                     b.HasDiscriminator().HasValue("Users");
+                });
+
+            modelBuilder.Entity("CPEA.Models.UserRoles", b =>
+                {
+                    b.HasBaseType("Microsoft.AspNetCore.Identity.IdentityUserRole<string>");
+
+                    b.Property<string>("StudentId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UsersId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasIndex("UsersId");
+
+                    b.HasDiscriminator().HasValue("UserRoles");
                 });
 
             modelBuilder.Entity("CPEA.Models.AffiliateUserAccount", b =>
@@ -1669,6 +1793,19 @@ namespace CPEA.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("CPEA.Models.PromoUsageHistory", b =>
+                {
+                    b.HasOne("CPEA.Models.Promo", "Promo")
+                        .WithMany()
+                        .HasForeignKey("PromoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("CPEA.Models.Users", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
+                });
+
             modelBuilder.Entity("CPEA.Models.States", b =>
                 {
                     b.HasOne("CPEA.Models.Countries", "Country")
@@ -1794,17 +1931,30 @@ namespace CPEA.Migrations
                         .HasForeignKey("UserId");
                 });
 
+            modelBuilder.Entity("CPEA.Models.UserReferralPaymentHistory", b =>
+                {
+                    b.HasOne("CPEA.Models.UserCourses", "UserCourse")
+                        .WithMany()
+                        .HasForeignKey("UserCourseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("CPEA.Models.UserReferred", "UserRefer")
+                        .WithMany()
+                        .HasForeignKey("UserReferId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("CPEA.Models.UserReferred", b =>
                 {
                     b.HasOne("CPEA.Models.Users", "Referral")
                         .WithMany()
                         .HasForeignKey("ReferralId");
 
-                    b.HasOne("CPEA.Models.UserProgramOption", "ReferredUserProgramOption")
+                    b.HasOne("CPEA.Models.Users", "ReferredUser")
                         .WithMany()
-                        .HasForeignKey("ReferredUserProgramOptionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("ReferredUserId");
                 });
 
             modelBuilder.Entity("CPEA.Models.UserRequest", b =>
@@ -1894,13 +2044,11 @@ namespace CPEA.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("CPEA.Models.Users", b =>
+            modelBuilder.Entity("CPEA.Models.UserRoles", b =>
                 {
-                    b.HasOne("CPEA.Models.AllUserRoles", "Role")
-                        .WithMany()
-                        .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.HasOne("CPEA.Models.Users", null)
+                        .WithMany("AllRoles")
+                        .HasForeignKey("UsersId");
                 });
 #pragma warning restore 612, 618
         }

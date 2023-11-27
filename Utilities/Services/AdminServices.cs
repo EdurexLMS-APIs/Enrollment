@@ -3,17 +3,21 @@ using CPEA.Models;
 using CPEA.Utilities.DTO;
 using CPEA.Utilities.Interface;
 using CPEA.Utilities.ViewModel;
+using iTextSharp.text;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using SendGrid.Helpers.Mail;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
+using static iTextSharp.text.pdf.AcroFields;
 
 namespace CPEA.Utilities.Services
 {
@@ -27,8 +31,6 @@ namespace CPEA.Utilities.Services
         private readonly SignInManager<Users> _signInManager;
         private IWebHostEnvironment _env;
         private readonly IEmail _smtpMail;
-
-
 
         public AdminServices(IEmail smtpMail, SignInManager<Users> signInManager, IWebHostEnvironment env, ApplicationDbContext context, RoleManager<IdentityRole> roleManager, UserManager<Users> userManager, IMessagingService messagingService, IProjectServices projectServices)
         {
@@ -46,29 +48,22 @@ namespace CPEA.Utilities.Services
         {
             try
             {
-                var result = await _userManager.Users.Include(x => x.Role).Where(x => x.Role.Name != "Student" && x.Role.Name != "Admin").ToListAsync();
-                var enrollmentList = new List<RegisteredAffiliates>();
-                if (result.Count() > 0)
-                {
-                    foreach (var item in result)
-                    {
-                        var enrollment = new RegisteredAffiliates
-                        {
-                            FirstName = item.FirstName,
-                            LastName = item.LastName,
-                            RegisteredDate = item.RegisteredDate.ToString("dd/MM/yyyy"),
-                            Role=item.Role.Name,
-                            Email = item.Email,
-                            Phone = item.PhoneNumber,
-                            TotalReferred = _context.UserReferred.Where(x => x.ReferralId == item.Id).Count()
-                            
-                        };
 
-                        enrollmentList.Add(enrollment);
-                    }
-
-                }
-                return enrollmentList;
+                var result = await (from ur in _context.UserRoles
+                                  join u in _userManager.Users on ur.UserId equals u.Id
+                                  join r in _context.Role on ur.RoleId equals r.Id
+                                  where r.Name != "Student" && r.Name != "Admin"
+                                  select new RegisteredAffiliates
+                                  {
+                                      FirstName = u.FirstName,
+                                      LastName =u.LastName,
+                                      RegisteredDate = u.RegisteredDate.ToString("dd/MM/yyyy"),
+                                      Role = r.Name,
+                                      Email = u.Email,
+                                      Phone =u.PhoneNumber,
+                                      TotalReferred = _context.UserReferred.Where(m => m.ReferralId == u.Id).Count()
+                                  }).ToListAsync();
+                return result;
             }
             catch (Exception ex)
             {
@@ -79,32 +74,54 @@ namespace CPEA.Utilities.Services
         {
             try
             {
-                var result = await _context.UserReferred.Include(x=>x.ReferredUser).Include(x=>x.Referral).Where(x => x.Referral.Email == email).ToListAsync();
-                var enrollmentList = new List<RegisteredStudents>();
-                if (result.Count() > 0)
-                {
-                    foreach (var item in result)
-                    {
-                        var enrollment = new RegisteredStudents
-                        {
-                            FirstName = item.ReferredUser.FirstName,
-                            LastName = item.ReferredUser.LastName,
-                            RegisteredDate = item.ReferredUser.RegisteredDate.ToString("dd/MM/yyyy"),
-                            Status = item.ReferredUser.Status,
-                            StudentNumber = item.ReferredUser.StudentNumber,
-                            Email = item.ReferredUser.Email,
-                            Phone = item.ReferredUser.PhoneNumber,
-                            TotalCourses = _context.UserCourses.Where(x => x.UserId == item.ReferredUser.Id).Count(),
-                            TotalCertifications = _context.UserCertifications.Where(x => x.UserId == item.ReferredUser.Id).Count(),
-                            LastLogin = _context.LoginTrail.Where(x => x.UserId == item.ReferredUser.Id).OrderByDescending(x => x.Id).Select(x => x.LogTime).FirstOrDefault()
+                var result = await (from ur in _context.UserReferred
+                                    join r in _userManager.Users on ur.ReferralId equals r.Id
+                                    join ru in _userManager.Users on ur.ReferredUserId equals ru.Id
 
-                        };
+                                    where r.Email == email
 
-                        enrollmentList.Add(enrollment);
-                    }
+                                    select new RegisteredStudents
+                                    {
+                                        FirstName = ru.FirstName,
+                                        LastName = ru.LastName,
+                                        RegisteredDate = ru.RegisteredDate.ToString("dd/MM/yyyy"),
+                                        Status = ru.Status,
+                                        StudentNumber = ru.StudentNumber,
+                                        Email = ru.Email,
+                                        Phone = ru.PhoneNumber,
+                                        TotalCourses = _context.UserCourses.Where(x => x.UserId == ru.Id).Count(),
+                                        TotalCertifications = _context.UserCertifications.Where(x => x.UserId == ru.Id).Count(),
+                                        LastLogin = _context.LoginTrail.Where(x => x.UserId == ru.Id).OrderByDescending(x => x.Id).Select(x => x.LogTime).FirstOrDefault()
 
-                }
-                return enrollmentList;
+                                    }
+
+                                   ).ToListAsync();
+                //var result = await _context.UserReferred.Include(x=>x.ReferredUser).Include(x=>x.Referral).Where(x => x.Referral.Email == email).ToListAsync();
+                //var enrollmentList = new List<RegisteredStudents>();
+                //if (result.Count() > 0)
+                //{
+                //    foreach (var item in result)
+                //    {
+                //        var enrollment = new RegisteredStudents
+                //        {
+                //            FirstName = item.ReferredUser.FirstName,
+                //            LastName = item.ReferredUser.LastName,
+                //            RegisteredDate = item.ReferredUser.RegisteredDate.ToString("dd/MM/yyyy"),
+                //            Status = item.ReferredUser.Status,
+                //            StudentNumber = item.ReferredUser.StudentNumber,
+                //            Email = item.ReferredUser.Email,
+                //            Phone = item.ReferredUser.PhoneNumber,
+                //            TotalCourses = _context.UserCourses.Where(x => x.UserId == item.ReferredUser.Id).Count(),
+                //            TotalCertifications = _context.UserCertifications.Where(x => x.UserId == item.ReferredUser.Id).Count(),
+                //            LastLogin = _context.LoginTrail.Where(x => x.UserId == item.ReferredUser.Id).OrderByDescending(x => x.Id).Select(x => x.LogTime).FirstOrDefault()
+
+                //        };
+
+                //        enrollmentList.Add(enrollment);
+                //    }
+
+                //}
+                return result;
             }
             catch (Exception ex)
             {
@@ -138,7 +155,7 @@ namespace CPEA.Utilities.Services
             try
             {
 
-                var studentRoleId = await _context.AllUserRoles.Where(x => x.Name.ToLower() == "student").Select(x => x.Id).FirstOrDefaultAsync();
+                var studentRoleId = await _roleManager.FindByNameAsync("Student");
                 if (dto.accountType.ToLower() == "personal")
                 {
                     var usernameExist = await _context.users.Where(x => x.Email == dto.personalReg.Email).FirstOrDefaultAsync();
@@ -170,7 +187,7 @@ namespace CPEA.Utilities.Services
                         UserName = dto.personalReg.Username.ToLower(),
                         StudentNumber = GenerateStudentId(),
                         Status = UserStatusEnums.Active,
-                        RoleId = studentRoleId,
+                       // RoleId = studentRoleId,
                         RegisteredDate = DateTime.Now,
                         StaffDep = StaffDepEnums.None
                     };
@@ -279,7 +296,7 @@ namespace CPEA.Utilities.Services
                         UserName = dto.personalReg.Username.ToLower(),
                         StudentNumber = GenerateStudentId(),
                         Status = UserStatusEnums.Active,
-                        RoleId = studentRoleId,
+                       // RoleId = studentRoleId,
                         RegisteredDate = DateTime.Now,
                         NYSC = true
                     };
@@ -523,14 +540,16 @@ namespace CPEA.Utilities.Services
 
                             if (referral != null)
                             {
-                                if ((UserRolesEnums)referral.Referral.RoleId == UserRolesEnums.Staff)
+                                var defaultRole = await _roleManager.FindByIdAsync(referral.Referral.DefaultRole);
+
+                                if (defaultRole.Name == "Staff")
                                 {
                                     discount = (7 * courseDate.coursePrice) / 100;
                                     // perAmount = dto.userCourseOption.AmountPaid;
                                     referral.ReferralDiscount = 3;
                                     referral.ReferredDiscount = 7;
                                 }
-                                else if ((UserRolesEnums)referral.Referral.RoleId == UserRolesEnums.Freelance)
+                                else if (defaultRole.Name == "Freelance")
                                 {
                                     discount = (5 * courseDate.coursePrice) / 100;
                                     //perAmount = dto.userCourseOption.AmountPaid;
@@ -1362,7 +1381,7 @@ namespace CPEA.Utilities.Services
         {
             try
             {
-                var result = await _context.AllUserRoles.Where(x=>x.Name != "Student").Select(x=>new AdminRolesdto { Id = x.Id, name = x.Name}).ToListAsync();
+                var result = await _context.Role.Select(x => new AdminRolesdto { Id = x.Id, name = x.Name }).ToListAsync(); //_context.AllUserRoles.Where(x=>x.Name != "Student").Select(x=>new AdminRolesdto { Id = x.Id, name = x.Name}).ToListAsync();
                 return result;
             }
             catch (Exception ex)
@@ -1373,37 +1392,45 @@ namespace CPEA.Utilities.Services
         public async Task<List<AdminRolesdto>> EditRole(AdminRolesdto dto)
         {
             var result = new List<AdminRolesdto>();
-            var roleExists = await _context.AllUserRoles.SingleOrDefaultAsync(s => s.Id == dto.Id);
+            var roleExists = await _context.Role.SingleOrDefaultAsync(s => s.Id == dto.Id);  //.AllUserRoles.SingleOrDefaultAsync(s => s.Id == dto.Id);
 
             if (roleExists != null)
             {
                 roleExists.Name = dto.name;
                 //roleExists.NormalizedName = dto.name.ToUpper();
 
-                _context.AllUserRoles.Update(roleExists);
+                //_context.AllUserRoles.Update(roleExists);
                 await _context.SaveChangesAsync();
             }
-            result = await _context.AllUserRoles.Select(x => new AdminRolesdto { Id = x.Id, name = x.Name }).ToListAsync();
+            result = await _context.Role.Select(x => new AdminRolesdto { Id = x.Id, name = x.Name }).ToListAsync();
             return result;
         }
         public async Task<List<AdminRolesdto>> AddRole(AdminRolesdto dto)
         {
             var result = new List<AdminRolesdto>();
-            var roleExists = await _context.AllUserRoles.SingleOrDefaultAsync(s => s.Name == dto.name);
-
-            if (roleExists == null)
+            var roleExist = await _roleManager.RoleExistsAsync(dto.name);
+            if (!roleExist)
             {
-                AllUserRoles userR = new AllUserRoles()
-                {
-                    Name = dto.name,
-                   // NormalizedName = dto.name.ToUpper()
-                };
-
-                await _context.AllUserRoles.AddAsync(userR);
+                //create the roles and seed them to the database: Question 1
+               var roleResult = await _roleManager.CreateAsync(new IdentityRole(dto.name));
 
                 await _context.SaveChangesAsync();
             }
-            result = await _context.AllUserRoles.Select(x => new AdminRolesdto { Id = x.Id, name = x.Name }).ToListAsync();
+            //var roleExists = await _context.AllUserRoles.SingleOrDefaultAsync(s => s.Name == dto.name);
+
+            //if (roleExists == null)
+            //{
+            //    AllUserRoles userR = new AllUserRoles()
+            //    {
+            //        Name = dto.name,
+            //       // NormalizedName = dto.name.ToUpper()
+            //    };
+
+            //    await _context.AllUserRoles.AddAsync(userR);
+
+            //    await _context.SaveChangesAsync();
+            //}
+            result = await _context.Role.Select(x => new AdminRolesdto { Id = x.Id, name = x.Name }).ToListAsync();
             return result;
         }
         public async Task<AdminDashboardVM> RegisterAdmin(AdminRegisVM dto)
@@ -1424,8 +1451,8 @@ namespace CPEA.Utilities.Services
                     return new AdminDashboardVM() { status = "Phone number already exist." };
 
                 }
+               // var Role = await _roleManager.FindByIdAsync(dto.AdminRegis.Role);
 
-                
                 var newUser = new Users
                 {
                     Email = dto.AdminRegis.Email.ToLower(),
@@ -1436,7 +1463,7 @@ namespace CPEA.Utilities.Services
                     EmailConfirmed = true,
                     Status = UserStatusEnums.Active,
                     RegisteredDate = DateTime.Now.Date,
-                    RoleId = dto.AdminRegis.Role
+                    DefaultRole = dto.AdminRegis.Role
                 };
 
                 var createdUser = await _userManager.CreateAsync(newUser, dto.AdminRegis.Password);
@@ -1444,11 +1471,12 @@ namespace CPEA.Utilities.Services
                 if (createdUser.Succeeded)
                 {
 
-                    //var rolede = await _roleManager.FindByIdAsync(dto.AdminRegis.);
+                    var rolede = await _roleManager.FindByIdAsync(dto.AdminRegis.Role);
+                    await _userManager.AddToRoleAsync(newUser, rolede.Name);
 
-                    //await _userManager.AddToRoleAsync(newUser, rolede.Name);
+                    //newUser.DefaultRole = rolede.Id;
 
-                    //await _userManager.UpdateAsync(newUser);
+                    await _userManager.UpdateAsync(newUser);
                     ////Send Email
                     ////----------
                     //var builder = new StringBuilder();
@@ -1457,8 +1485,8 @@ namespace CPEA.Utilities.Services
                     ////Send SMS
                     ////--------
                     //await _messagingService.SendSMS(dto.AdminRegis.Phone, "Edurex Registration Successful");
-                    var role = await _context.AllUserRoles.Where(x=>x.Id == newUser.RoleId).Select(x=>x.Name).FirstOrDefaultAsync();
-                    return new AdminDashboardVM() { status = "Successful", email =dto.AdminRegis.Email.ToLower(), role = role };
+                    // var role = await _context.AllUserRoles.Where(x=>x.Id == newUser.RoleId).Select(x=>x.Name).FirstOrDefaultAsync();
+                    return new AdminDashboardVM() { status = "Successful", email =dto.AdminRegis.Email.ToLower(), role = rolede.Name };
                 }
                 return new AdminDashboardVM() { status = "Error creating user." };
             }
@@ -1467,13 +1495,14 @@ namespace CPEA.Utilities.Services
         public async Task<DashboardVM> DashboardRe(string email)
         {
 
-            var existingUser = await _userManager.Users.Include(x => x.Role).Where(x => x.Email == email).FirstOrDefaultAsync();
+            var existingUser = await _userManager.FindByEmailAsync(email);//.Users.Include(x => x.Role).Where(x => x.Email == email).FirstOrDefaultAsync();
 
 
             if (existingUser != null)
             {               
                 var vm = new DashboardVM();
-                GeneralClass.FullName = $"{existingUser.FirstName} {existingUser.LastName} - {(existingUser.Role.Name).ToUpper()}";
+                var defaultRole = await _roleManager.FindByIdAsync(existingUser.DefaultRole);
+                GeneralClass.FullName = $"{existingUser.FirstName} {existingUser.LastName} - {(defaultRole.Name).ToUpper()}";
 
                 string ipAddress = "";
                var IPs = Array.FindAll(Dns.GetHostEntry(string.Empty).AddressList,address => address.AddressFamily == AddressFamily.InterNetwork);
@@ -1494,16 +1523,48 @@ namespace CPEA.Utilities.Services
                 await _context.SaveChangesAsync();
 
                 //Today's Record
-                var studentTodayR = await _userManager.Users.Include(x=>x.Role).Where(x => x.Role.Name == "Student" && x.RegisteredDate.Date == DateTime.Now.Date).Select(x => x.Id).Distinct().CountAsync();
-                var studentTodayWithoutCou = await (from user in _userManager.Users
-                                                    join role in _context.AllUserRoles on user.RoleId equals role.Id
-                                        where !_context.UserCourses.Any(f => f.UserId == user.Id)
+                var studentTodayR = await (from ur in _context.UserRoles
+                                           join user in _userManager.Users on ur.UserId equals user.Id
+                                           join role in _context.Role on ur.RoleId equals role.Id
+                                           where role.Name == "Student"
+                                           && user.RegisteredDate.Date == DateTime.Now.Date
+                                           select new { userId = user.Id }).Distinct().CountAsync(); 
+                //await _userManager.Users.Include(x=>x.Role).Where(x => x.Role.Name == "Student" && x.RegisteredDate.Date == DateTime.Now.Date).Select(x => x.Id).Distinct().CountAsync();
+                var studentTodayWithoutCou = await (from ur in _context.UserRoles
+                                                    join user in _userManager.Users on ur.UserId equals user.Id
+                                                    join role in _context.Role on ur.RoleId equals role.Id
+                                                    where !_context.UserCourses.Any(f => f.UserId == user.Id)
                                         && role.Name == "Student"
                                         && user.RegisteredDate.Date == DateTime.Now.Date
                                         select new {userId = user.Id }).Distinct().CountAsync();
-                var studentTodayWithCou = await _context.UserCourses.Include(x=>x.User).ThenInclude(x => x.Role).Where(x => x.User.Role.Name == "Student" && x.RegisteredDate.Date == DateTime.Now.Date).Select(x => x.UserId).Distinct().CountAsync();
-                var TodayPaidCourse = await _context.UserPaymentHistory.Include(x=>x.User).Where(x => x.PaymentFor == paymentForEnums.Course && x.User.Role.Name == "Student" && x.PaymentDate.Date == DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Paid).Select(x => x.Amount).SumAsync();
-                var TodayPaidCertifications = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.PaymentFor == paymentForEnums.Certifications && x.User.Role.Name == "Student" && x.PaymentDate.Date == DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Paid).Select(x => x.Amount).SumAsync();
+                var studentTodayWithCou = await (from ucourse in _context.UserCourses
+                                                 join urole in _context.UserRole on ucourse.UserId equals urole.UserId
+                                                 join user in _userManager.Users on urole.UserId equals user.Id
+                                                 join role in _context.Role on urole.RoleId equals role.Id
+                                                 where role.Name == "Student"
+                                                 && user.RegisteredDate.Date == DateTime.Now.Date
+                                                 select new { userId = user.Id }).Distinct().CountAsync(); 
+                //await _context.UserCourses.Include(x=>x.User).ThenInclude(x => x.Role).Where(x => x.User.Role.Name == "Student" && x.RegisteredDate.Date == DateTime.Now.Date).Select(x => x.UserId).Distinct().CountAsync();
+                var TodayPaidCourse = await (from uPaid in _context.UserPaymentHistory
+                                             join urole in _context.UserRole on uPaid.UserId equals urole.UserId
+                                             join user in _userManager.Users on urole.UserId equals user.Id
+                                             join role in _context.Role on urole.RoleId equals role.Id
+                                             where uPaid.PaymentFor == paymentForEnums.Course
+                                             && role.Name == "Student"
+                                             && uPaid.PaymentDate.Date == DateTime.Now.Date
+                                             && uPaid.StatusId == PaymentStatusEnums.Paid
+                                             select uPaid.Amount).SumAsync();
+                //await _context.UserPaymentHistory.Include(x=>x.User).Where(x => x.PaymentFor == paymentForEnums.Course && x.User.Role.Name == "Student" && x.PaymentDate.Date == DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Paid).Select(x => x.Amount).SumAsync();
+                var TodayPaidCertifications = await (from uPaid in _context.UserPaymentHistory
+                                                     join urole in _context.UserRole on uPaid.UserId equals urole.UserId
+                                                     join user in _userManager.Users on urole.UserId equals user.Id
+                                                     join role in _context.Role on urole.RoleId equals role.Id
+                                                     where uPaid.PaymentFor == paymentForEnums.Certifications
+                                                     && role.Name == "Student"
+                                                     && uPaid.PaymentDate.Date == DateTime.Now.Date
+                                                     && uPaid.StatusId == PaymentStatusEnums.Paid
+                                                     select uPaid.Amount).SumAsync(); 
+                //await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.PaymentFor == paymentForEnums.Certifications && x.User.Role.Name == "Student" && x.PaymentDate.Date == DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Paid).Select(x => x.Amount).SumAsync();
                 
                 var studentTodayPayment = TodayPaidCourse + TodayPaidCertifications;
                 var todayTotalRecord = new TotalRecord()
@@ -1522,113 +1583,340 @@ namespace CPEA.Utilities.Services
                 decimal studentWeekPayment = 0;
                 if (TodayDayWeek.ToLower() == "sunday")
                 {
-                    studentWeekR = await _userManager.Users.Include(x => x.Role).Where(x => x.Role.Name == "Student" && x.RegisteredDate.Date == DateTime.Now).Select(x => x.Id).Distinct().CountAsync();
-                    studentWeekWithoutCou = await (from user in _userManager.Users
-                                                   join role in _context.AllUserRoles on user.RoleId equals role.Id
-                                                        where !_context.UserCourses.Any(f => f.UserId == user.Id)
+                    studentWeekR = await (from ur in _context.UserRoles
+                                          join user in _userManager.Users on ur.UserId equals user.Id
+                                          join role in _context.Role on ur.RoleId equals role.Id
+                                          where role.Name == "Student"
+                                          && user.RegisteredDate.Date == DateTime.Now.Date
+                                          select new { userId = user.Id }).Distinct().CountAsync(); 
+                    //await _userManager.Users.Include(x => x.Role).Where(x => x.Role.Name == "Student" && x.RegisteredDate.Date == DateTime.Now).Select(x => x.Id).Distinct().CountAsync();
+                    studentWeekWithoutCou = await (from ur in _context.UserRoles
+                                                   join user in _userManager.Users on ur.UserId equals user.Id
+                                                   join role in _context.Role on ur.RoleId equals role.Id
+                                                   where !_context.UserCourses.Any(f => f.UserId == user.Id)
                                                         && role.Name == "Student"
-                                                        && user.RegisteredDate.Date == DateTime.Now
-                                                        select new { userId = user.Id }).Distinct().CountAsync();
-                    studentWeekWithCou = await _context.UserCourses.Include(x => x.User).ThenInclude(x => x.Role).Where(x => x.User.Role.Name == "Student" && x.RegisteredDate.Date == DateTime.Now).Select(x => x.UserId).Distinct().CountAsync();
-                    var WeekPaidCourse = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.PaymentFor == paymentForEnums.Course && x.User.Role.Name == "Student" && x.PaymentDate.Date == DateTime.Now && x.StatusId == PaymentStatusEnums.Paid).Select(x => x.Amount).SumAsync();
-                    var WeekPaidCertifications = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.PaymentFor == paymentForEnums.Certifications && x.User.Role.Name == "Student" && x.PaymentDate.Date == DateTime.Now && x.StatusId == PaymentStatusEnums.Paid).Select(x => x.Amount).SumAsync();
+                                                        && user.RegisteredDate.Date == DateTime.Now.Date
+                                                   select new { userId = user.Id }).Distinct().CountAsync();
+                    studentWeekWithCou = await (from ucourse in _context.UserCourses
+                                                join urole in _context.UserRole on ucourse.UserId equals urole.UserId
+                                                join user in _userManager.Users on urole.UserId equals user.Id
+                                                join role in _context.Role on urole.RoleId equals role.Id
+                                                where role.Name == "Student"
+                                                && user.RegisteredDate.Date == DateTime.Now.Date
+                                                select new { userId = user.Id }).Distinct().CountAsync(); 
+                    //await _context.UserCourses.Include(x => x.User).ThenInclude(x => x.Role).Where(x => x.User.Role.Name == "Student" && x.RegisteredDate.Date == DateTime.Now).Select(x => x.UserId).Distinct().CountAsync();
+                    var WeekPaidCourse = await (from uPaid in _context.UserPaymentHistory
+                                                join urole in _context.UserRole on uPaid.UserId equals urole.UserId
+                                                join user in _userManager.Users on urole.UserId equals user.Id
+                                                join role in _context.Role on urole.RoleId equals role.Id
+                                                where uPaid.PaymentFor == paymentForEnums.Course 
+                                                && role.Name == "Student"
+                                                && uPaid.PaymentDate.Date == DateTime.Now.Date
+                                                && uPaid.StatusId == PaymentStatusEnums.Paid
+                                                select uPaid.Amount).SumAsync();
+
+                    //await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.PaymentFor == paymentForEnums.Course && x.User.Role.Name == "Student" && x.PaymentDate.Date == DateTime.Now && x.StatusId == PaymentStatusEnums.Paid).Select(x => x.Amount).SumAsync();
+                    var WeekPaidCertifications = await (from uPaid in _context.UserPaymentHistory
+                                                        join urole in _context.UserRole on uPaid.UserId equals urole.UserId
+                                                        join user in _userManager.Users on urole.UserId equals user.Id
+                                                        join role in _context.Role on urole.RoleId equals role.Id
+                                                        where uPaid.PaymentFor == paymentForEnums.Certifications
+                                                        && role.Name == "Student"
+                                                        && uPaid.PaymentDate.Date == DateTime.Now.Date
+                                                        && uPaid.StatusId == PaymentStatusEnums.Paid
+                                                        select uPaid.Amount).SumAsync(); 
+                    //await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.PaymentFor == paymentForEnums.Certifications && x.User.Role.Name == "Student" && x.PaymentDate.Date == DateTime.Now && x.StatusId == PaymentStatusEnums.Paid).Select(x => x.Amount).SumAsync();
 
                     studentWeekPayment = WeekPaidCourse + WeekPaidCertifications;
 
                 }
                 else if (TodayDayWeek.ToLower() == "monday")
                 {
-                    studentWeekR = await _userManager.Users.Include(x => x.Role).Where(x => x.Role.Name == "Student" && x.RegisteredDate.Date >= DateTime.Now.Date.AddDays(-1) && x.RegisteredDate.Date <= DateTime.Now.Date).Select(x => x.Id).Distinct().CountAsync();
-                    studentWeekWithoutCou = await (from user in _userManager.Users
-                                                   join role in _context.AllUserRoles on user.RoleId equals role.Id
+                    studentWeekR = await (from ur in _context.UserRoles
+                                          join user in _userManager.Users on ur.UserId equals user.Id
+                                          join role in _context.Role on ur.RoleId equals role.Id
+                                          where role.Name == "Student"
+                                          && user.RegisteredDate.Date >= DateTime.Now.Date.AddDays(-1) && user.RegisteredDate.Date <= DateTime.Now.Date
+                                          select new { userId = user.Id }).Distinct().CountAsync(); 
+                    //await _userManager.Users.Include(x => x.Role).Where(x => x.Role.Name == "Student" && x.RegisteredDate.Date >= DateTime.Now.Date.AddDays(-1) && x.RegisteredDate.Date <= DateTime.Now.Date).Select(x => x.Id).Distinct().CountAsync();
+                    studentWeekWithoutCou = await (from ur in _context.UserRoles
+                                                   join user in _userManager.Users on ur.UserId equals user.Id
+                                                   join role in _context.Role on ur.RoleId equals role.Id
                                                    where !_context.UserCourses.Any(f => f.UserId == user.Id)
                                                    && role.Name == "Student"
                                                    && user.RegisteredDate.Date >= DateTime.Now.Date.AddDays(-1) && user.RegisteredDate.Date <= DateTime.Now.Date
                                                    select new { userId = user.Id }).Distinct().CountAsync();
-                    studentWeekWithCou = await _context.UserCourses.Include(x => x.User).ThenInclude(x => x.Role).Where(x => x.User.Role.Name == "Student" && x.RegisteredDate.Date >= DateTime.Now.Date.AddDays(-1) && x.RegisteredDate.Date <= DateTime.Now.Date).Select(x => x.UserId).Distinct().CountAsync();
+                    studentWeekWithCou = await (from ucourse in _context.UserCourses
+                                                join urole in _context.UserRole on ucourse.UserId equals urole.UserId
+                                                join user in _userManager.Users on urole.UserId equals user.Id
+                                                join role in _context.Role on urole.RoleId equals role.Id
+                                                where role.Name == "Student"
+                                                && user.RegisteredDate.Date >= DateTime.Now.Date.AddDays(-1) && user.RegisteredDate.Date <= DateTime.Now.Date
+                                                select new { userId = user.Id }).Distinct().CountAsync(); 
+                    //await _context.UserCourses.Include(x => x.User).ThenInclude(x => x.Role).Where(x => x.User.Role.Name == "Student" && x.RegisteredDate.Date >= DateTime.Now.Date.AddDays(-1) && x.RegisteredDate.Date <= DateTime.Now.Date).Select(x => x.UserId).Distinct().CountAsync();
 
-                    var WeekPaidCourse = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.PaymentFor == paymentForEnums.Course && x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-1) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Paid).Select(x => x.Amount).SumAsync();
-                    var WeekPaidCertifications = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.PaymentFor == paymentForEnums.Certifications && x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-1) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Paid).Select(x => x.Amount).SumAsync();
+                    var WeekPaidCourse = await (from uPaid in _context.UserPaymentHistory
+                                                join urole in _context.UserRole on uPaid.UserId equals urole.UserId
+                                                join user in _userManager.Users on urole.UserId equals user.Id
+                                                join role in _context.Role on urole.RoleId equals role.Id
+                                                where uPaid.PaymentFor == paymentForEnums.Course
+                                                && role.Name == "Student"
+                                                && uPaid.PaymentDate.Date >= DateTime.Now.Date.AddDays(-1) && uPaid.PaymentDate.Date <= DateTime.Now.Date
+                                                && uPaid.StatusId == PaymentStatusEnums.Paid
+                                                select uPaid.Amount).SumAsync(); 
+                    
+                    //await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.PaymentFor == paymentForEnums.Course && x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-1) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Paid).Select(x => x.Amount).SumAsync();
+                    var WeekPaidCertifications = await (from uPaid in _context.UserPaymentHistory
+                                                        join urole in _context.UserRole on uPaid.UserId equals urole.UserId
+                                                        join user in _userManager.Users on urole.UserId equals user.Id
+                                                        join role in _context.Role on urole.RoleId equals role.Id
+                                                        where uPaid.PaymentFor == paymentForEnums.Certifications
+                                                        && role.Name == "Student"
+                                                        && uPaid.PaymentDate.Date >= DateTime.Now.Date.AddDays(-1) && uPaid.PaymentDate.Date <= DateTime.Now.Date
+                                                        && uPaid.StatusId == PaymentStatusEnums.Paid
+                                                        select uPaid.Amount).SumAsync(); 
+                    //await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.PaymentFor == paymentForEnums.Certifications && x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-1) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Paid).Select(x => x.Amount).SumAsync();
 
                     studentWeekPayment = WeekPaidCourse + WeekPaidCertifications;
 
                 }
                 else if (TodayDayWeek.ToLower() == "tuesday")
                 {
-                    studentWeekR = await _userManager.Users.Include(x => x.Role).Where(x => x.Role.Name == "Student" && x.RegisteredDate.Date >= DateTime.Now.Date.AddDays(-2) && x.RegisteredDate.Date <= DateTime.Now.Date).Select(x => x.Id).Distinct().CountAsync();
-                    studentWeekWithoutCou = await (from user in _userManager.Users
-                                                   join role in _context.AllUserRoles on user.RoleId equals role.Id
+                    studentWeekR = await (from ur in _context.UserRoles
+                                          join user in _userManager.Users on ur.UserId equals user.Id
+                                          join role in _context.Role on ur.RoleId equals role.Id
+                                          where role.Name == "Student"
+                                          && user.RegisteredDate.Date >= DateTime.Now.Date.AddDays(-2) && user.RegisteredDate.Date <= DateTime.Now.Date
+                                          select new { userId = user.Id }).Distinct().CountAsync(); 
+                    //await _userManager.Users.Include(x => x.Role).Where(x => x.Role.Name == "Student" && x.RegisteredDate.Date >= DateTime.Now.Date.AddDays(-2) && x.RegisteredDate.Date <= DateTime.Now.Date).Select(x => x.Id).Distinct().CountAsync();
+                    studentWeekWithoutCou = await (from ur in _context.UserRoles
+                                                   join user in _userManager.Users on ur.UserId equals user.Id
+                                                   join role in _context.Role on ur.RoleId equals role.Id
                                                    where !_context.UserCourses.Any(f => f.UserId == user.Id)
                                                   && role.Name == "Student"
                                                    && user.RegisteredDate.Date >= DateTime.Now.Date.AddDays(-2) && user.RegisteredDate.Date <= DateTime.Now.Date
                                                    select new { userId = user.Id }).Distinct().CountAsync();
-                    studentWeekWithCou = await _context.UserCourses.Include(x => x.User).ThenInclude(x => x.Role).Where(x => x.User.Role.Name == "Student" && x.RegisteredDate.Date >= DateTime.Now.Date.AddDays(-2) && x.RegisteredDate.Date <= DateTime.Now.Date).Select(x => x.UserId).Distinct().CountAsync();
-                    var WeekPaidCourse = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.PaymentFor == paymentForEnums.Course && x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-2) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Paid).Select(x => x.Amount).SumAsync();
-                    var WeekPaidCertifications = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.PaymentFor == paymentForEnums.Certifications && x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-2) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Paid).Select(x => x.Amount).SumAsync();
+                    studentWeekWithCou = await (from ucourse in _context.UserCourses
+                                                join urole in _context.UserRole on ucourse.UserId equals urole.UserId
+                                                join user in _userManager.Users on urole.UserId equals user.Id
+                                                join role in _context.Role on urole.RoleId equals role.Id
+                                                where role.Name == "Student"
+                                                && user.RegisteredDate.Date >= DateTime.Now.Date.AddDays(-2) && user.RegisteredDate.Date <= DateTime.Now.Date
+                                                select new { userId = user.Id }).Distinct().CountAsync(); 
+                    //await _context.UserCourses.Include(x => x.User).ThenInclude(x => x.Role).Where(x => x.User.Role.Name == "Student" && x.RegisteredDate.Date >= DateTime.Now.Date.AddDays(-2) && x.RegisteredDate.Date <= DateTime.Now.Date).Select(x => x.UserId).Distinct().CountAsync();
+                    var WeekPaidCourse = await (from uPaid in _context.UserPaymentHistory
+                                                join urole in _context.UserRole on uPaid.UserId equals urole.UserId
+                                                join user in _userManager.Users on urole.UserId equals user.Id
+                                                join role in _context.Role on urole.RoleId equals role.Id
+                                                where uPaid.PaymentFor == paymentForEnums.Course
+                                                && role.Name == "Student"
+                                                && uPaid.PaymentDate.Date >= DateTime.Now.Date.AddDays(-2) && uPaid.PaymentDate.Date <= DateTime.Now.Date
+                                                && uPaid.StatusId == PaymentStatusEnums.Paid
+                                                select uPaid.Amount).SumAsync(); 
+                    //await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.PaymentFor == paymentForEnums.Course && x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-2) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Paid).Select(x => x.Amount).SumAsync();
+                    var WeekPaidCertifications = await (from uPaid in _context.UserPaymentHistory
+                                                        join urole in _context.UserRole on uPaid.UserId equals urole.UserId
+                                                        join user in _userManager.Users on urole.UserId equals user.Id
+                                                        join role in _context.Role on urole.RoleId equals role.Id
+                                                        where uPaid.PaymentFor == paymentForEnums.Certifications
+                                                        && role.Name == "Student"
+                                                        && uPaid.PaymentDate.Date >= DateTime.Now.Date.AddDays(-2) && uPaid.PaymentDate.Date <= DateTime.Now.Date
+                                                        && uPaid.StatusId == PaymentStatusEnums.Paid
+                                                        select uPaid.Amount).SumAsync(); 
+                    //await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.PaymentFor == paymentForEnums.Certifications && x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-2) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Paid).Select(x => x.Amount).SumAsync();
 
                     studentWeekPayment = WeekPaidCourse + WeekPaidCertifications;
 
                 }
                 else if (TodayDayWeek.ToLower() == "wednesday")
                 {
-                    studentWeekR = await _userManager.Users.Include(x => x.Role).Where(x => x.Role.Name == "Student" && x.RegisteredDate.Date >= DateTime.Now.Date.AddDays(-3) && x.RegisteredDate.Date <= DateTime.Now.Date).Select(x => x.Id).Distinct().CountAsync();
-                    studentWeekWithoutCou = await (from user in _userManager.Users
-                                                   join role in _context.AllUserRoles on user.RoleId equals role.Id
+                    studentWeekR = await (from ur in _context.UserRoles
+                                          join user in _userManager.Users on ur.UserId equals user.Id
+                                          join role in _context.Role on ur.RoleId equals role.Id
+                                          where role.Name == "Student"
+                                          && user.RegisteredDate.Date >= DateTime.Now.Date.AddDays(-3) && user.RegisteredDate.Date <= DateTime.Now.Date
+                                          select new { userId = user.Id }).Distinct().CountAsync(); 
+                    //await _userManager.Users.Include(x => x.Role).Where(x => x.Role.Name == "Student" && x.RegisteredDate.Date >= DateTime.Now.Date.AddDays(-3) && x.RegisteredDate.Date <= DateTime.Now.Date).Select(x => x.Id).Distinct().CountAsync();
+                    studentWeekWithoutCou = await (from ur in _context.UserRoles
+                                                   join user in _userManager.Users on ur.UserId equals user.Id
+                                                   join role in _context.Role on ur.RoleId equals role.Id
                                                    where !_context.UserCourses.Any(f => f.UserId == user.Id)
                                                    && role.Name == "Student"
                                                    && user.RegisteredDate.Date >= DateTime.Now.Date.AddDays(-3) && user.RegisteredDate.Date <= DateTime.Now.Date
                                                    select new { userId = user.Id }).Distinct().CountAsync();
-                    studentWeekWithCou = await _context.UserCourses.Include(x => x.User).ThenInclude(x => x.Role).Where(x => x.User.Role.Name == "Student" && x.RegisteredDate.Date >= DateTime.Now.Date.AddDays(-3) && x.RegisteredDate.Date <= DateTime.Now.Date).Select(x => x.UserId).Distinct().CountAsync();
-                    var WeekPaidCourse = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.PaymentFor == paymentForEnums.Course && x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-3) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Paid).Select(x => x.Amount).SumAsync();
-                    var WeekPaidCertifications = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.PaymentFor == paymentForEnums.Certifications && x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-3) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Paid).Select(x => x.Amount).SumAsync();
+                    studentWeekWithCou = await (from ucourse in _context.UserCourses
+                                                join urole in _context.UserRole on ucourse.UserId equals urole.UserId
+                                                join user in _userManager.Users on urole.UserId equals user.Id
+                                                join role in _context.Role on urole.RoleId equals role.Id
+                                                where role.Name == "Student"
+                                                && user.RegisteredDate.Date >= DateTime.Now.Date.AddDays(-3) && user.RegisteredDate.Date <= DateTime.Now.Date
+                                                select new { userId = user.Id }).Distinct().CountAsync(); 
+                    //await _context.UserCourses.Include(x => x.User).ThenInclude(x => x.Role).Where(x => x.User.Role.Name == "Student" && x.RegisteredDate.Date >= DateTime.Now.Date.AddDays(-3) && x.RegisteredDate.Date <= DateTime.Now.Date).Select(x => x.UserId).Distinct().CountAsync();
+                    var WeekPaidCourse = await (from uPaid in _context.UserPaymentHistory
+                                                join urole in _context.UserRole on uPaid.UserId equals urole.UserId
+                                                join user in _userManager.Users on urole.UserId equals user.Id
+                                                join role in _context.Role on urole.RoleId equals role.Id
+                                                where uPaid.PaymentFor == paymentForEnums.Course
+                                                && role.Name == "Student"
+                                                && uPaid.PaymentDate.Date >= DateTime.Now.Date.AddDays(-3) && uPaid.PaymentDate.Date <= DateTime.Now.Date
+                                                && uPaid.StatusId == PaymentStatusEnums.Paid
+                                                select uPaid.Amount).SumAsync(); 
+                    //await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.PaymentFor == paymentForEnums.Course && x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-3) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Paid).Select(x => x.Amount).SumAsync();
+                    var WeekPaidCertifications = await (from uPaid in _context.UserPaymentHistory
+                                                        join urole in _context.UserRole on uPaid.UserId equals urole.UserId
+                                                        join user in _userManager.Users on urole.UserId equals user.Id
+                                                        join role in _context.Role on urole.RoleId equals role.Id
+                                                        where uPaid.PaymentFor == paymentForEnums.Certifications
+                                                        && role.Name == "Student"
+                                                        && uPaid.PaymentDate.Date >= DateTime.Now.Date.AddDays(-3) && uPaid.PaymentDate.Date <= DateTime.Now.Date
+                                                        && uPaid.StatusId == PaymentStatusEnums.Paid
+                                                        select uPaid.Amount).SumAsync(); 
+                    //await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.PaymentFor == paymentForEnums.Certifications && x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-3) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Paid).Select(x => x.Amount).SumAsync();
 
                     studentWeekPayment = WeekPaidCourse + WeekPaidCertifications;
 
                 }
                 else if (TodayDayWeek.ToLower() == "thursday")
                 {
-                    studentWeekR = await _userManager.Users.Include(x => x.Role).Where(x => x.Role.Name == "Student" && x.RegisteredDate.Date >= DateTime.Now.Date.AddDays(-4) && x.RegisteredDate.Date <= DateTime.Now.Date).Select(x => x.Id).Distinct().CountAsync();
-                    studentWeekWithoutCou = await (from user in _userManager.Users
-                                                   join role in _context.AllUserRoles on user.RoleId equals role.Id
+                    studentWeekR = await (from ur in _context.UserRoles
+                                          join user in _userManager.Users on ur.UserId equals user.Id
+                                          join role in _context.Role on ur.RoleId equals role.Id
+                                          where role.Name == "Student"
+                                          && user.RegisteredDate.Date >= DateTime.Now.Date.AddDays(-4) && user.RegisteredDate.Date <= DateTime.Now.Date
+                                          select new { userId = user.Id }).Distinct().CountAsync(); 
+                    //await _userManager.Users.Include(x => x.Role).Where(x => x.Role.Name == "Student" && x.RegisteredDate.Date >= DateTime.Now.Date.AddDays(-4) && x.RegisteredDate.Date <= DateTime.Now.Date).Select(x => x.Id).Distinct().CountAsync();
+                    studentWeekWithoutCou = await (from ur in _context.UserRoles
+                                                   join user in _userManager.Users on ur.UserId equals user.Id
+                                                   join role in _context.Role on ur.RoleId equals role.Id
                                                    where !_context.UserCourses.Any(f => f.UserId == user.Id)
                                                    && role.Name == "Student"
                                                    && user.RegisteredDate.Date >= DateTime.Now.Date.AddDays(-4) && user.RegisteredDate.Date <= DateTime.Now.Date
                                                    select new { userId = user.Id }).Distinct().CountAsync();
-                    studentWeekWithCou = await _context.UserCourses.Include(x => x.User).ThenInclude(x => x.Role).Where(x => x.User.Role.Name == "Student" && x.RegisteredDate.Date >= DateTime.Now.Date.AddDays(-4) && x.RegisteredDate.Date <= DateTime.Now.Date).Select(x => x.UserId).Distinct().CountAsync();
-                    var WeekPaidCourse = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.PaymentFor == paymentForEnums.Course && x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-4) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Paid).Select(x => x.Amount).SumAsync();
-                    var WeekPaidCertifications = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.PaymentFor == paymentForEnums.Certifications && x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-4) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Paid).Select(x => x.Amount).SumAsync();
+
+                    studentWeekWithCou = await (from ucourse in _context.UserCourses
+                                                join urole in _context.UserRole on ucourse.UserId equals urole.UserId
+                                                join user in _userManager.Users on urole.UserId equals user.Id
+                                                join role in _context.Role on urole.RoleId equals role.Id
+                                                where role.Name == "Student"
+                                                && user.RegisteredDate.Date >= DateTime.Now.Date.AddDays(-4) && user.RegisteredDate.Date <= DateTime.Now.Date
+                                                select new { userId = user.Id }).Distinct().CountAsync(); 
+                    //await _context.UserCourses.Include(x => x.User).ThenInclude(x => x.Role).Where(x => x.User.Role.Name == "Student" && x.RegisteredDate.Date >= DateTime.Now.Date.AddDays(-4) && x.RegisteredDate.Date <= DateTime.Now.Date).Select(x => x.UserId).Distinct().CountAsync();
+                    var WeekPaidCourse = await (from uPaid in _context.UserPaymentHistory
+                                                join urole in _context.UserRole on uPaid.UserId equals urole.UserId
+                                                join user in _userManager.Users on urole.UserId equals user.Id
+                                                join role in _context.Role on urole.RoleId equals role.Id
+                                                where uPaid.PaymentFor == paymentForEnums.Course
+                                                && role.Name == "Student"
+                                                && uPaid.PaymentDate.Date >= DateTime.Now.Date.AddDays(-4) && uPaid.PaymentDate.Date <= DateTime.Now.Date
+                                                && uPaid.StatusId == PaymentStatusEnums.Paid
+                                                select uPaid.Amount).SumAsync(); 
+                    //await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.PaymentFor == paymentForEnums.Course && x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-4) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Paid).Select(x => x.Amount).SumAsync();
+                    var WeekPaidCertifications = await (from uPaid in _context.UserPaymentHistory
+                                                        join urole in _context.UserRole on uPaid.UserId equals urole.UserId
+                                                        join user in _userManager.Users on urole.UserId equals user.Id
+                                                        join role in _context.Role on urole.RoleId equals role.Id
+                                                        where uPaid.PaymentFor == paymentForEnums.Certifications
+                                                        && role.Name == "Student"
+                                                        && uPaid.PaymentDate.Date >= DateTime.Now.Date.AddDays(-4) && uPaid.PaymentDate.Date <= DateTime.Now.Date
+                                                        && uPaid.StatusId == PaymentStatusEnums.Paid
+                                                        select uPaid.Amount).SumAsync(); 
+                    //await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.PaymentFor == paymentForEnums.Certifications && x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-4) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Paid).Select(x => x.Amount).SumAsync();
 
                     studentWeekPayment = WeekPaidCourse + WeekPaidCertifications;
 
                 }
                 else if (TodayDayWeek.ToLower() == "friday")
                 {
-                    studentWeekR = await _userManager.Users.Include(x => x.Role).Where(x => x.Role.Name == "Student" && x.RegisteredDate.Date >= DateTime.Now.Date.AddDays(-5) && x.RegisteredDate.Date <= DateTime.Now.Date).Select(x => x.Id).Distinct().CountAsync();
-                    studentWeekWithoutCou = await (from user in _userManager.Users
-                                                   join role in _context.AllUserRoles on user.RoleId equals role.Id
+                    studentWeekR = await (from ur in _context.UserRoles
+                                          join user in _userManager.Users on ur.UserId equals user.Id
+                                          join role in _context.Role on ur.RoleId equals role.Id
+                                          where role.Name == "Student"
+                                          && user.RegisteredDate.Date >= DateTime.Now.Date.AddDays(-5) && user.RegisteredDate.Date <= DateTime.Now.Date
+                                          select new { userId = user.Id }).Distinct().CountAsync(); 
+                    //await _userManager.Users.Include(x => x.Role).Where(x => x.Role.Name == "Student" && x.RegisteredDate.Date >= DateTime.Now.Date.AddDays(-5) && x.RegisteredDate.Date <= DateTime.Now.Date).Select(x => x.Id).Distinct().CountAsync();
+                    studentWeekWithoutCou = await (from ur in _context.UserRoles
+                                                   join user in _userManager.Users on ur.UserId equals user.Id
+                                                   join role in _context.Role on ur.RoleId equals role.Id
                                                    where !_context.UserCourses.Any(f => f.UserId == user.Id)
                                                    && role.Name == "Student"
                                                    && user.RegisteredDate.Date >= DateTime.Now.Date.AddDays(-5) && user.RegisteredDate.Date <= DateTime.Now.Date
                                                    select new { userId = user.Id }).Distinct().CountAsync();
-                    studentWeekWithCou = await _context.UserCourses.Include(x => x.User).ThenInclude(x => x.Role).Where(x => x.User.Role.Name == "Student" && x.RegisteredDate.Date >= DateTime.Now.Date.AddDays(-5) && x.RegisteredDate.Date <= DateTime.Now.Date).Select(x=>x.UserId).Distinct().CountAsync();
-                    var WeekPaidCourse = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.PaymentFor == paymentForEnums.Course && x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-5) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Paid).Select(x => x.Amount).SumAsync();
-                    var WeekPaidCertifications = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.PaymentFor == paymentForEnums.Certifications && x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-5) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Paid).Select(x => x.Amount).SumAsync();
+                    studentWeekWithCou = await (from ucourse in _context.UserCourses
+                                                join urole in _context.UserRole on ucourse.UserId equals urole.UserId
+                                                join user in _userManager.Users on urole.UserId equals user.Id
+                                                join role in _context.Role on urole.RoleId equals role.Id
+                                                where role.Name == "Student"
+                                                && user.RegisteredDate.Date >= DateTime.Now.Date.AddDays(-5) && user.RegisteredDate.Date <= DateTime.Now.Date
+                                                select new { userId = user.Id }).Distinct().CountAsync(); 
+                    //await _context.UserCourses.Include(x => x.User).ThenInclude(x => x.Role).Where(x => x.User.Role.Name == "Student" && x.RegisteredDate.Date >= DateTime.Now.Date.AddDays(-5) && x.RegisteredDate.Date <= DateTime.Now.Date).Select(x=>x.UserId).Distinct().CountAsync();
+                    var WeekPaidCourse = await (from uPaid in _context.UserPaymentHistory
+                                                join urole in _context.UserRole on uPaid.UserId equals urole.UserId
+                                                join user in _userManager.Users on urole.UserId equals user.Id
+                                                join role in _context.Role on urole.RoleId equals role.Id
+                                                where uPaid.PaymentFor == paymentForEnums.Course
+                                                && role.Name == "Student"
+                                                && uPaid.PaymentDate.Date >= DateTime.Now.Date.AddDays(-5) && uPaid.PaymentDate.Date <= DateTime.Now.Date
+                                                && uPaid.StatusId == PaymentStatusEnums.Paid
+                                                select uPaid.Amount).SumAsync(); 
+                    //await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.PaymentFor == paymentForEnums.Course && x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-5) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Paid).Select(x => x.Amount).SumAsync();
+                    var WeekPaidCertifications = await (from uPaid in _context.UserPaymentHistory
+                                                        join urole in _context.UserRole on uPaid.UserId equals urole.UserId
+                                                        join user in _userManager.Users on urole.UserId equals user.Id
+                                                        join role in _context.Role on urole.RoleId equals role.Id
+                                                        where uPaid.PaymentFor == paymentForEnums.Certifications
+                                                        && role.Name == "Student"
+                                                        && uPaid.PaymentDate.Date >= DateTime.Now.Date.AddDays(-5) && uPaid.PaymentDate.Date <= DateTime.Now.Date
+                                                        && uPaid.StatusId == PaymentStatusEnums.Paid
+                                                        select uPaid.Amount).SumAsync(); 
+                    //await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.PaymentFor == paymentForEnums.Certifications && x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-5) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Paid).Select(x => x.Amount).SumAsync();
 
                     studentWeekPayment = WeekPaidCourse + WeekPaidCertifications;
 
                 }
                 else if (TodayDayWeek.ToLower() == "saturday")
                 {
-                    studentWeekR = await _userManager.Users.Include(x => x.Role).Where(x => x.Role.Name == "Student" && x.RegisteredDate.Date >= DateTime.Now.Date.AddDays(-6) && x.RegisteredDate.Date <= DateTime.Now.Date).Select(x => x.Id).Distinct().CountAsync();
-                    studentWeekWithoutCou = await (from user in _userManager.Users
-                                                   join role in _context.AllUserRoles on user.RoleId equals role.Id
+                    studentWeekR = await (from ur in _context.UserRoles
+                                          join user in _userManager.Users on ur.UserId equals user.Id
+                                          join role in _context.Role on ur.RoleId equals role.Id
+                                          where role.Name == "Student"
+                                          && user.RegisteredDate.Date >= DateTime.Now.Date.AddDays(-6) && user.RegisteredDate.Date <= DateTime.Now.Date
+                                          select new { userId = user.Id }).Distinct().CountAsync(); 
+                    //await _userManager.Users.Include(x => x.Role).Where(x => x.Role.Name == "Student" && x.RegisteredDate.Date >= DateTime.Now.Date.AddDays(-6) && x.RegisteredDate.Date <= DateTime.Now.Date).Select(x => x.Id).Distinct().CountAsync();
+                    studentWeekWithoutCou = await (from ur in _context.UserRoles
+                                                   join user in _userManager.Users on ur.UserId equals user.Id
+                                                   join role in _context.Role on ur.RoleId equals role.Id
                                                    where !_context.UserCourses.Any(f => f.UserId == user.Id)
                                                    && role.Name == "Student"
                                                    && user.RegisteredDate.Date >= DateTime.Now.Date.AddDays(-6) && user.RegisteredDate.Date <= DateTime.Now.Date
                                                    select new { userId = user.Id }).Distinct().CountAsync();
-                    studentWeekWithCou = await _context.UserCourses.Include(x => x.User).ThenInclude(x => x.Role).Where(x => x.User.Role.Name == "Student" && x.RegisteredDate.Date >= DateTime.Now.Date.AddDays(-6) && x.RegisteredDate.Date <= DateTime.Now.Date).Select(x => x.UserId).Distinct().CountAsync();
-                    var WeekPaidCourse = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.PaymentFor == paymentForEnums.Course && x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-6) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Paid).Select(x => x.Amount).SumAsync();
-                    var WeekPaidCertifications = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.PaymentFor == paymentForEnums.Certifications && x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-6) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Paid).Select(x => x.Amount).SumAsync();
+                    studentWeekWithCou = await (from ucourse in _context.UserCourses
+                                                join urole in _context.UserRole on ucourse.UserId equals urole.UserId
+                                                join user in _userManager.Users on urole.UserId equals user.Id
+                                                join role in _context.Role on urole.RoleId equals role.Id
+                                                where role.Name == "Student"
+                                                && user.RegisteredDate.Date >= DateTime.Now.Date.AddDays(-6) && user.RegisteredDate.Date <= DateTime.Now.Date
+                                                select new { userId = user.Id }).Distinct().CountAsync(); 
+                    //await _context.UserCourses.Include(x => x.User).ThenInclude(x => x.Role).Where(x => x.User.Role.Name == "Student" && x.RegisteredDate.Date >= DateTime.Now.Date.AddDays(-6) && x.RegisteredDate.Date <= DateTime.Now.Date).Select(x => x.UserId).Distinct().CountAsync();
+                    var WeekPaidCourse = await (from uPaid in _context.UserPaymentHistory
+                                                join urole in _context.UserRole on uPaid.UserId equals urole.UserId
+                                                join user in _userManager.Users on urole.UserId equals user.Id
+                                                join role in _context.Role on urole.RoleId equals role.Id
+                                                where uPaid.PaymentFor == paymentForEnums.Course
+                                                && role.Name == "Student"
+                                                && uPaid.PaymentDate.Date >= DateTime.Now.Date.AddDays(-6) && uPaid.PaymentDate.Date <= DateTime.Now.Date
+                                                && uPaid.StatusId == PaymentStatusEnums.Paid
+                                                select uPaid.Amount).SumAsync(); 
+                    //await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.PaymentFor == paymentForEnums.Course && x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-6) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Paid).Select(x => x.Amount).SumAsync();
+                    var WeekPaidCertifications = await (from uPaid in _context.UserPaymentHistory
+                                                        join urole in _context.UserRole on uPaid.UserId equals urole.UserId
+                                                        join user in _userManager.Users on urole.UserId equals user.Id
+                                                        join role in _context.Role on urole.RoleId equals role.Id
+                                                        where uPaid.PaymentFor == paymentForEnums.Certifications
+                                                        && role.Name == "Student"
+                                                        && uPaid.PaymentDate.Date >= DateTime.Now.Date.AddDays(-6) && uPaid.PaymentDate.Date <= DateTime.Now.Date
+                                                        && uPaid.StatusId == PaymentStatusEnums.Paid
+                                                        select uPaid.Amount).SumAsync(); 
+                    //await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.PaymentFor == paymentForEnums.Certifications && x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-6) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Paid).Select(x => x.Amount).SumAsync();
 
                     studentWeekPayment = WeekPaidCourse + WeekPaidCertifications;
 
@@ -1641,16 +1929,48 @@ namespace CPEA.Utilities.Services
                     WithoutCourses = $"{studentWeekWithoutCou:n0}"
                 };
                 //This Month Record
-                var studentMonthR = await _userManager.Users.Include(x => x.Role).Where(x => x.Role.Name == "Student" && x.RegisteredDate.Date.Month == DateTime.Now.Date.Month).Select(x => x.Id).Distinct().CountAsync();
-                var studentMonthWithoutCou = await (from user in _userManager.Users
-                                                    join role in _context.AllUserRoles on user.RoleId equals role.Id
+                var studentMonthR = await (from ur in _context.UserRoles
+                                           join user in _userManager.Users on ur.UserId equals user.Id
+                                           join role in _context.Role on ur.RoleId equals role.Id
+                                           where role.Name == "Student"
+                                           && user.RegisteredDate.Month == DateTime.Now.Date.Month
+                                           select new { userId = user.Id }).Distinct().CountAsync(); 
+                //await _userManager.Users.Include(x => x.Role).Where(x => x.Role.Name == "Student" && x.RegisteredDate.Date.Month == DateTime.Now.Date.Month).Select(x => x.Id).Distinct().CountAsync();
+                var studentMonthWithoutCou = await (from ur in _context.UserRoles
+                                                    join user in _userManager.Users on ur.UserId equals user.Id
+                                                    join role in _context.Role on ur.RoleId equals role.Id
                                                     where !_context.UserCourses.Any(f => f.UserId == user.Id)
                                                    && role.Name == "Student"
                                                     && user.RegisteredDate.Month == DateTime.Now.Month
                                                     select new { userId = user.Id }).Distinct().CountAsync();
-                var studentMonthWithCou = await _context.UserCourses.Include(x => x.User).ThenInclude(x => x.Role).Where(x => x.User.Role.Name == "Student" && x.RegisteredDate.Month == DateTime.Now.Month).Select(x => x.UserId).Distinct().CountAsync();
-                var MonthPaidCourse = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.PaymentFor == paymentForEnums.Course && x.User.Role.Name == "Student" && x.PaymentDate.Month == DateTime.Now.Month && x.StatusId == PaymentStatusEnums.Paid).Select(x => x.Amount).SumAsync();
-                var MonthPaidCertifications = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.PaymentFor == paymentForEnums.Certifications && x.User.Role.Name == "Student" && x.PaymentDate.Month == DateTime.Now.Month && x.StatusId == PaymentStatusEnums.Paid).Select(x => x.Amount).SumAsync();
+                var studentMonthWithCou = await (from ucourse in _context.UserCourses
+                                                 join urole in _context.UserRole on ucourse.UserId equals urole.UserId
+                                                 join user in _userManager.Users on urole.UserId equals user.Id
+                                                 join role in _context.Role on urole.RoleId equals role.Id
+                                                 where role.Name == "Student"
+                                                 && user.RegisteredDate.Month == DateTime.Now.Date.Month
+                                                 select new { userId = user.Id }).Distinct().CountAsync(); 
+                //await _context.UserCourses.Include(x => x.User).ThenInclude(x => x.Role).Where(x => x.User.Role.Name == "Student" && x.RegisteredDate.Month == DateTime.Now.Month).Select(x => x.UserId).Distinct().CountAsync();
+                var MonthPaidCourse = await (from uPaid in _context.UserPaymentHistory
+                                             join urole in _context.UserRole on uPaid.UserId equals urole.UserId
+                                             join user in _userManager.Users on urole.UserId equals user.Id
+                                             join role in _context.Role on urole.RoleId equals role.Id
+                                             where uPaid.PaymentFor == paymentForEnums.Course
+                                             && role.Name == "Student"
+                                             && uPaid.PaymentDate.Month == DateTime.Now.Month
+                                             && uPaid.StatusId == PaymentStatusEnums.Paid
+                                             select uPaid.Amount).SumAsync(); 
+                //await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.PaymentFor == paymentForEnums.Course && x.User.Role.Name == "Student" && x.PaymentDate.Month == DateTime.Now.Month && x.StatusId == PaymentStatusEnums.Paid).Select(x => x.Amount).SumAsync();
+                var MonthPaidCertifications = await (from uPaid in _context.UserPaymentHistory
+                                                     join urole in _context.UserRole on uPaid.UserId equals urole.UserId
+                                                     join user in _userManager.Users on urole.UserId equals user.Id
+                                                     join role in _context.Role on urole.RoleId equals role.Id
+                                                     where uPaid.PaymentFor == paymentForEnums.Certifications
+                                                     && role.Name == "Student"
+                                                     && uPaid.PaymentDate.Month == DateTime.Now.Month
+                                                     && uPaid.StatusId == PaymentStatusEnums.Paid
+                                                     select uPaid.Amount).SumAsync(); 
+                //await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.PaymentFor == paymentForEnums.Certifications && x.User.Role.Name == "Student" && x.PaymentDate.Month == DateTime.Now.Month && x.StatusId == PaymentStatusEnums.Paid).Select(x => x.Amount).SumAsync();
 
                 var studentMonthPayment = MonthPaidCourse + MonthPaidCertifications;
 
@@ -1668,14 +1988,32 @@ namespace CPEA.Utilities.Services
                 var totCert = await _context.Certifications.CountAsync();
 
                 //Student Block
-                var studentR = await _userManager.Users.Include(x => x.Role).Where(x => x.Role.Name == "Student").Select(x => x.Id).Distinct().CountAsync();
-                var studentWithoutCou = await (from user in _userManager.Users
-                                               join role in _context.AllUserRoles on user.RoleId equals role.Id
+                var studentR = await (from ur in _context.UserRoles
+                                      join user in _userManager.Users on ur.UserId equals user.Id
+                                      join role in _context.Role on ur.RoleId equals role.Id
+                                      where role.Name == "Student"
+                                      select new { userId = user.Id }).Distinct().CountAsync(); 
+                //await _userManager.Users.Include(x => x.Role).Where(x => x.Role.Name == "Student").Select(x => x.Id).Distinct().CountAsync();
+                var studentWithoutCou = await (from ur in _context.UserRoles
+                                               join user in _userManager.Users on ur.UserId equals user.Id
+                                               join role in _context.Role on ur.RoleId equals role.Id
                                                where !_context.UserCourses.Any(f => f.UserId == user.Id)
                                                     && role.Name == "Student"
                                                     select new { userId = user.Id }).Distinct().CountAsync();
-                var studentWithCou = await _context.UserCourses.Include(x => x.User).ThenInclude(x => x.Role).Where(x => x.User.Role.Name == "Student").Select(x => x.UserId).Distinct().CountAsync();
-                var studentBlocked = await _userManager.Users.Include (x=>x.Role).Where(x => x.Role.Name == "Student" && x.Status == UserStatusEnums.Blocked).Select(x => x.Id).Distinct().CountAsync();
+                var studentWithCou = await (from ucourse in _context.UserCourses
+                                            join urole in _context.UserRole on ucourse.UserId equals urole.UserId
+                                            join user in _userManager.Users on urole.UserId equals user.Id
+                                            join role in _context.Role on urole.RoleId equals role.Id
+                                            where role.Name == "Student"
+                                            select new { userId = user.Id }).Distinct().CountAsync();
+                //await _context.UserCourses.Include(x => x.User).ThenInclude(x => x.Role).Where(x => x.User.Role.Name == "Student").Select(x => x.UserId).Distinct().CountAsync();
+                var studentBlocked = await (from ur in _context.UserRoles
+                                            join user in _userManager.Users on ur.UserId equals user.Id
+                                            join role in _context.Role on ur.RoleId equals role.Id
+                                            where role.Name == "Student"
+                                            && user.Status == UserStatusEnums.Blocked
+                                            select new { userId = user.Id }).Distinct().CountAsync(); 
+                //await _userManager.Users.Include (x=>x.Role).Where(x => x.Role.Name == "Student" && x.Status == UserStatusEnums.Blocked).Select(x => x.Id).Distinct().CountAsync();
                 var studentRecord = new TotalStudentRecord
                 {
                     BlockedStudent = $"{studentBlocked:n0}",
@@ -1711,11 +2049,17 @@ namespace CPEA.Utilities.Services
                     {
                             "Name", "Total"
                     });
-            var dbRecord = await (from u in _userManager.Users 
-                                join r in _context.AllUserRoles on u.RoleId equals r.Id
-                                where r.Name != "Student"
-                                group u by r.Name into g
-                                select new ChartRecord { Value = g.Key, Total = g.Count() }).ToListAsync();
+            var dbRecord = await (from ur in _context.UserRoles
+                                  join u in _userManager.Users on ur.UserId equals u.Id
+                                  join r in _context.Role on ur.RoleId equals r.Id
+                                  group u by r.Name into g
+                                  select new ChartRecord { Value = g.Key, Total = g.Count() }).ToListAsync();
+
+            //await (from u in _userManager.Users 
+            //                    join r in _context.AllUserRoles on u.RoleId equals r.Id
+            //                    where r.Name != "Student"
+            //                    group u by r.Name into g
+            //                    select new ChartRecord { Value = g.Key, Total = g.Count() }).ToListAsync();
 
             //Add db record to chart
             foreach(var item in dbRecord)
@@ -1885,28 +2229,43 @@ namespace CPEA.Utilities.Services
         {
             try
             {
-                var result =await _userManager.Users.Include(x=>x.Role).Where(x=>x.Role.Name != "Student").ToListAsync();
-                var enrollmentList = new List<RegisteredUsers>();
-                if (result.Count() > 0)
-                {                    
-                    foreach (var item in result)
-                    {
-                        var enrollment = new RegisteredUsers
-                        {
-                            FirstName = item.FirstName,
-                            LastName = item.LastName,
-                            RegisteredDate = item.RegisteredDate.ToString("dd/MM/yyyy"),
-                            Status = item.Status,
-                            Role = item.Role.Name,
-                            Email = item.Email,
-                            LastLogin = _context.LoginTrail.Where(x=>x.UserId == item.Id).OrderByDescending(x=>x.Id).Select(x=>x.LogTime).FirstOrDefault()
+                var enrollmentList = await (from ur in _context.UserRoles
+                                    join u in _userManager.Users on ur.UserId equals u.Id
+                                    join r in _context.Role on ur.RoleId equals r.Id
+                                    where r.Name != "Student" 
+                                    select new RegisteredUsers
+                                    {
+                                        FirstName = u.FirstName,
+                                        LastName = u.LastName,
+                                        RegisteredDate = u.RegisteredDate.ToString("dd/MM/yyyy"),
+                                        Status = u.Status,
+                                        Role = r.Name,
+                                        Email = u.Email,
+                                        LastLogin = _context.LoginTrail.Where(x => x.UserId == u.Id).OrderByDescending(x => x.Id).Select(x => x.LogTime).FirstOrDefault()
 
-                        };
+                                    }
+                                        ).ToListAsync();
+                //var enrollmentList = new List<RegisteredUsers>();
+                //if (result.Count() > 0)
+                //{                    
+                //    foreach (var item in result)
+                //    {
+                //        var enrollment = new RegisteredUsers
+                //        {
+                //            FirstName = item.FirstName,
+                //            LastName = item.LastName,
+                //            RegisteredDate = item.RegisteredDate,
+                //            Status = item.Status,
+                //            Role = item.Role,
+                //            Email = item.Email,
+                //            LastLogin =item.LastLogin// _context.LoginTrail.Where(x=>x.UserId == item.Id).OrderByDescending(x=>x.Id).Select(x=>x.LogTime).FirstOrDefault()
 
-                        enrollmentList.Add(enrollment);
-                    }
+                //        };
 
-                }
+                //        enrollmentList.Add(enrollment);
+                //    }
+
+                //}
                 return enrollmentList;
             }
             catch (Exception ex)
@@ -1932,27 +2291,42 @@ namespace CPEA.Utilities.Services
                     _context.users.Update(user);
                     await _context.SaveChangesAsync();
 
-                    var result = await _userManager.Users.Include(x => x.Role).Where(x => x.Role.Name != "Student").ToListAsync();
-                    if (result.Count() > 0)
-                    {
-                        foreach (var item in result)
-                        {
-                            var enrollment = new RegisteredUsers
-                            {
-                                FirstName = item.FirstName,
-                                LastName = item.LastName,
-                                RegisteredDate = item.RegisteredDate.ToString("dd/MM/yyyy"),
-                                Status = item.Status,
-                                Role = item.Role.Name,
-                                Email = item.Email,
-                                LastLogin = _context.LoginTrail.Where(x => x.UserId == item.Id).OrderByDescending(x => x.Id).Select(x => x.LogTime).FirstOrDefault()
+                     enrollmentList = await (from ur in _context.UserRoles
+                                        join u in _userManager.Users on ur.UserId equals u.Id
+                                        join r in _context.Role on ur.RoleId equals r.Id
+                                        where r.Name != "Student"
+                                        select new RegisteredUsers
+                                        {
+                                            FirstName = u.FirstName,
+                                            LastName = u.LastName,
+                                            RegisteredDate = u.RegisteredDate.ToString("dd/MM/yyyy"),
+                                            Status = u.Status,
+                                            Role = r.Name,
+                                            Email = u.Email,
+                                            LastLogin = _context.LoginTrail.Where(x => x.UserId == u.Id).OrderByDescending(x => x.Id).Select(x => x.LogTime).FirstOrDefault()
 
-                            };
+                                        }
+                                        ).ToListAsync();
+                    //if (result.Count() > 0)
+                    //{
+                    //    foreach (var item in result)
+                    //    {
+                    //        var enrollment = new RegisteredUsers
+                    //        {
+                    //            FirstName = item.FirstName,
+                    //            LastName = item.LastName,
+                    //            RegisteredDate = item.RegisteredDate,
+                    //            Status = item.Status,
+                    //            Role = item.Role,
+                    //            Email = item.Email,
+                    //            LastLogin =item.LastLogin// _context.LoginTrail.Where(x => x.UserId == item.Id).OrderByDescending(x => x.Id).Select(x => x.LogTime).FirstOrDefault()
 
-                            enrollmentList.Add(enrollment);
-                        }
+                    //        };
 
-                    }
+                    //        enrollmentList.Add(enrollment);
+                    //    }
+
+                    //}
 
                 }
                 return enrollmentList;
@@ -1980,27 +2354,22 @@ namespace CPEA.Utilities.Services
                         _context.users.Update(user);
                         await _context.SaveChangesAsync();
 
-                        var result = await _userManager.Users.Include(x => x.Role).Where(x => x.Role.Name != "Student").ToListAsync();
-                        if (result.Count() > 0)
-                        {
-                            foreach (var item in result)
-                            {
-                                var enrollment = new RegisteredUsers
-                                {
-                                    FirstName = item.FirstName,
-                                    LastName = item.LastName,
-                                    RegisteredDate = item.RegisteredDate.ToString("dd/MM/yyyy"),
-                                    Status = item.Status,
-                                    Role = item.Role.Name,
-                                    Email = item.Email,
-                                    LastLogin = _context.LoginTrail.Where(x => x.UserId == item.Id).OrderByDescending(x => x.Id).Select(x => x.LogTime).FirstOrDefault()
+                        enrollmentList = await (from ur in _context.UserRoles
+                                                join u in _userManager.Users on ur.UserId equals u.Id
+                                                join r in _context.Role on ur.RoleId equals r.Id
+                                                where r.Name != "Student"
+                                                select new RegisteredUsers
+                                                {
+                                                    FirstName = u.FirstName,
+                                                    LastName = u.LastName,
+                                                    RegisteredDate = u.RegisteredDate.ToString("dd/MM/yyyy"),
+                                                    Status = u.Status,
+                                                    Role = r.Name,
+                                                    Email = u.Email,
+                                                    LastLogin = _context.LoginTrail.Where(x => x.UserId == u.Id).OrderByDescending(x => x.Id).Select(x => x.LogTime).FirstOrDefault()
 
-                                };
+                                                }).ToListAsync();
 
-                                enrollmentList.Add(enrollment);
-                            }
-
-                        }
                         return new Tuple<List<RegisteredUsers>,Users, string>(enrollmentList,user, "Successful");
                     }
                     return new Tuple<List<RegisteredUsers>, Users, string>(null,null, "Not Found");
@@ -2031,27 +2400,22 @@ namespace CPEA.Utilities.Services
                         _context.users.Update(user);
                         await _context.SaveChangesAsync();
 
-                        var result = await _userManager.Users.Include(x => x.Role).Where(x => x.Role.Name != "Student").ToListAsync();
-                        if (result.Count() > 0)
-                        {
-                            foreach (var item in result)
-                            {
-                                var enrollment = new RegisteredUsers
-                                {
-                                    FirstName = item.FirstName,
-                                    LastName = item.LastName,
-                                    RegisteredDate = item.RegisteredDate.ToString("dd/MM/yyyy"),
-                                    Status = item.Status,
-                                    Role = item.Role.Name,
-                                    Email = item.Email,
-                                    LastLogin = _context.LoginTrail.Where(x => x.UserId == item.Id).OrderByDescending(x => x.Id).Select(x => x.LogTime).FirstOrDefault()
+                        enrollmentList = await (from ur in _context.UserRoles
+                                                join u in _userManager.Users on ur.UserId equals u.Id
+                                                join r in _context.Role on ur.RoleId equals r.Id
+                                                where r.Name != "Student"
+                                                select new RegisteredUsers
+                                                {
+                                                    FirstName = u.FirstName,
+                                                    LastName = u.LastName,
+                                                    RegisteredDate = u.RegisteredDate.ToString("dd/MM/yyyy"),
+                                                    Status = u.Status,
+                                                    Role = r.Name,
+                                                    Email = u.Email,
+                                                    LastLogin = _context.LoginTrail.Where(x => x.UserId == u.Id).OrderByDescending(x => x.Id).Select(x => x.LogTime).FirstOrDefault()
 
-                                };
-
-                                enrollmentList.Add(enrollment);
-                            }
-
-                        }
+                                                }
+                                        ).ToListAsync();
                         return new Tuple<List<RegisteredUsers>, Users, string>(enrollmentList, user, "Successful");
                     }
                     return new Tuple<List<RegisteredUsers>, Users, string>(null, null, "Not Found");
@@ -2068,28 +2432,22 @@ namespace CPEA.Utilities.Services
         {
             try
             {
-                var result = await _userManager.Users.Include(x => x.Role).Where(x => x.Role.Name != "Student" && x.Status == UserStatusEnums.Blocked).ToListAsync();
-                var enrollmentList = new List<RegisteredUsers>();
-                if (result.Count() > 0)
-                {
-                    foreach (var item in result)
-                    {
-                        var enrollment = new RegisteredUsers
-                        {
-                            FirstName = item.FirstName,
-                            LastName = item.LastName,
-                            RegisteredDate = item.RegisteredDate.ToString("dd/MM/yyyy"),
-                            Status = item.Status,
-                            Role = item.Role.Name,
-                            Email = item.Email,
-                            LastLogin = _context.LoginTrail.Where(x => x.UserId == item.Id).OrderByDescending(x => x.Id).Select(x => x.LogTime).FirstOrDefault()
+               var enrollmentList = await (from ur in _context.UserRoles
+                                        join u in _userManager.Users on ur.UserId equals u.Id
+                                        join r in _context.Role on ur.RoleId equals r.Id
+                                        where r.Name != "Student"
+                                        select new RegisteredUsers
+                                        {
+                                            FirstName = u.FirstName,
+                                            LastName = u.LastName,
+                                            RegisteredDate = u.RegisteredDate.ToString("dd/MM/yyyy"),
+                                            Status = u.Status,
+                                            Role = r.Name,
+                                            Email = u.Email,
+                                            LastLogin = _context.LoginTrail.Where(x => x.UserId == u.Id).OrderByDescending(x => x.Id).Select(x => x.LogTime).FirstOrDefault()
 
-                        };
-
-                        enrollmentList.Add(enrollment);
-                    }
-
-                }
+                                        }
+                                         ).ToListAsync();
                 return enrollmentList;
             }
             catch (Exception ex)
@@ -2114,27 +2472,22 @@ namespace CPEA.Utilities.Services
                         await _userManager.ResetPasswordAsync(user, token, dto.newPassword);
                         var res = await _userManager.UpdateAsync(user);
 
-                        var result = await _userManager.Users.Include(x => x.Role).Where(x => x.Role.Name != "Student").ToListAsync();
-                        if (result.Count() > 0)
-                        {
-                            foreach (var item in result)
-                            {
-                                var enrollment = new RegisteredUsers
-                                {
-                                    FirstName = item.FirstName,
-                                    LastName = item.LastName,
-                                    RegisteredDate = item.RegisteredDate.ToString("dd/MM/yyyy"),
-                                    Status = item.Status,
-                                    Role = item.Role.Name,
-                                    Email = item.Email,
-                                    LastLogin = _context.LoginTrail.Where(x => x.UserId == item.Id).OrderByDescending(x => x.Id).Select(x => x.LogTime).FirstOrDefault()
+                        enrollmentList = await (from ur in _context.UserRoles
+                                                join u in _userManager.Users on ur.UserId equals u.Id
+                                                join r in _context.Role on ur.RoleId equals r.Id
+                                                where r.Name != "Student"
+                                                select new RegisteredUsers
+                                                {
+                                                    FirstName = u.FirstName,
+                                                    LastName = u.LastName,
+                                                    RegisteredDate = u.RegisteredDate.ToString("dd/MM/yyyy"),
+                                                    Status = u.Status,
+                                                    Role = r.Name,
+                                                    Email = u.Email,
+                                                    LastLogin = _context.LoginTrail.Where(x => x.UserId == u.Id).OrderByDescending(x => x.Id).Select(x => x.LogTime).FirstOrDefault()
 
-                                };
-
-                                enrollmentList.Add(enrollment);
-                            }
-
-                        }
+                                                }
+                                        ).ToListAsync();
                         return new Tuple<List<RegisteredUsers>, Users, string>(enrollmentList, user, "Successful");
                     }
                     return new Tuple<List<RegisteredUsers>, Users, string>(null, null, "Not Found");
@@ -2182,28 +2535,23 @@ namespace CPEA.Utilities.Services
                     //----------
                     var builder = new StringBuilder();
                     await _messagingService.SendEmail(email, $"Your new password is {password}", "Edurex Password Reset");
+                    // string role = "Student";
+                    enrollmentList = await (from ur in _context.UserRoles
+                                            join u in _userManager.Users on ur.UserId equals u.Id
+                                            join r in _context.Role on ur.RoleId equals r.Id
+                                            where r.Name != "Student"
+                                            select new RegisteredUsers
+                                            {
+                                                FirstName = u.FirstName,
+                                                LastName = u.LastName,
+                                                RegisteredDate = u.RegisteredDate.ToString("dd/MM/yyyy"),
+                                                Status = u.Status,
+                                                Role = r.Name,
+                                                Email = u.Email,
+                                                LastLogin = _context.LoginTrail.Where(x => x.UserId == u.Id).OrderByDescending(x => x.Id).Select(x => x.LogTime).FirstOrDefault()
 
-                    var result = await _userManager.Users.Include(x => x.Role).Where(x => x.Role.Name != "Student").ToListAsync();
-                    if (result.Count() > 0)
-                    {
-                        foreach (var item in result)
-                        {
-                            var enrollment = new RegisteredUsers
-                            {
-                                FirstName = item.FirstName,
-                                LastName = item.LastName,
-                                RegisteredDate = item.RegisteredDate.ToString("dd/MM/yyyy"),
-                                Status = item.Status,
-                                Role = item.Role.Name,
-                                Email = item.Email,
-                                LastLogin = _context.LoginTrail.Where(x => x.UserId == item.Id).OrderByDescending(x => x.Id).Select(x => x.LogTime).FirstOrDefault()
-
-                            };
-
-                            enrollmentList.Add(enrollment);
-                        }
-
-                    }
+                                            }
+                                        ).ToListAsync();
                     return new Tuple<List<RegisteredUsers>, Users, string>(enrollmentList, user, "Successful");
                 }
                 return new Tuple<List<RegisteredUsers>, Users, string>(null, null, "Not Found");
@@ -2218,7 +2566,7 @@ namespace CPEA.Utilities.Services
         {
             try
             {
-                var result = await _userManager.Users.Include(x => x.Role).Where(x => x.Role.Name == "Student").ToListAsync();
+                var result = await _userManager.GetUsersInRoleAsync("Student"); //await _userManager.Users.Include(x => x.Role).Where(x => x.Role.Name == "Student").ToListAsync();
                 var enrollmentList = new List<RegisteredStudents>();
                 if (result.Count() > 0)
                 {
@@ -2254,10 +2602,11 @@ namespace CPEA.Utilities.Services
         {
             try
             {
-                var result = await _userManager.Users.Include(x => x.Role).Where(x => x.Role.Name == "Student" && x.Status == UserStatusEnums.Blocked).ToListAsync();
+                var result = await _userManager.GetUsersInRoleAsync("Student");//await _userManager.Users.Include(x => x.Role).Where(x => x.Role.Name == "Student" && x.Status == UserStatusEnums.Blocked).ToListAsync();
                 var enrollmentList = new List<RegisteredStudents>();
                 if (result.Count() > 0)
                 {
+                    result = result.Where(x => x.Status == UserStatusEnums.Blocked).ToList();
                     foreach (var item in result)
                     {
                         var enrollment = new RegisteredStudents
@@ -2304,7 +2653,7 @@ namespace CPEA.Utilities.Services
                         _context.users.Update(user);
                         await _context.SaveChangesAsync();
 
-                        var result = await _userManager.Users.Include(x => x.Role).Where(x => x.Role.Name == "Student").ToListAsync();
+                        var result = await _userManager.GetUsersInRoleAsync("Student");// await _userManager.Users.Include(x => x.Role).Where(x => x.Role.Name == "Student").ToListAsync();
                         if (result.Count() > 0)
                         {
                             foreach (var item in result)
@@ -2358,7 +2707,7 @@ namespace CPEA.Utilities.Services
                         _context.users.Update(user);
                         await _context.SaveChangesAsync();
 
-                        var result = await _userManager.Users.Include(x => x.Role).Where(x => x.Role.Name == "Student").ToListAsync();
+                        var result = await _userManager.GetUsersInRoleAsync("Student");// await _userManager.Users.Include(x => x.Role).Where(x => x.Role.Name == "Student").ToListAsync();
                         if (result.Count() > 0)
                         {
                             foreach (var item in result)
@@ -2411,7 +2760,7 @@ namespace CPEA.Utilities.Services
                         await _userManager.ResetPasswordAsync(user, token, dto.newPassword);
                         var res = await _userManager.UpdateAsync(user);
 
-                        var result = await _userManager.Users.Include(x => x.Role).Where(x => x.Role.Name == "Student").ToListAsync();
+                        var result = await _userManager.GetUsersInRoleAsync("Student");// await _userManager..Users.Include(x => x.Role).Where(x => x.Role.Name == "Student").ToListAsync();
                         if (result.Count() > 0)
                         {
                             foreach (var item in result)
@@ -2537,31 +2886,33 @@ namespace CPEA.Utilities.Services
         public async Task<Tuple<Users, string>> Login(LoginDTO dto)
         {
 
-            var existingUser = await _userManager.Users.Include(x=>x.Role).Where(x => x.Email == dto.email).FirstOrDefaultAsync();//.FindByEmailAsync(dto.email);
+            var existingUser = await _userManager.FindByEmailAsync(dto.email);
 
 
-            if (existingUser == null)
+            if (existingUser != null && await _userManager.CheckPasswordAsync(existingUser, dto.password))
             {
-                return new Tuple<Users, string>(null, "Not Found");
-            }
-            else
-            {
-                if(existingUser.RoleId != (int)UserRolesEnums.Admin && existingUser.StaffDep == StaffDepEnums.None)
+                var userDefaultRole = await _roleManager.FindByIdAsync(existingUser.DefaultRole);
+
+                //var userRoles = await _userManager.GetRolesAsync(existingUser);
+
+                //if(!userRoles.Contains(existingUser.DefaultRole))
+
+                if (userDefaultRole.Name.ToLower() != Enum.GetName(typeof(UserRolesEnums), UserRolesEnums.Admin).ToLower() && existingUser.StaffDep == StaffDepEnums.None)
                 {
                     return new Tuple<Users, string>(null, "You don't have access to this.");
                 }
                 var result = await _signInManager.PasswordSignInAsync(existingUser, dto.password, true, lockoutOnFailure: false);
                 if (result.Succeeded)
                 {
-                    var rolde = await _context.AllUserRoles.Where(x => x.Id == existingUser.RoleId).Select(x => x.Name).FirstOrDefaultAsync();
+                    //var rolde = await _context.AllUserRoles.Where(x => x.Id == existingUser.RoleId).Select(x => x.Name).FirstOrDefaultAsync();
                     if (existingUser.Status != UserStatusEnums.Blocked)
                     {
-                        GeneralClass.role = rolde;
+                        GeneralClass.role = userDefaultRole.Name;
                         return new Tuple<Users, string>(existingUser, "Successful");
                     }
 
                     return new Tuple<Users, string>(existingUser, "User Blocked");
-                   
+
                 }
                 return new Tuple<Users, string>(existingUser, "Incorrect details.");
 
@@ -2579,47 +2930,57 @@ namespace CPEA.Utilities.Services
                 //return "User Blocked";
 
                 //return "Error";// Enum.GetName(typeof(UserRolesEnums), existingUser.Role) ;
+               
+            }
+            else
+            {
+                return new Tuple<Users, string>(null, "Wrong password");
             }
         }
         public async Task<List<RegisteredStudents>> Enrollment()
         {
             try
             {
-                var result = await _context.UserCourses.Include(x=>x.User).ThenInclude(x => x.Role).Where(x => x.User.Role.Name == "Student").Select(x => new { studentId = x.UserId }).ToListAsync();
                 var enrollmentList = new List<RegisteredStudents>();
-                if (result.Count() > 0)
+
+                var studentUsers = await _userManager.GetUsersInRoleAsync("Student");
+                if(studentUsers.Count>0)
                 {
-                    var query = from r in result
-                                group r by r.studentId into g
-                                select new { Count = g.Count(), Value = g.Key };
-
-                    foreach (var v in query)
+                    foreach (var item in studentUsers)
                     {
-                        var user = await _userManager.FindByIdAsync(v.Value);
-
-                        var enrollment = new RegisteredStudents
+                        var result = await _context.UserCourses.Select(x => new { studentId = x.UserId }).ToListAsync();
+                        if (result.Count() > 0)
                         {
-                            FirstName = user.FirstName,
-                            LastName = user.LastName,
-                            RegisteredDate = user.RegisteredDate.ToString("dd/MM/yyyy"),
-                            Status = user.Status,
-                            StudentNumber = user.StudentNumber,
-                            Email = user.Email,
-                            TotalCourses = v.Count,
-                            Phone = user.PhoneNumber,
-                            TotalCertifications = _context.UserCertifications.Where(x => x.UserId == v.Value).Count(),
-                            LastLogin = _context.LoginTrail.Where(x => x.UserId == v.Value).OrderByDescending(x => x.Id).Select(x => x.LogTime).FirstOrDefault()
+                            var query = from r in result
+                                        group r by r.studentId into g
+                                        select new { Count = g.Count(), Value = g.Key };
 
-                        };
+                            foreach (var v in query)
+                            {
+                                var user = await _userManager.FindByIdAsync(v.Value);
 
-                        enrollmentList.Add(enrollment);
+                                var enrollment = new RegisteredStudents
+                                {
+                                    FirstName = user.FirstName,
+                                    LastName = user.LastName,
+                                    RegisteredDate = user.RegisteredDate.ToString("dd/MM/yyyy"),
+                                    Status = user.Status,
+                                    StudentNumber = user.StudentNumber,
+                                    Email = user.Email,
+                                    TotalCourses = v.Count,
+                                    Phone = user.PhoneNumber,
+                                    TotalCertifications = _context.UserCertifications.Where(x => x.UserId == v.Value).Count(),
+                                    LastLogin = _context.LoginTrail.Where(x => x.UserId == v.Value).OrderByDescending(x => x.Id).Select(x => x.LogTime).FirstOrDefault()
+
+                                };
+
+                                enrollmentList.Add(enrollment);
+                            }
+
+                        }
                     }
-                    foreach (var item in result)
-                    {
-
-                    }
-
                 }
+                
                 //else
                 //{
                 //    var result2 = await _context.UserCertifications.Include(x=>x.User).ThenInclude(x => x.Role).Where(x => x.User.Role.Name == "Student").Select(x => new { studentId = x.UserId }).ToListAsync();
@@ -2668,27 +3029,38 @@ namespace CPEA.Utilities.Services
         {
             try
             {
-                var enrollmentList =await (from user in _userManager.Users
-                                           join role in _context.AllUserRoles on user.RoleId equals role.Id
-                            where !_context.UserCourses.Any(f => f.UserId == user.Id)
-                            //&& !_context.UserCertifications.Any(k => k.UserId == user.Id)
-                            && role.Name =="Student"
-                            select new RegisteredStudents
-                            {
-                                FirstName = user.FirstName,
-                                LastName = user.LastName,
-                                RegisteredDate = user.RegisteredDate.ToString("dd/MM/yyyy"),
-                                Status = user.Status,
-                                StudentNumber = user.StudentNumber,
-                                Email = user.Email,
-                                TotalCourses = 0,
-                                Phone =user.PhoneNumber,
-                                TotalCertifications = _context.UserCertifications.Where(x => x.UserId == user.Id).Count(),
-                                LastLogin = _context.LoginTrail.Where(x => x.UserId == user.Id).OrderByDescending(x => x.Id).Select(x => x.LogTime).FirstOrDefault()
+                var studentUsers = await _userManager.GetUsersInRoleAsync("Student");
+                var enrollmentList = new List<RegisteredStudents>();
 
-                            }).ToListAsync();
-                
-                return enrollmentList;
+                if (studentUsers.Count > 0)
+                {
+                    foreach (var item in studentUsers)
+                    {
+                        enrollmentList = await (from ur in _context.UserRoles
+                                                    join user in _userManager.Users on ur.UserId equals user.Id
+                                                    join role in _context.Role on ur.RoleId equals role.Id
+                                                    where !_context.UserCourses.Any(f => f.UserId == user.Id)
+                                                    //&& !_context.UserCertifications.Any(k => k.UserId == user.Id)
+                                                    && role.Name == "Student"
+                                                    select new RegisteredStudents
+                                                    {
+                                                        FirstName = user.FirstName,
+                                                        LastName = user.LastName,
+                                                        RegisteredDate = user.RegisteredDate.ToString("dd/MM/yyyy"),
+                                                        Status = user.Status,
+                                                        StudentNumber = user.StudentNumber,
+                                                        Email = user.Email,
+                                                        TotalCourses = 0,
+                                                        Phone = user.PhoneNumber,
+                                                        TotalCertifications = _context.UserCertifications.Where(x => x.UserId == user.Id).Count(),
+                                                        LastLogin = _context.LoginTrail.Where(x => x.UserId == user.Id).OrderByDescending(x => x.Id).Select(x => x.LogTime).FirstOrDefault()
+
+                                                    }).ToListAsync();
+
+                    }
+                }
+               return enrollmentList;
+
             }
             catch (Exception ex)
             {
@@ -2731,51 +3103,92 @@ namespace CPEA.Utilities.Services
             try
             {
                 var result = new List<AllPayments>();
-                var PaidCourse = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.PaymentFor == paymentForEnums.Course && x.User.Role.Name == "Student").Select(x => new AllPayments
-                {
-                    Amount = x.Amount.ToString("N"),
-                    Id = x.Id,
-                    Payee = $"{x.User.FirstName } {x.User.LastName }",
-                    PaymentDate = x.PaymentDate.ToString("dd/MM/yyyy"),
-                    PaymentMethodId = x.PaymentMethodId,
-                    PaymentReference = x.PaymentRef,
-                    Program =_context.UserCourses.Include(c=>c.CoursePriceOption).ThenInclude(c=>c.Course).ThenInclude(c=>c.Category).ThenInclude(c=>c.Institution).Where(c=>c.Id == x.UserPaymentForId).Select(c=>c.CoursePriceOption.Course.Category.Institution.ShortName + "/" + c.CoursePriceOption.Course.Category.Name +"/" + c.CoursePriceOption.Course.CourseCode ).FirstOrDefault(),
-                    StatusId = x.StatusId,
-                    TransactionReference = x.Description,
-                    StudentId = x.User.StudentNumber
+                var PaidCourse = await (from uph in _context.UserPaymentHistory
+                                        join ur in _context.UserRole on uph.UserId equals ur.UserId
+                                        join u in _context.users on ur.UserId equals u.Id
+                                        join r in _context.Role on ur.RoleId equals r.Id
+                                        where r.Name == "Student" && uph.PaymentFor == paymentForEnums.Course
+                                        select new AllPayments
+                                        {
+                                            Amount = uph.Amount.ToString("N"),
+                                            Id = uph.Id,
+                                            Payee = $"{u.FirstName} {u.LastName}",
+                                            PaymentDate = uph.PaymentDate.ToString("dd/MM/yyyy"),
+                                            PaymentMethodId = uph.PaymentMethodId,
+                                            PaymentReference = uph.PaymentRef,
+                                            Program = _context.UserCourses.Include(c => c.CoursePriceOption).ThenInclude(c => c.Course).ThenInclude(c => c.Category).ThenInclude(c => c.Institution).Where(c => c.Id == uph.UserPaymentForId).Select(c => c.CoursePriceOption.Course.Category.Institution.ShortName + "/" + c.CoursePriceOption.Course.Category.Name + "/" + c.CoursePriceOption.Course.CourseCode).FirstOrDefault(),
+                                            StatusId = uph.StatusId,
+                                            TransactionReference = uph.Description,
+                                            StudentId = uph.User.StudentNumber
 
-                }).ToListAsync();
+                                        }).ToListAsync();
+
+
+                //   await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.PaymentFor == paymentForEnums.Course && x.User.Role.Name == "Student").Select(x => 
 
                 if (PaidCourse.Count() > 0)
                 {
                     result.AddRange(PaidCourse);
                 }
 
-                var PaidCert = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.PaymentFor == paymentForEnums.Certifications && x.User.Role.Name == "Student").Select(x => new AllPayments
-                {
-                    Amount = x.Amount.ToString("N"),
-                    Id = x.Id,
-                    Payee = $"{x.User.FirstName } {x.User.LastName }",
-                    PaymentDate = x.PaymentDate.ToString("dd/MM/yyyy"),
-                    PaymentMethodId = x.PaymentMethodId,
-                    PaymentReference = x.PaymentRef,
-                    Program = _context.UserCertifications.Include(c=>c.CertificationPriceOption).ThenInclude(c=>c.Certification).ThenInclude(c => c.Category).ThenInclude(c => c.Institution).Where(c => c.Id == x.UserPaymentForId).Select(c => c.CertificationPriceOption.Certification.Category.Institution.ShortName + "/" + c.CertificationPriceOption.Certification.Category.Name + "/" + c.CertificationPriceOption.Certification.ShortCode ).FirstOrDefault(),
-                    StatusId = x.StatusId,
-                    TransactionReference = x.Description,
-                    StudentId = x.User.StudentNumber
+                var PaidCert = await (from uph in _context.UserPaymentHistory
+                                      join ur in _context.UserRole on uph.UserId equals ur.UserId
+                                      join u in _context.users on ur.UserId equals u.Id
+                                      join r in _context.Role on ur.RoleId equals r.Id
+                                      where r.Name == "Student" && uph.PaymentFor == paymentForEnums.Certifications
+                                      select new AllPayments
+                                      {
+                                          Amount = uph.Amount.ToString("N"),
+                                          Id = uph.Id,
+                                          Payee = $"{u.FirstName} {u.LastName}",
+                                          PaymentDate = uph.PaymentDate.ToString("dd/MM/yyyy"),
+                                          PaymentMethodId = uph.PaymentMethodId,
+                                          PaymentReference = uph.PaymentRef,
+                                          Program = _context.UserCertifications.Include(c => c.CertificationPriceOption).ThenInclude(c => c.Certification).ThenInclude(c => c.Category).ThenInclude(c => c.Institution).Where(c => c.Id == uph.UserPaymentForId).Select(c => c.CertificationPriceOption.Certification.Category.Institution.ShortName + "/" + c.CertificationPriceOption.Certification.Category.Name + "/" + c.CertificationPriceOption.Certification.ShortCode).FirstOrDefault(),
+                                          StatusId = uph.StatusId,
+                                          TransactionReference = uph.Description,
+                                          StudentId = uph.User.StudentNumber
 
-                }).ToListAsync();
+                                      }).ToListAsync();
                 if (PaidCert.Count() > 0)
                 {
                     result.AddRange(PaidCert);
                 }
 
-
+                // var allROles = await _roleManager.Roles
                 //Today's Record
-                var TodayR = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date == DateTime.Now.Date).Select(x => x.Id).Distinct().CountAsync();
-                var TodayF = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date == DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Failed).Select(x => x.Id).Distinct().CountAsync();
-                var TodayS = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date == DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Paid).Select(x => x.Id).Distinct().CountAsync();
-                var TodayP = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date == DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Pending).Select(x => x.Id).Distinct().CountAsync();
+               
+                var TodayR = await (from uph in _context.UserPaymentHistory
+                                    join ur in _context.UserRole on uph.UserId equals ur.UserId
+                                    join u in _context.users on ur.UserId equals u.Id
+                                    join r in _context.Role on ur.RoleId equals r.Id
+                                    where r.Name == "Student" && uph.PaymentDate.Date == DateTime.Now.Date
+                                    select uph.Id).Distinct().CountAsync();
+
+                var TodayF = await (from uph in _context.UserPaymentHistory
+                                    join ur in _context.UserRole on uph.UserId equals ur.UserId
+                                    join u in _context.users on ur.UserId equals u.Id
+                                    join r in _context.Role on ur.RoleId equals r.Id
+                                    where r.Name == "Student" && uph.PaymentDate.Date == DateTime.Now.Date && uph.StatusId == PaymentStatusEnums.Failed
+                                    select uph.Id).Distinct().CountAsync();
+
+                var TodayS = await (from uph in _context.UserPaymentHistory
+                                    join ur in _context.UserRole on uph.UserId equals ur.UserId
+                                    join u in _context.users on ur.UserId equals u.Id
+                                    join r in _context.Role on ur.RoleId equals r.Id
+                                    where r.Name == "Student" && uph.PaymentDate.Date == DateTime.Now.Date && uph.StatusId == PaymentStatusEnums.Paid
+                                    select uph.Id).Distinct().CountAsync();
+
+                var TodayP = await (from uph in _context.UserPaymentHistory
+                                    join ur in _context.UserRole on uph.UserId equals ur.UserId
+                                    join u in _context.users on ur.UserId equals u.Id
+                                    join r in _context.Role on ur.RoleId equals r.Id
+                                    where r.Name == "Student" && uph.PaymentDate.Date == DateTime.Now.Date && uph.StatusId == PaymentStatusEnums.Pending
+                                    select uph.Id).Distinct().CountAsync();
+                //.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date == DateTime.Now.Date).Select(x => x.Id).Distinct().CountAsync();
+                //var TodayF = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date == DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Failed).Select(x => x.Id).Distinct().CountAsync();
+                //var TodayS = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date == DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Paid).Select(x => x.Id).Distinct().CountAsync();
+                //var TodayP = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date == DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Pending).Select(x => x.Id).Distinct().CountAsync();
 
                 var todayTotalRecord = new ReportStat()
                 {
@@ -2793,60 +3206,219 @@ namespace CPEA.Utilities.Services
                 var WeekP = 0;
                 if (TodayDayWeek.ToLower() == "sunday")
                 {
-                    WeekR = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date == DateTime.Now).Select(x => x.Id).Distinct().CountAsync();
-                    WeekF = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date == DateTime.Now && x.StatusId == PaymentStatusEnums.Failed).Select(x => x.Id).Distinct().CountAsync();
-                    WeekS = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date == DateTime.Now && x.StatusId == PaymentStatusEnums.Paid).Select(x => x.Id).Distinct().CountAsync();
-                    WeekP = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date == DateTime.Now && x.StatusId == PaymentStatusEnums.Pending).Select(x => x.Id).Distinct().CountAsync();
+                    WeekR = await (from uph in _context.UserPaymentHistory
+                                   join ur in _context.UserRole on uph.UserId equals ur.UserId
+                                   join u in _context.users on ur.UserId equals u.Id
+                                   join r in _context.Role on ur.RoleId equals r.Id
+                                   where r.Name == "Student" && uph.PaymentDate.Date == DateTime.Now.Date
+                                   select uph.Id).Distinct().CountAsync(); //await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date == DateTime.Now).Select(x => x.Id).Distinct().CountAsync();
+                    WeekF = await (from uph in _context.UserPaymentHistory
+                                   join ur in _context.UserRole on uph.UserId equals ur.UserId
+                                   join u in _context.users on ur.UserId equals u.Id
+                                   join r in _context.Role on ur.RoleId equals r.Id
+                                   where r.Name == "Student" && uph.PaymentDate.Date == DateTime.Now.Date && uph.StatusId == PaymentStatusEnums.Failed
+                                   select uph.Id).Distinct().CountAsync(); //await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date == DateTime.Now && x.StatusId == PaymentStatusEnums.Failed).Select(x => x.Id).Distinct().CountAsync();
+                    WeekS = await (from uph in _context.UserPaymentHistory
+                                   join ur in _context.UserRole on uph.UserId equals ur.UserId
+                                   join u in _context.users on ur.UserId equals u.Id
+                                   join r in _context.Role on ur.RoleId equals r.Id
+                                   where r.Name == "Student" && uph.PaymentDate.Date == DateTime.Now.Date && uph.StatusId == PaymentStatusEnums.Pending
+                                   select uph.Id).Distinct().CountAsync(); //await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date == DateTime.Now && x.StatusId == PaymentStatusEnums.Paid).Select(x => x.Id).Distinct().CountAsync();
+                    WeekP = await (from uph in _context.UserPaymentHistory
+                                   join ur in _context.UserRole on uph.UserId equals ur.UserId
+                                   join u in _context.users on ur.UserId equals u.Id
+                                   join r in _context.Role on ur.RoleId equals r.Id
+                                   where r.Name == "Student" && uph.PaymentDate.Date == DateTime.Now.Date && uph.StatusId == PaymentStatusEnums.Pending
+                                   select uph.Id).Distinct().CountAsync(); //await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date == DateTime.Now && x.StatusId == PaymentStatusEnums.Pending).Select(x => x.Id).Distinct().CountAsync();
 
                 }
                 else if (TodayDayWeek.ToLower() == "monday")
                 {
 
-                    WeekR = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-1) && x.PaymentDate.Date <= DateTime.Now.Date).Select(x => x.Id).Distinct().CountAsync();
-                    WeekF = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-1) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Failed).Select(x => x.Id).Distinct().CountAsync();
-                    WeekS = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-1) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Paid).Select(x => x.Id).Distinct().CountAsync();
-                    WeekP = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-1) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Pending).Select(x => x.Id).Distinct().CountAsync();
+                    WeekR = await (from uph in _context.UserPaymentHistory
+                                   join ur in _context.UserRole on uph.UserId equals ur.UserId
+                                   join u in _context.users on ur.UserId equals u.Id
+                                   join r in _context.Role on ur.RoleId equals r.Id
+                                   where r.Name == "Student" && uph.PaymentDate.Date == DateTime.Now.Date.AddDays(-1)
+                                   select uph.Id).Distinct().CountAsync(); //await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-1) && x.PaymentDate.Date <= DateTime.Now.Date).Select(x => x.Id).Distinct().CountAsync();
+                    WeekF = await (from uph in _context.UserPaymentHistory
+                                   join ur in _context.UserRole on uph.UserId equals ur.UserId
+                                   join u in _context.users on ur.UserId equals u.Id
+                                   join r in _context.Role on ur.RoleId equals r.Id
+                                   where r.Name == "Student" && uph.PaymentDate.Date == DateTime.Now.Date.AddDays(-1) && uph.StatusId == PaymentStatusEnums.Failed
+                                   select uph.Id).Distinct().CountAsync(); //await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-1) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Failed).Select(x => x.Id).Distinct().CountAsync();
+                    WeekS = await (from uph in _context.UserPaymentHistory
+                                   join ur in _context.UserRole on uph.UserId equals ur.UserId
+                                   join u in _context.users on ur.UserId equals u.Id
+                                   join r in _context.Role on ur.RoleId equals r.Id
+                                   where r.Name == "Student" && uph.PaymentDate.Date == DateTime.Now.Date.AddDays(-1) && uph.StatusId == PaymentStatusEnums.Paid
+                                   select uph.Id).Distinct().CountAsync(); //await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-1) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Paid).Select(x => x.Id).Distinct().CountAsync();
+                    WeekP = await (from uph in _context.UserPaymentHistory
+                                   join ur in _context.UserRole on uph.UserId equals ur.UserId
+                                   join u in _context.users on ur.UserId equals u.Id
+                                   join r in _context.Role on ur.RoleId equals r.Id
+                                   where r.Name == "Student" && uph.PaymentDate.Date == DateTime.Now.Date.AddDays(-1) && uph.StatusId == PaymentStatusEnums.Pending
+                                   select uph.Id).Distinct().CountAsync(); //await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-1) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Pending).Select(x => x.Id).Distinct().CountAsync();
 
                 }
                 else if (TodayDayWeek.ToLower() == "tuesday")
                 {
-                    WeekR = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-2) && x.PaymentDate.Date <= DateTime.Now.Date).Select(x => x.Id).Distinct().CountAsync();
-                    WeekF = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-2) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Failed).Select(x => x.Id).Distinct().CountAsync();
-                    WeekS = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-2) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Paid).Select(x => x.Id).Distinct().CountAsync();
-                    WeekP = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-2) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Pending).Select(x => x.Id).Distinct().CountAsync();
+                    WeekR = await (from uph in _context.UserPaymentHistory
+                                   join ur in _context.UserRole on uph.UserId equals ur.UserId
+                                   join u in _context.users on ur.UserId equals u.Id
+                                   join r in _context.Role on ur.RoleId equals r.Id
+                                   where r.Name == "Student" && uph.PaymentDate.Date == DateTime.Now.Date.AddDays(-2) 
+                                   select uph.Id).Distinct().CountAsync(); //await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-2) && x.PaymentDate.Date <= DateTime.Now.Date).Select(x => x.Id).Distinct().CountAsync();
+                    WeekF = await (from uph in _context.UserPaymentHistory
+                                   join ur in _context.UserRole on uph.UserId equals ur.UserId
+                                   join u in _context.users on ur.UserId equals u.Id
+                                   join r in _context.Role on ur.RoleId equals r.Id
+                                   where r.Name == "Student" && uph.PaymentDate.Date == DateTime.Now.Date.AddDays(-2) && uph.StatusId == PaymentStatusEnums.Failed
+                                   select uph.Id).Distinct().CountAsync(); //await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-2) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Failed).Select(x => x.Id).Distinct().CountAsync();
+                    WeekS = await (from uph in _context.UserPaymentHistory
+                                   join ur in _context.UserRole on uph.UserId equals ur.UserId
+                                   join u in _context.users on ur.UserId equals u.Id
+                                   join r in _context.Role on ur.RoleId equals r.Id
+                                   where r.Name == "Student" && uph.PaymentDate.Date == DateTime.Now.Date.AddDays(-2) && uph.StatusId == PaymentStatusEnums.Paid
+                                   select uph.Id).Distinct().CountAsync(); //await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-2) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Paid).Select(x => x.Id).Distinct().CountAsync();
+                    WeekP = await (from uph in _context.UserPaymentHistory
+                                   join ur in _context.UserRole on uph.UserId equals ur.UserId
+                                   join u in _context.users on ur.UserId equals u.Id
+                                   join r in _context.Role on ur.RoleId equals r.Id
+                                   where r.Name == "Student" && uph.PaymentDate.Date == DateTime.Now.Date.AddDays(-2) && uph.StatusId == PaymentStatusEnums.Pending
+                                   select uph.Id).Distinct().CountAsync(); //await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-2) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Pending).Select(x => x.Id).Distinct().CountAsync();
                 }
                 else if (TodayDayWeek.ToLower() == "wednesday")
                 {
-                    WeekR = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-3) && x.PaymentDate.Date <= DateTime.Now.Date).Select(x => x.Id).Distinct().CountAsync();
-                    WeekF = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-3) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Failed).Select(x => x.Id).Distinct().CountAsync();
-                    WeekS = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-3) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Paid).Select(x => x.Id).Distinct().CountAsync();
-                    WeekP = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-3) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Pending).Select(x => x.Id).Distinct().CountAsync();
+                    WeekR = await (from uph in _context.UserPaymentHistory
+                                   join ur in _context.UserRole on uph.UserId equals ur.UserId
+                                   join u in _context.users on ur.UserId equals u.Id
+                                   join r in _context.Role on ur.RoleId equals r.Id
+                                   where r.Name == "Student" && uph.PaymentDate.Date == DateTime.Now.Date.AddDays(-3)
+                                   select uph.Id).Distinct().CountAsync(); //await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-2) && x.PaymentDate.Date <= DateTime.Now.Date).Select(x => x.Id).Distinct().CountAsync();
+                    WeekF = await (from uph in _context.UserPaymentHistory
+                                   join ur in _context.UserRole on uph.UserId equals ur.UserId
+                                   join u in _context.users on ur.UserId equals u.Id
+                                   join r in _context.Role on ur.RoleId equals r.Id
+                                   where r.Name == "Student" && uph.PaymentDate.Date == DateTime.Now.Date.AddDays(-3) && uph.StatusId == PaymentStatusEnums.Failed
+                                   select uph.Id).Distinct().CountAsync(); //await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-2) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Failed).Select(x => x.Id).Distinct().CountAsync();
+                    WeekS = await (from uph in _context.UserPaymentHistory
+                                   join ur in _context.UserRole on uph.UserId equals ur.UserId
+                                   join u in _context.users on ur.UserId equals u.Id
+                                   join r in _context.Role on ur.RoleId equals r.Id
+                                   where r.Name == "Student" && uph.PaymentDate.Date == DateTime.Now.Date.AddDays(-3) && uph.StatusId == PaymentStatusEnums.Paid
+                                   select uph.Id).Distinct().CountAsync(); //await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-2) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Paid).Select(x => x.Id).Distinct().CountAsync();
+                    WeekP = await (from uph in _context.UserPaymentHistory
+                                   join ur in _context.UserRole on uph.UserId equals ur.UserId
+                                   join u in _context.users on ur.UserId equals u.Id
+                                   join r in _context.Role on ur.RoleId equals r.Id
+                                   where r.Name == "Student" && uph.PaymentDate.Date == DateTime.Now.Date.AddDays(-3) && uph.StatusId == PaymentStatusEnums.Pending
+                                   select uph.Id).Distinct().CountAsync(); //await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-2) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Pending).Select(x => x.Id).Distinct().CountAsync();
+
+                    //WeekR = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-3) && x.PaymentDate.Date <= DateTime.Now.Date).Select(x => x.Id).Distinct().CountAsync();
+                    //WeekF = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-3) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Failed).Select(x => x.Id).Distinct().CountAsync();
+                    //WeekS = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-3) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Paid).Select(x => x.Id).Distinct().CountAsync();
+                    //WeekP = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-3) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Pending).Select(x => x.Id).Distinct().CountAsync();
 
                 }
                 else if (TodayDayWeek.ToLower() == "thursday")
                 {
+                    WeekR = await (from uph in _context.UserPaymentHistory
+                                   join ur in _context.UserRole on uph.UserId equals ur.UserId
+                                   join u in _context.users on ur.UserId equals u.Id
+                                   join r in _context.Role on ur.RoleId equals r.Id
+                                   where r.Name == "Student" && uph.PaymentDate.Date == DateTime.Now.Date.AddDays(-4)
+                                   select uph.Id).Distinct().CountAsync(); //await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-2) && x.PaymentDate.Date <= DateTime.Now.Date).Select(x => x.Id).Distinct().CountAsync();
+                    WeekF = await (from uph in _context.UserPaymentHistory
+                                   join ur in _context.UserRole on uph.UserId equals ur.UserId
+                                   join u in _context.users on ur.UserId equals u.Id
+                                   join r in _context.Role on ur.RoleId equals r.Id
+                                   where r.Name == "Student" && uph.PaymentDate.Date == DateTime.Now.Date.AddDays(-4) && uph.StatusId == PaymentStatusEnums.Failed
+                                   select uph.Id).Distinct().CountAsync(); //await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-2) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Failed).Select(x => x.Id).Distinct().CountAsync();
+                    WeekS = await (from uph in _context.UserPaymentHistory
+                                   join ur in _context.UserRole on uph.UserId equals ur.UserId
+                                   join u in _context.users on ur.UserId equals u.Id
+                                   join r in _context.Role on ur.RoleId equals r.Id
+                                   where r.Name == "Student" && uph.PaymentDate.Date == DateTime.Now.Date.AddDays(-4) && uph.StatusId == PaymentStatusEnums.Paid
+                                   select uph.Id).Distinct().CountAsync(); //await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-2) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Paid).Select(x => x.Id).Distinct().CountAsync();
+                    WeekP = await (from uph in _context.UserPaymentHistory
+                                   join ur in _context.UserRole on uph.UserId equals ur.UserId
+                                   join u in _context.users on ur.UserId equals u.Id
+                                   join r in _context.Role on ur.RoleId equals r.Id
+                                   where r.Name == "Student" && uph.PaymentDate.Date == DateTime.Now.Date.AddDays(-4) && uph.StatusId == PaymentStatusEnums.Pending
+                                   select uph.Id).Distinct().CountAsync(); //await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-2) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Pending).Select(x => x.Id).Distinct().CountAsync();
 
-                    WeekR = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-4) && x.PaymentDate.Date <= DateTime.Now.Date).Select(x => x.Id).Distinct().CountAsync();
-                    WeekF = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-4) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Failed).Select(x => x.Id).Distinct().CountAsync();
-                    WeekS = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-4) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Paid).Select(x => x.Id).Distinct().CountAsync();
-                    WeekP = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-4) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Pending).Select(x => x.Id).Distinct().CountAsync();
+                    //WeekR = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-4) && x.PaymentDate.Date <= DateTime.Now.Date).Select(x => x.Id).Distinct().CountAsync();
+                    //WeekF = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-4) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Failed).Select(x => x.Id).Distinct().CountAsync();
+                    //WeekS = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-4) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Paid).Select(x => x.Id).Distinct().CountAsync();
+                    //WeekP = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-4) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Pending).Select(x => x.Id).Distinct().CountAsync();
 
                 }
                 else if (TodayDayWeek.ToLower() == "friday")
                 {
-                    WeekR = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-5) && x.PaymentDate.Date <= DateTime.Now.Date).Select(x => x.Id).Distinct().CountAsync();
-                    WeekF = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-5) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Failed).Select(x => x.Id).Distinct().CountAsync();
-                    WeekS = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-5) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Paid).Select(x => x.Id).Distinct().CountAsync();
-                    WeekP = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-5) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Pending).Select(x => x.Id).Distinct().CountAsync();
+                    WeekR = await (from uph in _context.UserPaymentHistory
+                                   join ur in _context.UserRole on uph.UserId equals ur.UserId
+                                   join u in _context.users on ur.UserId equals u.Id
+                                   join r in _context.Role on ur.RoleId equals r.Id
+                                   where r.Name == "Student" && uph.PaymentDate.Date == DateTime.Now.Date.AddDays(-5)
+                                   select uph.Id).Distinct().CountAsync(); //await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-2) && x.PaymentDate.Date <= DateTime.Now.Date).Select(x => x.Id).Distinct().CountAsync();
+                    WeekF = await (from uph in _context.UserPaymentHistory
+                                   join ur in _context.UserRole on uph.UserId equals ur.UserId
+                                   join u in _context.users on ur.UserId equals u.Id
+                                   join r in _context.Role on ur.RoleId equals r.Id
+                                   where r.Name == "Student" && uph.PaymentDate.Date == DateTime.Now.Date.AddDays(-5) && uph.StatusId == PaymentStatusEnums.Failed
+                                   select uph.Id).Distinct().CountAsync(); //await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-2) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Failed).Select(x => x.Id).Distinct().CountAsync();
+                    WeekS = await (from uph in _context.UserPaymentHistory
+                                   join ur in _context.UserRole on uph.UserId equals ur.UserId
+                                   join u in _context.users on ur.UserId equals u.Id
+                                   join r in _context.Role on ur.RoleId equals r.Id
+                                   where r.Name == "Student" && uph.PaymentDate.Date == DateTime.Now.Date.AddDays(-5) && uph.StatusId == PaymentStatusEnums.Paid
+                                   select uph.Id).Distinct().CountAsync(); //await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-2) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Paid).Select(x => x.Id).Distinct().CountAsync();
+                    WeekP = await (from uph in _context.UserPaymentHistory
+                                   join ur in _context.UserRole on uph.UserId equals ur.UserId
+                                   join u in _context.users on ur.UserId equals u.Id
+                                   join r in _context.Role on ur.RoleId equals r.Id
+                                   where r.Name == "Student" && uph.PaymentDate.Date == DateTime.Now.Date.AddDays(-5) && uph.StatusId == PaymentStatusEnums.Pending
+                                   select uph.Id).Distinct().CountAsync(); //await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-2) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Pending).Select(x => x.Id).Distinct().CountAsync();
+
+                    //WeekR = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-5) && x.PaymentDate.Date <= DateTime.Now.Date).Select(x => x.Id).Distinct().CountAsync();
+                    //WeekF = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-5) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Failed).Select(x => x.Id).Distinct().CountAsync();
+                    //WeekS = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-5) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Paid).Select(x => x.Id).Distinct().CountAsync();
+                    //WeekP = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-5) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Pending).Select(x => x.Id).Distinct().CountAsync();
 
 
                 }
                 else if (TodayDayWeek.ToLower() == "saturday")
                 {
-                    WeekR = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-6) && x.PaymentDate.Date <= DateTime.Now.Date).Select(x => x.Id).Distinct().CountAsync();
-                    WeekF = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-6) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Failed).Select(x => x.Id).Distinct().CountAsync();
-                    WeekS = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-6) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Paid).Select(x => x.Id).Distinct().CountAsync();
-                    WeekP = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-6) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Pending).Select(x => x.Id).Distinct().CountAsync();
+                    WeekR = await (from uph in _context.UserPaymentHistory
+                                   join ur in _context.UserRole on uph.UserId equals ur.UserId
+                                   join u in _context.users on ur.UserId equals u.Id
+                                   join r in _context.Role on ur.RoleId equals r.Id
+                                   where r.Name == "Student" && uph.PaymentDate.Date == DateTime.Now.Date.AddDays(-6)
+                                   select uph.Id).Distinct().CountAsync(); //await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-2) && x.PaymentDate.Date <= DateTime.Now.Date).Select(x => x.Id).Distinct().CountAsync();
+                    WeekF = await (from uph in _context.UserPaymentHistory
+                                   join ur in _context.UserRole on uph.UserId equals ur.UserId
+                                   join u in _context.users on ur.UserId equals u.Id
+                                   join r in _context.Role on ur.RoleId equals r.Id
+                                   where r.Name == "Student" && uph.PaymentDate.Date == DateTime.Now.Date.AddDays(-6) && uph.StatusId == PaymentStatusEnums.Failed
+                                   select uph.Id).Distinct().CountAsync(); //await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-2) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Failed).Select(x => x.Id).Distinct().CountAsync();
+                    WeekS = await (from uph in _context.UserPaymentHistory
+                                   join ur in _context.UserRole on uph.UserId equals ur.UserId
+                                   join u in _context.users on ur.UserId equals u.Id
+                                   join r in _context.Role on ur.RoleId equals r.Id
+                                   where r.Name == "Student" && uph.PaymentDate.Date == DateTime.Now.Date.AddDays(-6) && uph.StatusId == PaymentStatusEnums.Paid
+                                   select uph.Id).Distinct().CountAsync(); //await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-2) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Paid).Select(x => x.Id).Distinct().CountAsync();
+                    WeekP = await (from uph in _context.UserPaymentHistory
+                                   join ur in _context.UserRole on uph.UserId equals ur.UserId
+                                   join u in _context.users on ur.UserId equals u.Id
+                                   join r in _context.Role on ur.RoleId equals r.Id
+                                   where r.Name == "Student" && uph.PaymentDate.Date == DateTime.Now.Date.AddDays(-6) && uph.StatusId == PaymentStatusEnums.Pending
+                                   select uph.Id).Distinct().CountAsync(); //await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-2) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Pending).Select(x => x.Id).Distinct().CountAsync();
+
+                    //WeekR = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-6) && x.PaymentDate.Date <= DateTime.Now.Date).Select(x => x.Id).Distinct().CountAsync();
+                    //WeekF = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-6) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Failed).Select(x => x.Id).Distinct().CountAsync();
+                    //WeekS = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-6) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Paid).Select(x => x.Id).Distinct().CountAsync();
+                    //WeekP = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-6) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Pending).Select(x => x.Id).Distinct().CountAsync();
 
 
                 }
@@ -2859,10 +3431,30 @@ namespace CPEA.Utilities.Services
                 };
 
                 //This Month Record
-                var MonthR = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Month == DateTime.Now.Date.Month).Select(x => x.Id).Distinct().CountAsync();
-                var MonthF = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Month == DateTime.Now.Date.Month && x.StatusId == PaymentStatusEnums.Failed).Select(x => x.Id).Distinct().CountAsync();
-                var MonthS = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Month == DateTime.Now.Date.Month && x.StatusId == PaymentStatusEnums.Paid).Select(x => x.Id).Distinct().CountAsync();
-                var MonthP = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Month == DateTime.Now.Date.Month && x.StatusId == PaymentStatusEnums.Pending).Select(x => x.Id).Distinct().CountAsync();
+                var MonthR = await (from uph in _context.UserPaymentHistory
+                                    join ur in _context.UserRole on uph.UserId equals ur.UserId
+                                    join u in _context.users on ur.UserId equals u.Id
+                                    join r in _context.Role on ur.RoleId equals r.Id
+                                    where r.Name == "Student" && uph.PaymentDate.Month == DateTime.Now.Date.Month
+                                    select uph.Id).Distinct().CountAsync(); //await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Month == DateTime.Now.Date.Month).Select(x => x.Id).Distinct().CountAsync();
+                var MonthF = await (from uph in _context.UserPaymentHistory
+                                    join ur in _context.UserRole on uph.UserId equals ur.UserId
+                                    join u in _context.users on ur.UserId equals u.Id
+                                    join r in _context.Role on ur.RoleId equals r.Id
+                                    where r.Name == "Student" && uph.PaymentDate.Month == DateTime.Now.Date.Month && uph.StatusId == PaymentStatusEnums.Failed
+                                    select uph.Id).Distinct().CountAsync(); //await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Month == DateTime.Now.Date.Month && x.StatusId == PaymentStatusEnums.Failed).Select(x => x.Id).Distinct().CountAsync();
+                var MonthS = await (from uph in _context.UserPaymentHistory
+                                    join ur in _context.UserRole on uph.UserId equals ur.UserId
+                                    join u in _context.users on ur.UserId equals u.Id
+                                    join r in _context.Role on ur.RoleId equals r.Id
+                                    where r.Name == "Student" && uph.PaymentDate.Month == DateTime.Now.Date.Month && uph.StatusId == PaymentStatusEnums.Paid
+                                    select uph.Id).Distinct().CountAsync(); //await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Month == DateTime.Now.Date.Month && x.StatusId == PaymentStatusEnums.Paid).Select(x => x.Id).Distinct().CountAsync();
+                var MonthP = await (from uph in _context.UserPaymentHistory
+                                    join ur in _context.UserRole on uph.UserId equals ur.UserId
+                                    join u in _context.users on ur.UserId equals u.Id
+                                    join r in _context.Role on ur.RoleId equals r.Id
+                                    where r.Name == "Student" && uph.PaymentDate.Month == DateTime.Now.Date.Month && uph.StatusId == PaymentStatusEnums.Pending
+                                    select uph.Id).Distinct().CountAsync(); //await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Month == DateTime.Now.Date.Month && x.StatusId == PaymentStatusEnums.Pending).Select(x => x.Id).Distinct().CountAsync();
 
                 var monthTotalRecord = new ReportStat()
                 {
@@ -2891,40 +3483,82 @@ namespace CPEA.Utilities.Services
             try
             {
                 var result = new List<AllPayments>();
-                var PaidCourse = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.PaymentFor == paymentForEnums.Course && x.User.Role.Name == "Student" && x.StatusId == PaymentStatusEnums.Paid).Select(x => new AllPayments
-                {
-                    Amount = x.Amount.ToString("N"),
-                    Id = x.Id,
-                    Payee = $"{x.User.FirstName } {x.User.LastName }",
-                    PaymentDate = x.PaymentDate.ToString("dd/MM/yyyy"),
-                    PaymentMethodId = x.PaymentMethodId,
-                    PaymentReference = x.PaymentRef,
-                    Program = _context.UserCourses.Include(c => c.CoursePriceOption).ThenInclude(c => c.Course).ThenInclude(c => c.Category).ThenInclude(c => c.Institution).Where(c => c.Id == x.UserPaymentForId).Select(c => c.CoursePriceOption.Course.Category.Institution.ShortName + "/" + c.CoursePriceOption.Course.Category.Name + "/" + c.CoursePriceOption.Course.CourseCode).FirstOrDefault(),
-                    StatusId = x.StatusId,
-                    TransactionReference = x.Description,
-                    StudentId = x.User.StudentNumber
+                var PaidCourse = await (from uph in _context.UserPaymentHistory
+                                        join ur in _context.UserRole on uph.UserId equals ur.UserId
+                                        join u in _context.users on ur.UserId equals u.Id
+                                        join r in _context.Role on ur.RoleId equals r.Id
+                                        where r.Name == "Student" && uph.PaymentFor == paymentForEnums.Course && uph.StatusId == PaymentStatusEnums.Paid
+                                        select new AllPayments
+                                        {
+                                            Amount = uph.Amount.ToString("N"),
+                                            Id = uph.Id,
+                                            Payee = $"{u.FirstName} {u.LastName}",
+                                            PaymentDate = uph.PaymentDate.ToString("dd/MM/yyyy"),
+                                            PaymentMethodId = uph.PaymentMethodId,
+                                            PaymentReference = uph.PaymentRef,
+                                            Program = _context.UserCourses.Include(c => c.CoursePriceOption).ThenInclude(c => c.Course).ThenInclude(c => c.Category).ThenInclude(c => c.Institution).Where(c => c.Id == uph.UserPaymentForId).Select(c => c.CoursePriceOption.Course.Category.Institution.ShortName + "/" + c.CoursePriceOption.Course.Category.Name + "/" + c.CoursePriceOption.Course.CourseCode).FirstOrDefault(),
+                                            StatusId = uph.StatusId,
+                                            TransactionReference = uph.Description,
+                                            StudentId = uph.User.StudentNumber
 
-                }).ToListAsync();
+                                        }).ToListAsync();
+
+
+
+                //await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.PaymentFor == paymentForEnums.Course && x.User.Role.Name == "Student" && x.StatusId == PaymentStatusEnums.Paid).Select(x => new AllPayments
+                //{
+                //    Amount = x.Amount.ToString("N"),
+                //    Id = x.Id,
+                //    Payee = $"{x.User.FirstName } {x.User.LastName }",
+                //    PaymentDate = x.PaymentDate.ToString("dd/MM/yyyy"),
+                //    PaymentMethodId = x.PaymentMethodId,
+                //    PaymentReference = x.PaymentRef,
+                //    Program = _context.UserCourses.Include(c => c.CoursePriceOption).ThenInclude(c => c.Course).ThenInclude(c => c.Category).ThenInclude(c => c.Institution).Where(c => c.Id == x.UserPaymentForId).Select(c => c.CoursePriceOption.Course.Category.Institution.ShortName + "/" + c.CoursePriceOption.Course.Category.Name + "/" + c.CoursePriceOption.Course.CourseCode).FirstOrDefault(),
+                //    StatusId = x.StatusId,
+                //    TransactionReference = x.Description,
+                //    StudentId = x.User.StudentNumber
+
+                //}).ToListAsync();
 
                 if (PaidCourse.Count() > 0)
                 {
                     result.AddRange(PaidCourse);
                 }
 
-                var PaidCert = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.PaymentFor == paymentForEnums.Certifications && x.User.Role.Name == "Student" && x.StatusId == PaymentStatusEnums.Paid).Select(x => new AllPayments
-                {
-                    Amount = x.Amount.ToString("N"),
-                    Id = x.Id,
-                    Payee = $"{x.User.FirstName } {x.User.LastName }",
-                    PaymentDate = x.PaymentDate.ToString("dd/MM/yyyy"),
-                    PaymentMethodId = x.PaymentMethodId,
-                    PaymentReference = x.PaymentRef,
-                    Program = _context.UserCertifications.Include(c => c.CertificationPriceOption).ThenInclude(c => c.Certification).ThenInclude(c => c.Category).ThenInclude(c => c.Institution).Where(c => c.Id == x.UserPaymentForId).Select(c => c.CertificationPriceOption.Certification.Category.Institution.ShortName + "/" + c.CertificationPriceOption.Certification.Category.Name + "/" + c.CertificationPriceOption.Certification.ShortCode).FirstOrDefault(),
-                    StatusId = x.StatusId,
-                    TransactionReference = x.Description,
-                    StudentId = x.User.StudentNumber
+                var PaidCert = await (from uph in _context.UserPaymentHistory
+                                      join ur in _context.UserRole on uph.UserId equals ur.UserId
+                                      join u in _context.users on ur.UserId equals u.Id
+                                      join r in _context.Role on ur.RoleId equals r.Id
+                                      where r.Name == "Student" && uph.PaymentFor == paymentForEnums.Certifications && uph.StatusId == PaymentStatusEnums.Paid
+                                      select new AllPayments
+                                      {
+                                          Amount = uph.Amount.ToString("N"),
+                                          Id = uph.Id,
+                                          Payee = $"{u.FirstName} {u.LastName}",
+                                          PaymentDate = uph.PaymentDate.ToString("dd/MM/yyyy"),
+                                          PaymentMethodId = uph.PaymentMethodId,
+                                          PaymentReference = uph.PaymentRef,
+                                          Program = _context.UserCertifications.Include(c => c.CertificationPriceOption).ThenInclude(c => c.Certification).ThenInclude(c => c.Category).ThenInclude(c => c.Institution).Where(c => c.Id == uph.UserPaymentForId).Select(c => c.CertificationPriceOption.Certification.Category.Institution.ShortName + "/" + c.CertificationPriceOption.Certification.Category.Name + "/" + c.CertificationPriceOption.Certification.ShortCode).FirstOrDefault(),
+                                          StatusId = uph.StatusId,
+                                          TransactionReference = uph.Description,
+                                          StudentId = uph.User.StudentNumber
 
-                }).ToListAsync();
+                                      }).ToListAsync(); 
+                
+                //await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.PaymentFor == paymentForEnums.Certifications && x.User.Role.Name == "Student" && x.StatusId == PaymentStatusEnums.Paid).Select(x => new AllPayments
+                //{
+                //    Amount = x.Amount.ToString("N"),
+                //    Id = x.Id,
+                //    Payee = $"{x.User.FirstName } {x.User.LastName }",
+                //    PaymentDate = x.PaymentDate.ToString("dd/MM/yyyy"),
+                //    PaymentMethodId = x.PaymentMethodId,
+                //    PaymentReference = x.PaymentRef,
+                //    Program = _context.UserCertifications.Include(c => c.CertificationPriceOption).ThenInclude(c => c.Certification).ThenInclude(c => c.Category).ThenInclude(c => c.Institution).Where(c => c.Id == x.UserPaymentForId).Select(c => c.CertificationPriceOption.Certification.Category.Institution.ShortName + "/" + c.CertificationPriceOption.Certification.Category.Name + "/" + c.CertificationPriceOption.Certification.ShortCode).FirstOrDefault(),
+                //    StatusId = x.StatusId,
+                //    TransactionReference = x.Description,
+                //    StudentId = x.User.StudentNumber
+
+                //}).ToListAsync();
                 if (PaidCert.Count() > 0)
                 {
                     result.AddRange(PaidCert);
@@ -2932,10 +3566,37 @@ namespace CPEA.Utilities.Services
 
 
                 //Today's Record
-                var TodayR = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date == DateTime.Now.Date).Select(x => x.Id).Distinct().CountAsync();
-                var TodayF = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date == DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Failed).Select(x => x.Id).Distinct().CountAsync();
-                var TodayS = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date == DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Paid).Select(x => x.Id).Distinct().CountAsync();
-                var TodayP = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date == DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Pending).Select(x => x.Id).Distinct().CountAsync();
+                var TodayR = await (from uph in _context.UserPaymentHistory
+                                    join ur in _context.UserRole on uph.UserId equals ur.UserId
+                                    join u in _context.users on ur.UserId equals u.Id
+                                    join r in _context.Role on ur.RoleId equals r.Id
+                                    where r.Name == "Student" && uph.PaymentDate.Date == DateTime.Now.Date
+                                    select uph.Id).Distinct().CountAsync();
+
+                var TodayF = await (from uph in _context.UserPaymentHistory
+                                    join ur in _context.UserRole on uph.UserId equals ur.UserId
+                                    join u in _context.users on ur.UserId equals u.Id
+                                    join r in _context.Role on ur.RoleId equals r.Id
+                                    where r.Name == "Student" && uph.PaymentDate.Date == DateTime.Now.Date && uph.StatusId == PaymentStatusEnums.Failed
+                                    select uph.Id).Distinct().CountAsync();
+
+                var TodayS = await (from uph in _context.UserPaymentHistory
+                                    join ur in _context.UserRole on uph.UserId equals ur.UserId
+                                    join u in _context.users on ur.UserId equals u.Id
+                                    join r in _context.Role on ur.RoleId equals r.Id
+                                    where r.Name == "Student" && uph.PaymentDate.Date == DateTime.Now.Date && uph.StatusId == PaymentStatusEnums.Paid
+                                    select uph.Id).Distinct().CountAsync();
+
+                var TodayP = await (from uph in _context.UserPaymentHistory
+                                    join ur in _context.UserRole on uph.UserId equals ur.UserId
+                                    join u in _context.users on ur.UserId equals u.Id
+                                    join r in _context.Role on ur.RoleId equals r.Id
+                                    where r.Name == "Student" && uph.PaymentDate.Date == DateTime.Now.Date && uph.StatusId == PaymentStatusEnums.Pending
+                                    select uph.Id).Distinct().CountAsync();
+                //.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date == DateTime.Now.Date).Select(x => x.Id).Distinct().CountAsync();
+                //var TodayF = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date == DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Failed).Select(x => x.Id).Distinct().CountAsync();
+                //var TodayS = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date == DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Paid).Select(x => x.Id).Distinct().CountAsync();
+                //var TodayP = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date == DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Pending).Select(x => x.Id).Distinct().CountAsync();
 
                 var todayTotalRecord = new ReportStat()
                 {
@@ -2953,60 +3614,219 @@ namespace CPEA.Utilities.Services
                 var WeekP = 0;
                 if (TodayDayWeek.ToLower() == "sunday")
                 {
-                    WeekR = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date == DateTime.Now).Select(x => x.Id).Distinct().CountAsync();
-                    WeekF = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date == DateTime.Now && x.StatusId == PaymentStatusEnums.Failed).Select(x => x.Id).Distinct().CountAsync();
-                    WeekS = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date == DateTime.Now && x.StatusId == PaymentStatusEnums.Paid).Select(x => x.Id).Distinct().CountAsync();
-                    WeekP = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date == DateTime.Now && x.StatusId == PaymentStatusEnums.Pending).Select(x => x.Id).Distinct().CountAsync();
+                    WeekR = await (from uph in _context.UserPaymentHistory
+                                   join ur in _context.UserRole on uph.UserId equals ur.UserId
+                                   join u in _context.users on ur.UserId equals u.Id
+                                   join r in _context.Role on ur.RoleId equals r.Id
+                                   where r.Name == "Student" && uph.PaymentDate.Date == DateTime.Now.Date
+                                   select uph.Id).Distinct().CountAsync(); //await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date == DateTime.Now).Select(x => x.Id).Distinct().CountAsync();
+                    WeekF = await (from uph in _context.UserPaymentHistory
+                                   join ur in _context.UserRole on uph.UserId equals ur.UserId
+                                   join u in _context.users on ur.UserId equals u.Id
+                                   join r in _context.Role on ur.RoleId equals r.Id
+                                   where r.Name == "Student" && uph.PaymentDate.Date == DateTime.Now.Date && uph.StatusId == PaymentStatusEnums.Failed
+                                   select uph.Id).Distinct().CountAsync(); //await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date == DateTime.Now && x.StatusId == PaymentStatusEnums.Failed).Select(x => x.Id).Distinct().CountAsync();
+                    WeekS = await (from uph in _context.UserPaymentHistory
+                                   join ur in _context.UserRole on uph.UserId equals ur.UserId
+                                   join u in _context.users on ur.UserId equals u.Id
+                                   join r in _context.Role on ur.RoleId equals r.Id
+                                   where r.Name == "Student" && uph.PaymentDate.Date == DateTime.Now.Date && uph.StatusId == PaymentStatusEnums.Pending
+                                   select uph.Id).Distinct().CountAsync(); //await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date == DateTime.Now && x.StatusId == PaymentStatusEnums.Paid).Select(x => x.Id).Distinct().CountAsync();
+                    WeekP = await (from uph in _context.UserPaymentHistory
+                                   join ur in _context.UserRole on uph.UserId equals ur.UserId
+                                   join u in _context.users on ur.UserId equals u.Id
+                                   join r in _context.Role on ur.RoleId equals r.Id
+                                   where r.Name == "Student" && uph.PaymentDate.Date == DateTime.Now.Date && uph.StatusId == PaymentStatusEnums.Pending
+                                   select uph.Id).Distinct().CountAsync(); //await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date == DateTime.Now && x.StatusId == PaymentStatusEnums.Pending).Select(x => x.Id).Distinct().CountAsync();
 
                 }
                 else if (TodayDayWeek.ToLower() == "monday")
                 {
 
-                    WeekR = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-1) && x.PaymentDate.Date <= DateTime.Now.Date).Select(x => x.Id).Distinct().CountAsync();
-                    WeekF = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-1) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Failed).Select(x => x.Id).Distinct().CountAsync();
-                    WeekS = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-1) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Paid).Select(x => x.Id).Distinct().CountAsync();
-                    WeekP = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-1) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Pending).Select(x => x.Id).Distinct().CountAsync();
+                    WeekR = await (from uph in _context.UserPaymentHistory
+                                   join ur in _context.UserRole on uph.UserId equals ur.UserId
+                                   join u in _context.users on ur.UserId equals u.Id
+                                   join r in _context.Role on ur.RoleId equals r.Id
+                                   where r.Name == "Student" && uph.PaymentDate.Date == DateTime.Now.Date.AddDays(-1)
+                                   select uph.Id).Distinct().CountAsync(); //await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-1) && x.PaymentDate.Date <= DateTime.Now.Date).Select(x => x.Id).Distinct().CountAsync();
+                    WeekF = await (from uph in _context.UserPaymentHistory
+                                   join ur in _context.UserRole on uph.UserId equals ur.UserId
+                                   join u in _context.users on ur.UserId equals u.Id
+                                   join r in _context.Role on ur.RoleId equals r.Id
+                                   where r.Name == "Student" && uph.PaymentDate.Date == DateTime.Now.Date.AddDays(-1) && uph.StatusId == PaymentStatusEnums.Failed
+                                   select uph.Id).Distinct().CountAsync(); //await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-1) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Failed).Select(x => x.Id).Distinct().CountAsync();
+                    WeekS = await (from uph in _context.UserPaymentHistory
+                                   join ur in _context.UserRole on uph.UserId equals ur.UserId
+                                   join u in _context.users on ur.UserId equals u.Id
+                                   join r in _context.Role on ur.RoleId equals r.Id
+                                   where r.Name == "Student" && uph.PaymentDate.Date == DateTime.Now.Date.AddDays(-1) && uph.StatusId == PaymentStatusEnums.Paid
+                                   select uph.Id).Distinct().CountAsync(); //await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-1) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Paid).Select(x => x.Id).Distinct().CountAsync();
+                    WeekP = await (from uph in _context.UserPaymentHistory
+                                   join ur in _context.UserRole on uph.UserId equals ur.UserId
+                                   join u in _context.users on ur.UserId equals u.Id
+                                   join r in _context.Role on ur.RoleId equals r.Id
+                                   where r.Name == "Student" && uph.PaymentDate.Date == DateTime.Now.Date.AddDays(-1) && uph.StatusId == PaymentStatusEnums.Pending
+                                   select uph.Id).Distinct().CountAsync(); //await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-1) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Pending).Select(x => x.Id).Distinct().CountAsync();
 
                 }
                 else if (TodayDayWeek.ToLower() == "tuesday")
                 {
-                    WeekR = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-2) && x.PaymentDate.Date <= DateTime.Now.Date).Select(x => x.Id).Distinct().CountAsync();
-                    WeekF = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-2) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Failed).Select(x => x.Id).Distinct().CountAsync();
-                    WeekS = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-2) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Paid).Select(x => x.Id).Distinct().CountAsync();
-                    WeekP = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-2) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Pending).Select(x => x.Id).Distinct().CountAsync();
+                    WeekR = await (from uph in _context.UserPaymentHistory
+                                   join ur in _context.UserRole on uph.UserId equals ur.UserId
+                                   join u in _context.users on ur.UserId equals u.Id
+                                   join r in _context.Role on ur.RoleId equals r.Id
+                                   where r.Name == "Student" && uph.PaymentDate.Date == DateTime.Now.Date.AddDays(-2)
+                                   select uph.Id).Distinct().CountAsync(); //await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-2) && x.PaymentDate.Date <= DateTime.Now.Date).Select(x => x.Id).Distinct().CountAsync();
+                    WeekF = await (from uph in _context.UserPaymentHistory
+                                   join ur in _context.UserRole on uph.UserId equals ur.UserId
+                                   join u in _context.users on ur.UserId equals u.Id
+                                   join r in _context.Role on ur.RoleId equals r.Id
+                                   where r.Name == "Student" && uph.PaymentDate.Date == DateTime.Now.Date.AddDays(-2) && uph.StatusId == PaymentStatusEnums.Failed
+                                   select uph.Id).Distinct().CountAsync(); //await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-2) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Failed).Select(x => x.Id).Distinct().CountAsync();
+                    WeekS = await (from uph in _context.UserPaymentHistory
+                                   join ur in _context.UserRole on uph.UserId equals ur.UserId
+                                   join u in _context.users on ur.UserId equals u.Id
+                                   join r in _context.Role on ur.RoleId equals r.Id
+                                   where r.Name == "Student" && uph.PaymentDate.Date == DateTime.Now.Date.AddDays(-2) && uph.StatusId == PaymentStatusEnums.Paid
+                                   select uph.Id).Distinct().CountAsync(); //await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-2) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Paid).Select(x => x.Id).Distinct().CountAsync();
+                    WeekP = await (from uph in _context.UserPaymentHistory
+                                   join ur in _context.UserRole on uph.UserId equals ur.UserId
+                                   join u in _context.users on ur.UserId equals u.Id
+                                   join r in _context.Role on ur.RoleId equals r.Id
+                                   where r.Name == "Student" && uph.PaymentDate.Date == DateTime.Now.Date.AddDays(-2) && uph.StatusId == PaymentStatusEnums.Pending
+                                   select uph.Id).Distinct().CountAsync(); //await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-2) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Pending).Select(x => x.Id).Distinct().CountAsync();
                 }
                 else if (TodayDayWeek.ToLower() == "wednesday")
                 {
-                    WeekR = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-3) && x.PaymentDate.Date <= DateTime.Now.Date).Select(x => x.Id).Distinct().CountAsync();
-                    WeekF = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-3) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Failed).Select(x => x.Id).Distinct().CountAsync();
-                    WeekS = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-3) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Paid).Select(x => x.Id).Distinct().CountAsync();
-                    WeekP = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-3) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Pending).Select(x => x.Id).Distinct().CountAsync();
+                    WeekR = await (from uph in _context.UserPaymentHistory
+                                   join ur in _context.UserRole on uph.UserId equals ur.UserId
+                                   join u in _context.users on ur.UserId equals u.Id
+                                   join r in _context.Role on ur.RoleId equals r.Id
+                                   where r.Name == "Student" && uph.PaymentDate.Date == DateTime.Now.Date.AddDays(-3)
+                                   select uph.Id).Distinct().CountAsync(); //await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-2) && x.PaymentDate.Date <= DateTime.Now.Date).Select(x => x.Id).Distinct().CountAsync();
+                    WeekF = await (from uph in _context.UserPaymentHistory
+                                   join ur in _context.UserRole on uph.UserId equals ur.UserId
+                                   join u in _context.users on ur.UserId equals u.Id
+                                   join r in _context.Role on ur.RoleId equals r.Id
+                                   where r.Name == "Student" && uph.PaymentDate.Date == DateTime.Now.Date.AddDays(-3) && uph.StatusId == PaymentStatusEnums.Failed
+                                   select uph.Id).Distinct().CountAsync(); //await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-2) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Failed).Select(x => x.Id).Distinct().CountAsync();
+                    WeekS = await (from uph in _context.UserPaymentHistory
+                                   join ur in _context.UserRole on uph.UserId equals ur.UserId
+                                   join u in _context.users on ur.UserId equals u.Id
+                                   join r in _context.Role on ur.RoleId equals r.Id
+                                   where r.Name == "Student" && uph.PaymentDate.Date == DateTime.Now.Date.AddDays(-3) && uph.StatusId == PaymentStatusEnums.Paid
+                                   select uph.Id).Distinct().CountAsync(); //await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-2) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Paid).Select(x => x.Id).Distinct().CountAsync();
+                    WeekP = await (from uph in _context.UserPaymentHistory
+                                   join ur in _context.UserRole on uph.UserId equals ur.UserId
+                                   join u in _context.users on ur.UserId equals u.Id
+                                   join r in _context.Role on ur.RoleId equals r.Id
+                                   where r.Name == "Student" && uph.PaymentDate.Date == DateTime.Now.Date.AddDays(-3) && uph.StatusId == PaymentStatusEnums.Pending
+                                   select uph.Id).Distinct().CountAsync(); //await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-2) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Pending).Select(x => x.Id).Distinct().CountAsync();
+
+                    //WeekR = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-3) && x.PaymentDate.Date <= DateTime.Now.Date).Select(x => x.Id).Distinct().CountAsync();
+                    //WeekF = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-3) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Failed).Select(x => x.Id).Distinct().CountAsync();
+                    //WeekS = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-3) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Paid).Select(x => x.Id).Distinct().CountAsync();
+                    //WeekP = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-3) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Pending).Select(x => x.Id).Distinct().CountAsync();
 
                 }
                 else if (TodayDayWeek.ToLower() == "thursday")
                 {
+                    WeekR = await (from uph in _context.UserPaymentHistory
+                                   join ur in _context.UserRole on uph.UserId equals ur.UserId
+                                   join u in _context.users on ur.UserId equals u.Id
+                                   join r in _context.Role on ur.RoleId equals r.Id
+                                   where r.Name == "Student" && uph.PaymentDate.Date == DateTime.Now.Date.AddDays(-4)
+                                   select uph.Id).Distinct().CountAsync(); //await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-2) && x.PaymentDate.Date <= DateTime.Now.Date).Select(x => x.Id).Distinct().CountAsync();
+                    WeekF = await (from uph in _context.UserPaymentHistory
+                                   join ur in _context.UserRole on uph.UserId equals ur.UserId
+                                   join u in _context.users on ur.UserId equals u.Id
+                                   join r in _context.Role on ur.RoleId equals r.Id
+                                   where r.Name == "Student" && uph.PaymentDate.Date == DateTime.Now.Date.AddDays(-4) && uph.StatusId == PaymentStatusEnums.Failed
+                                   select uph.Id).Distinct().CountAsync(); //await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-2) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Failed).Select(x => x.Id).Distinct().CountAsync();
+                    WeekS = await (from uph in _context.UserPaymentHistory
+                                   join ur in _context.UserRole on uph.UserId equals ur.UserId
+                                   join u in _context.users on ur.UserId equals u.Id
+                                   join r in _context.Role on ur.RoleId equals r.Id
+                                   where r.Name == "Student" && uph.PaymentDate.Date == DateTime.Now.Date.AddDays(-4) && uph.StatusId == PaymentStatusEnums.Paid
+                                   select uph.Id).Distinct().CountAsync(); //await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-2) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Paid).Select(x => x.Id).Distinct().CountAsync();
+                    WeekP = await (from uph in _context.UserPaymentHistory
+                                   join ur in _context.UserRole on uph.UserId equals ur.UserId
+                                   join u in _context.users on ur.UserId equals u.Id
+                                   join r in _context.Role on ur.RoleId equals r.Id
+                                   where r.Name == "Student" && uph.PaymentDate.Date == DateTime.Now.Date.AddDays(-4) && uph.StatusId == PaymentStatusEnums.Pending
+                                   select uph.Id).Distinct().CountAsync(); //await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-2) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Pending).Select(x => x.Id).Distinct().CountAsync();
 
-                    WeekR = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-4) && x.PaymentDate.Date <= DateTime.Now.Date).Select(x => x.Id).Distinct().CountAsync();
-                    WeekF = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-4) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Failed).Select(x => x.Id).Distinct().CountAsync();
-                    WeekS = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-4) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Paid).Select(x => x.Id).Distinct().CountAsync();
-                    WeekP = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-4) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Pending).Select(x => x.Id).Distinct().CountAsync();
+                    //WeekR = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-4) && x.PaymentDate.Date <= DateTime.Now.Date).Select(x => x.Id).Distinct().CountAsync();
+                    //WeekF = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-4) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Failed).Select(x => x.Id).Distinct().CountAsync();
+                    //WeekS = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-4) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Paid).Select(x => x.Id).Distinct().CountAsync();
+                    //WeekP = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-4) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Pending).Select(x => x.Id).Distinct().CountAsync();
 
                 }
                 else if (TodayDayWeek.ToLower() == "friday")
                 {
-                    WeekR = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-5) && x.PaymentDate.Date <= DateTime.Now.Date).Select(x => x.Id).Distinct().CountAsync();
-                    WeekF = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-5) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Failed).Select(x => x.Id).Distinct().CountAsync();
-                    WeekS = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-5) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Paid).Select(x => x.Id).Distinct().CountAsync();
-                    WeekP = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-5) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Pending).Select(x => x.Id).Distinct().CountAsync();
+                    WeekR = await (from uph in _context.UserPaymentHistory
+                                   join ur in _context.UserRole on uph.UserId equals ur.UserId
+                                   join u in _context.users on ur.UserId equals u.Id
+                                   join r in _context.Role on ur.RoleId equals r.Id
+                                   where r.Name == "Student" && uph.PaymentDate.Date == DateTime.Now.Date.AddDays(-5)
+                                   select uph.Id).Distinct().CountAsync(); //await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-2) && x.PaymentDate.Date <= DateTime.Now.Date).Select(x => x.Id).Distinct().CountAsync();
+                    WeekF = await (from uph in _context.UserPaymentHistory
+                                   join ur in _context.UserRole on uph.UserId equals ur.UserId
+                                   join u in _context.users on ur.UserId equals u.Id
+                                   join r in _context.Role on ur.RoleId equals r.Id
+                                   where r.Name == "Student" && uph.PaymentDate.Date == DateTime.Now.Date.AddDays(-5) && uph.StatusId == PaymentStatusEnums.Failed
+                                   select uph.Id).Distinct().CountAsync(); //await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-2) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Failed).Select(x => x.Id).Distinct().CountAsync();
+                    WeekS = await (from uph in _context.UserPaymentHistory
+                                   join ur in _context.UserRole on uph.UserId equals ur.UserId
+                                   join u in _context.users on ur.UserId equals u.Id
+                                   join r in _context.Role on ur.RoleId equals r.Id
+                                   where r.Name == "Student" && uph.PaymentDate.Date == DateTime.Now.Date.AddDays(-5) && uph.StatusId == PaymentStatusEnums.Paid
+                                   select uph.Id).Distinct().CountAsync(); //await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-2) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Paid).Select(x => x.Id).Distinct().CountAsync();
+                    WeekP = await (from uph in _context.UserPaymentHistory
+                                   join ur in _context.UserRole on uph.UserId equals ur.UserId
+                                   join u in _context.users on ur.UserId equals u.Id
+                                   join r in _context.Role on ur.RoleId equals r.Id
+                                   where r.Name == "Student" && uph.PaymentDate.Date == DateTime.Now.Date.AddDays(-5) && uph.StatusId == PaymentStatusEnums.Pending
+                                   select uph.Id).Distinct().CountAsync(); //await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-2) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Pending).Select(x => x.Id).Distinct().CountAsync();
+
+                    //WeekR = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-5) && x.PaymentDate.Date <= DateTime.Now.Date).Select(x => x.Id).Distinct().CountAsync();
+                    //WeekF = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-5) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Failed).Select(x => x.Id).Distinct().CountAsync();
+                    //WeekS = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-5) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Paid).Select(x => x.Id).Distinct().CountAsync();
+                    //WeekP = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-5) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Pending).Select(x => x.Id).Distinct().CountAsync();
 
 
                 }
                 else if (TodayDayWeek.ToLower() == "saturday")
                 {
-                    WeekR = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-6) && x.PaymentDate.Date <= DateTime.Now.Date).Select(x => x.Id).Distinct().CountAsync();
-                    WeekF = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-6) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Failed).Select(x => x.Id).Distinct().CountAsync();
-                    WeekS = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-6) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Paid).Select(x => x.Id).Distinct().CountAsync();
-                    WeekP = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-6) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Pending).Select(x => x.Id).Distinct().CountAsync();
+                    WeekR = await (from uph in _context.UserPaymentHistory
+                                   join ur in _context.UserRole on uph.UserId equals ur.UserId
+                                   join u in _context.users on ur.UserId equals u.Id
+                                   join r in _context.Role on ur.RoleId equals r.Id
+                                   where r.Name == "Student" && uph.PaymentDate.Date == DateTime.Now.Date.AddDays(-6)
+                                   select uph.Id).Distinct().CountAsync(); //await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-2) && x.PaymentDate.Date <= DateTime.Now.Date).Select(x => x.Id).Distinct().CountAsync();
+                    WeekF = await (from uph in _context.UserPaymentHistory
+                                   join ur in _context.UserRole on uph.UserId equals ur.UserId
+                                   join u in _context.users on ur.UserId equals u.Id
+                                   join r in _context.Role on ur.RoleId equals r.Id
+                                   where r.Name == "Student" && uph.PaymentDate.Date == DateTime.Now.Date.AddDays(-6) && uph.StatusId == PaymentStatusEnums.Failed
+                                   select uph.Id).Distinct().CountAsync(); //await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-2) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Failed).Select(x => x.Id).Distinct().CountAsync();
+                    WeekS = await (from uph in _context.UserPaymentHistory
+                                   join ur in _context.UserRole on uph.UserId equals ur.UserId
+                                   join u in _context.users on ur.UserId equals u.Id
+                                   join r in _context.Role on ur.RoleId equals r.Id
+                                   where r.Name == "Student" && uph.PaymentDate.Date == DateTime.Now.Date.AddDays(-6) && uph.StatusId == PaymentStatusEnums.Paid
+                                   select uph.Id).Distinct().CountAsync(); //await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-2) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Paid).Select(x => x.Id).Distinct().CountAsync();
+                    WeekP = await (from uph in _context.UserPaymentHistory
+                                   join ur in _context.UserRole on uph.UserId equals ur.UserId
+                                   join u in _context.users on ur.UserId equals u.Id
+                                   join r in _context.Role on ur.RoleId equals r.Id
+                                   where r.Name == "Student" && uph.PaymentDate.Date == DateTime.Now.Date.AddDays(-6) && uph.StatusId == PaymentStatusEnums.Pending
+                                   select uph.Id).Distinct().CountAsync(); //await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-2) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Pending).Select(x => x.Id).Distinct().CountAsync();
+
+                    //WeekR = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-6) && x.PaymentDate.Date <= DateTime.Now.Date).Select(x => x.Id).Distinct().CountAsync();
+                    //WeekF = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-6) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Failed).Select(x => x.Id).Distinct().CountAsync();
+                    //WeekS = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-6) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Paid).Select(x => x.Id).Distinct().CountAsync();
+                    //WeekP = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Date >= DateTime.Now.Date.AddDays(-6) && x.PaymentDate.Date <= DateTime.Now.Date && x.StatusId == PaymentStatusEnums.Pending).Select(x => x.Id).Distinct().CountAsync();
 
 
                 }
@@ -3019,10 +3839,30 @@ namespace CPEA.Utilities.Services
                 };
 
                 //This Month Record
-                var MonthR = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Month == DateTime.Now.Date.Month).Select(x => x.Id).Distinct().CountAsync();
-                var MonthF = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Month == DateTime.Now.Date.Month && x.StatusId == PaymentStatusEnums.Failed).Select(x => x.Id).Distinct().CountAsync();
-                var MonthS = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Month == DateTime.Now.Date.Month && x.StatusId == PaymentStatusEnums.Paid).Select(x => x.Id).Distinct().CountAsync();
-                var MonthP = await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Month == DateTime.Now.Date.Month && x.StatusId == PaymentStatusEnums.Pending).Select(x => x.Id).Distinct().CountAsync();
+                var MonthR = await (from uph in _context.UserPaymentHistory
+                                    join ur in _context.UserRole on uph.UserId equals ur.UserId
+                                    join u in _context.users on ur.UserId equals u.Id
+                                    join r in _context.Role on ur.RoleId equals r.Id
+                                    where r.Name == "Student" && uph.PaymentDate.Month == DateTime.Now.Date.Month
+                                    select uph.Id).Distinct().CountAsync(); //await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Month == DateTime.Now.Date.Month).Select(x => x.Id).Distinct().CountAsync();
+                var MonthF = await (from uph in _context.UserPaymentHistory
+                                    join ur in _context.UserRole on uph.UserId equals ur.UserId
+                                    join u in _context.users on ur.UserId equals u.Id
+                                    join r in _context.Role on ur.RoleId equals r.Id
+                                    where r.Name == "Student" && uph.PaymentDate.Month == DateTime.Now.Date.Month && uph.StatusId == PaymentStatusEnums.Failed
+                                    select uph.Id).Distinct().CountAsync(); //await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Month == DateTime.Now.Date.Month && x.StatusId == PaymentStatusEnums.Failed).Select(x => x.Id).Distinct().CountAsync();
+                var MonthS = await (from uph in _context.UserPaymentHistory
+                                    join ur in _context.UserRole on uph.UserId equals ur.UserId
+                                    join u in _context.users on ur.UserId equals u.Id
+                                    join r in _context.Role on ur.RoleId equals r.Id
+                                    where r.Name == "Student" && uph.PaymentDate.Month == DateTime.Now.Date.Month && uph.StatusId == PaymentStatusEnums.Paid
+                                    select uph.Id).Distinct().CountAsync(); //await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Month == DateTime.Now.Date.Month && x.StatusId == PaymentStatusEnums.Paid).Select(x => x.Id).Distinct().CountAsync();
+                var MonthP = await (from uph in _context.UserPaymentHistory
+                                    join ur in _context.UserRole on uph.UserId equals ur.UserId
+                                    join u in _context.users on ur.UserId equals u.Id
+                                    join r in _context.Role on ur.RoleId equals r.Id
+                                    where r.Name == "Student" && uph.PaymentDate.Month == DateTime.Now.Date.Month && uph.StatusId == PaymentStatusEnums.Pending
+                                    select uph.Id).Distinct().CountAsync(); //await _context.UserPaymentHistory.Include(x => x.User).Where(x => x.User.Role.Name == "Student" && x.PaymentDate.Month == DateTime.Now.Date.Month && x.StatusId == PaymentStatusEnums.Pending).Select(x => x.Id).Distinct().CountAsync();
 
                 var monthTotalRecord = new ReportStat()
                 {

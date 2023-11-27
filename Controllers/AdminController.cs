@@ -25,14 +25,16 @@ namespace CPEA.Controllers
         private readonly UserManager<Users> _userManager;
         private readonly IImageUpload _imageService;
         private const string SessionUsername = "";
+        private readonly RoleManager<IdentityRole> _roleManager;
 
-        public AdminController(IImageUpload imageService, IAdminServices adminServices, INotyfService notyfService, IProjectServices projectServices, UserManager<Users> userManager)
+        public AdminController(RoleManager<IdentityRole> roleManager, IImageUpload imageService, IAdminServices adminServices, INotyfService notyfService, IProjectServices projectServices, UserManager<Users> userManager)
         {
             _adminServices = adminServices;
             _projectServices = projectServices; 
             _notyfService = notyfService;
             _userManager = userManager;
             _imageService = imageService;
+            _roleManager = roleManager;
         }
         [HttpPost]
         public async Task<IActionResult> Export()
@@ -132,7 +134,7 @@ namespace CPEA.Controllers
                 return RedirectToAction("Login", "Admin", new { area = "" });
             }
             var sessionUsername = HttpContext.Session.GetString(SessionUsername);
-            var user = await _userManager.Users.Include(x => x.Role).Where(x => x.UserName == sessionUsername).FirstOrDefaultAsync();//.FindByNameAsync(sessionUsername);
+            var user = await _userManager.Users.Where(x => x.UserName == sessionUsername).FirstOrDefaultAsync();//.FindByNameAsync(sessionUsername);
             if (user == null)
             {
                 _notyfService.Error("Invalid user", 5);
@@ -140,8 +142,9 @@ namespace CPEA.Controllers
             }
             GeneralClass.source = "Dashboard";
             GeneralClass.email = user.Email;
-            GeneralClass.role = user.Role.Name;
-            var dashboardRecord = new DashboardVM();
+           var role = await _roleManager.FindByIdAsync(user.DefaultRole);
+            GeneralClass.role = role.Name;
+           var dashboardRecord = new DashboardVM();
 
             //var email = GeneralClass.email;
 
@@ -197,7 +200,7 @@ namespace CPEA.Controllers
             if (userLogin.Item2 == "Successful")
             {
                 var valll = userLogin.Item1.UserName.ToString();
-                var rol = userLogin.Item1.Role.Name.ToString();
+                //var rol = userLogin.Item1.Role.Name.ToString();
                 HttpContext.Session.SetString(SessionUsername, userLogin.Item1.UserName.ToString());
 
                 _notyfService.Success("Welcome back, " + userLogin.Item1.Email, 10);

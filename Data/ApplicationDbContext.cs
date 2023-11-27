@@ -67,5 +67,7 @@ namespace CPEA.Data
         public DbSet<Promo> Promo { get; set; }        
         public DbSet<PromoUsageHistory> PromoUsageHistory { get; set; }        
         public DbSet<UserReferralPaymentHistory> UserReferralPaymentHistory { get; set; }        
+        public DbSet<UserRoles> UserRole { get; set; }        
+        public DbSet<Role> Role { get; set; }        
     }
 }

@@ -26,7 +26,7 @@ namespace CPEA.Utilities.DTO
         [Required]
         public string Phone { get; set; } 
         [Required]
-        public int Role { get; set; }
+        public string Role { get; set; }
         //public UserRolesEnums Role { get; set; }
     }
 }

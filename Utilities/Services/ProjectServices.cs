@@ -39,8 +39,10 @@ namespace CPEA.Utilities.Services
         private IWebHostEnvironment _env;
         private readonly IInterSwitch _intswitchService;
         private readonly IEmail _smtpMail;
+        private readonly RoleManager<IdentityRole> _roleManager;
 
-        public ProjectServices(IEmail smtpMail, IInterSwitch intswitchService, ApplicationDbContext context, IWebHostEnvironment env, UserManager<Users> userManager, SignInManager<Users> signInManager, IOptions<APISettings> apiSettings)
+
+        public ProjectServices(RoleManager<IdentityRole> roleManager, IEmail smtpMail, IInterSwitch intswitchService, ApplicationDbContext context, IWebHostEnvironment env, UserManager<Users> userManager, SignInManager<Users> signInManager, IOptions<APISettings> apiSettings)
         {
             _smtpMail = smtpMail;
             _intswitchService = intswitchService;
@@ -51,6 +53,7 @@ namespace CPEA.Utilities.Services
            // _messagingService = messagingService;
             _env = env;
             _signInManager = signInManager;
+            _roleManager = roleManager;
 
         }
         public async Task<string> ResetPassword(PasswordResetDTO dto)
@@ -1357,8 +1360,8 @@ namespace CPEA.Utilities.Services
         {
             try
             {
-                
-                var studentRoleId = await _context.AllUserRoles.Where(x => x.Name.ToLower() == "student").Select(x => x.Id).FirstOrDefaultAsync();
+
+                // _context.AllUserRoles.Where(x => x.Name.ToLower() == "student").Select(x => x.Id).FirstOrDefaultAsync();
                 if (dto.accountType.ToLower() == "personal")
                 {
                     var usernameExist = await _userManager.Users.Where(x => x.Email == dto.personalReg.Email).FirstOrDefaultAsync();
@@ -1372,6 +1375,8 @@ namespace CPEA.Utilities.Services
                         return new Response<Users>() { Data = usernameExist, Message = "Phone number exist.", Successful = false };
 
                     }
+
+                    var studentRoleId = await _roleManager.FindByNameAsync("Student");
                     var user = new Users
                     {
                         FirstName = dto.personalReg.FirstName,
@@ -1386,7 +1391,7 @@ namespace CPEA.Utilities.Services
                         UserName = dto.personalReg.Username.ToLower(),
                         StudentNumber = GenerateStudentId(),
                         Status = UserStatusEnums.Active,
-                        RoleId = studentRoleId,
+                        DefaultRole = studentRoleId.Id,
                         RegisteredDate =DateTime.Now,
                         StaffDep = StaffDepEnums.None
                     };
@@ -1395,6 +1400,10 @@ namespace CPEA.Utilities.Services
 
                     if (createdUser.Succeeded)
                     {
+
+                        await _userManager.AddToRoleAsync(user, studentRoleId.Name);
+                        await _userManager.UpdateAsync(user);
+
                         var result = await _signInManager.PasswordSignInAsync(user, dto.personalReg.Password,
                                                                     true, lockoutOnFailure: false);
                         var webRoot = _env.WebRootPath;
@@ -1480,6 +1489,8 @@ namespace CPEA.Utilities.Services
                         return new Response<Users>() { Data = usernameExist, Message = "Phone number exist.", Successful = false };
 
                     }
+
+                    var studentRoleId = await _roleManager.FindByNameAsync("Student");
                     var user = new Users
                     {
                         FirstName = dto.personalReg.FirstName,
@@ -1494,7 +1505,7 @@ namespace CPEA.Utilities.Services
                         UserName = dto.personalReg.Username.ToLower(),
                         StudentNumber = GenerateStudentId(),
                         Status = UserStatusEnums.Active,
-                        RoleId = studentRoleId,
+                        DefaultRole = studentRoleId.Id,
                         RegisteredDate = DateTime.Now,
                         NYSC =true
                     };
@@ -1503,6 +1514,9 @@ namespace CPEA.Utilities.Services
 
                     if (createdUser.Succeeded)
                     {
+                        await _userManager.AddToRoleAsync(user, studentRoleId.Name);
+                        await _userManager.UpdateAsync(user);
+
                         var result = await _signInManager.PasswordSignInAsync(user, dto.personalReg.Password,
                                                                     true, lockoutOnFailure: false);
 
@@ -1545,84 +1559,84 @@ namespace CPEA.Utilities.Services
                 }
                 else
                 {
-                    var usernameExist = await _userManager.Users.Where(x => x.Email == dto.personalReg.Email).FirstOrDefaultAsync();
-                    if (usernameExist != null)
-                    {
-                        return new Response<Users>() { Data = usernameExist, Message = "Email exist", Successful = false };
-                    }
-                    var currentuser = _userManager.Users.FirstOrDefault(x => x.PhoneNumber == dto.personalReg.PhoneNo);
-                    if (currentuser != null)
-                    {
-                        return new Response<Users>() { Data = usernameExist, Message = "Phone number exist.", Successful = false };
+                    //var usernameExist = await _userManager.Users.Where(x => x.Email == dto.personalReg.Email).FirstOrDefaultAsync();
+                    //if (usernameExist != null)
+                    //{
+                    //    return new Response<Users>() { Data = usernameExist, Message = "Email exist", Successful = false };
+                    //}
+                    //var currentuser = _userManager.Users.FirstOrDefault(x => x.PhoneNumber == dto.personalReg.PhoneNo);
+                    //if (currentuser != null)
+                    //{
+                    //    return new Response<Users>() { Data = usernameExist, Message = "Phone number exist.", Successful = false };
 
-                    }
+                    //}
 
-                    var user = new Users
-                    {
-                        FirstName = dto.businessReg.FirstName,
-                        LastName = dto.businessReg.LastName,
-                        MiddleName = dto.businessReg.MiddleName,
-                        CityId = dto.businessReg.CityId,
-                        Email = dto.businessReg.Email.ToLower(),
-                        Address = dto.businessReg.Address,
-                        Gender = dto.businessReg.Gender,
-                        AlternatePhone = dto.businessReg.AlternatePhone,
-                        PhoneNumber = dto.businessReg.PhoneNo,
-                        UserName = dto.businessReg.Username.ToLower(),
-                        StudentNumber = GenerateStudentId(),
-                        Status = UserStatusEnums.Active,
-                        RoleId = studentRoleId,
-                        RegisteredDate = DateTime.Now
-                    };
+                    //var user = new Users
+                    //{
+                    //    FirstName = dto.businessReg.FirstName,
+                    //    LastName = dto.businessReg.LastName,
+                    //    MiddleName = dto.businessReg.MiddleName,
+                    //    CityId = dto.businessReg.CityId,
+                    //    Email = dto.businessReg.Email.ToLower(),
+                    //    Address = dto.businessReg.Address,
+                    //    Gender = dto.businessReg.Gender,
+                    //    AlternatePhone = dto.businessReg.AlternatePhone,
+                    //    PhoneNumber = dto.businessReg.PhoneNo,
+                    //    UserName = dto.businessReg.Username.ToLower(),
+                    //    StudentNumber = GenerateStudentId(),
+                    //    Status = UserStatusEnums.Active,
+                    //    RoleId = studentRoleId,
+                    //    RegisteredDate = DateTime.Now
+                    //};
 
-                    var createdUser = await _userManager.CreateAsync(user, dto.businessReg.Password);
+                    //var createdUser = await _userManager.CreateAsync(user, dto.businessReg.Password);
 
-                    if (createdUser.Succeeded)
-                    {
-                        var result = await _signInManager.PasswordSignInAsync(user, dto.businessReg.Password,
-                                                                    true, lockoutOnFailure: false);
-                        var business = new Businesses
-                        {
-                            Address = dto.businessReg.BusinessAddress,
-                            Email = dto.businessReg.BusinessEmail,
-                            Name = dto.businessReg.BusinessName,
-                            Phone = dto.businessReg.BusinessPhone,
-                            CityId = dto.businessReg.BusinessCityId
-                        };
+                    //if (createdUser.Succeeded)
+                    //{
+                    //    var result = await _signInManager.PasswordSignInAsync(user, dto.businessReg.Password,
+                    //                                                true, lockoutOnFailure: false);
+                    //    var business = new Businesses
+                    //    {
+                    //        Address = dto.businessReg.BusinessAddress,
+                    //        Email = dto.businessReg.BusinessEmail,
+                    //        Name = dto.businessReg.BusinessName,
+                    //        Phone = dto.businessReg.BusinessPhone,
+                    //        CityId = dto.businessReg.BusinessCityId
+                    //    };
 
-                        await _context.Businesses.AddAsync(business);
+                    //    await _context.Businesses.AddAsync(business);
                         
-                       if(await _context.SaveChangesAsync() >0)
-                        {
-                            var businessUser = new BusinessesUsers
-                            {
-                                UserRole =dto.businessReg.UserRole,
-                                BusinessId= business.Id,
-                                UserId = user.Id
-                            };
+                    //   if(await _context.SaveChangesAsync() >0)
+                    //    {
+                    //        var businessUser = new BusinessesUsers
+                    //        {
+                    //            UserRole =dto.businessReg.UserRole,
+                    //            BusinessId= business.Id,
+                    //            UserId = user.Id
+                    //        };
 
-                            await _context.BusinessesUsers.AddAsync(businessUser);
-                            await _context.SaveChangesAsync();
+                    //        await _context.BusinessesUsers.AddAsync(businessUser);
+                    //        await _context.SaveChangesAsync();
 
-                            //Create acccount wallet
-                            int maxWalletId = await _context.UserWallet.MaxAsync(x => x.Id); ;
-                            int newWalletId = maxWalletId + 1;
+                    //        //Create acccount wallet
+                    //        int maxWalletId = await _context.UserWallet.MaxAsync(x => x.Id); ;
+                    //        int newWalletId = maxWalletId + 1;
 
-                            //Currency Id will be changed to NGN id once the whole currency is available in the db
-                            await CreateWallet(new UserWallet
-                            {
-                                WalletId = ZeroPadUp(newWalletId.ToString(), 5, "3500") + 0,
-                                CurrencyId = 1,
-                                UserId = user.Id,
-                                AvailableBalance = 0.0m,
-                                SavingBalance = 0.0m,
-                                EscrowBalance = 0.0m,
-                                CreatedDate = DateTime.Now,
+                    //        //Currency Id will be changed to NGN id once the whole currency is available in the db
+                    //        await CreateWallet(new UserWallet
+                    //        {
+                    //            WalletId = ZeroPadUp(newWalletId.ToString(), 5, "3500") + 0,
+                    //            CurrencyId = 1,
+                    //            UserId = user.Id,
+                    //            AvailableBalance = 0.0m,
+                    //            SavingBalance = 0.0m,
+                    //            EscrowBalance = 0.0m,
+                    //            CreatedDate = DateTime.Now,
 
-                            });
-                        }
-                        return new Response<Users>() { Data = user, Message = "Successful", Successful = true };
-                    }
+                    //        });
+                    //    }
+                    //    return new Response<Users>() { Data = user, Message = "Successful", Successful = true };
+                    //}
 
                     return new Response<Users>() { Data = null, Message = "Not Successful", Successful = false };
                 }
@@ -1758,14 +1772,15 @@ namespace CPEA.Utilities.Services
                             if(referral != null)
                             {
                                 discription = "Referral";
-                                if ((UserRolesEnums)referral.Referral.RoleId == UserRolesEnums.Staff)
+                                var role = await _roleManager.FindByIdAsync(referral.Referral.DefaultRole);
+                                if (role.Name == "Staff")
                                 {
                                     discount = (7 * courseDate.coursePrice) / 100;
                                    // perAmount = dto.userCourseOption.AmountPaid;
                                     referral.ReferralDiscount = 3;
                                     referral.ReferredDiscount = 7;
                                 }
-                                else if ((UserRolesEnums)referral.Referral.RoleId == UserRolesEnums.Freelance)
+                                else if (role.Name == "Freelance")
                                 {
                                     discount = (5 * courseDate.coursePrice) / 100;
                                     //perAmount = dto.userCourseOption.AmountPaid;
@@ -2503,6 +2518,33 @@ namespace CPEA.Utilities.Services
 
         public async Task<Register1VM> GetRegister()
         {
+
+            var listRole = new List<string>();
+            listRole.Add("Student");
+            listRole.Add("Admin");
+            listRole.Add("Customer Support");
+            listRole.Add("Marketing");
+            listRole.Add("Supervisor");
+            listRole.Add("Staff");
+            listRole.Add("Freelance");
+
+            foreach (var item in listRole)
+            {
+                var roleExists = await _roleManager.FindByNameAsync(item);
+                if (roleExists == null)
+                {
+                    var newR = new Role
+                    {
+                        Name = item,
+                        NormalizedName = item.ToUpper()
+                    };
+
+                    await _roleManager.CreateAsync(newR);
+                    //await _context.Role.AddAsync(newR);
+                }
+                await _context.SaveChangesAsync();
+            }
+
             //Load Countries from DB
             //----------------------
             var country = await _context.Countries.ToListAsync();
@@ -3526,14 +3568,10 @@ namespace CPEA.Utilities.Services
             var existingUser = await _userManager.FindByEmailAsync(dto.email);
 
 
-            if (existingUser == null)
+            if (existingUser != null && await _userManager.CheckPasswordAsync(existingUser, dto.password))
             {
-                return new Tuple<Users, string, string>(null, "Not Found", "");
-            }
-            else
-            {
-                var result = await _signInManager.PasswordSignInAsync(existingUser, dto.password,true, lockoutOnFailure: false);
-                if(result.Succeeded)
+                var result = await _signInManager.PasswordSignInAsync(existingUser, dto.password, true, lockoutOnFailure: false);
+                if (result.Succeeded)
                 {
                     var completedEnroll = await _context.UserCourses.Where(x => x.UserId == existingUser.Id).FirstOrDefaultAsync();
                     if (completedEnroll != null)
@@ -3542,13 +3580,13 @@ namespace CPEA.Utilities.Services
 
                     }
                     var referCodeUsed = await _context.UserReferred.Include(x => x.Referral).Where(x => x.ReferredUserId == existingUser.Id).Select(x => x.Referral.ReferralCode).FirstOrDefaultAsync();
-                    if(referCodeUsed != null && referCodeUsed != "")
+                    if (referCodeUsed != null && referCodeUsed != "")
                     {
                         return new Tuple<Users, string, string>(existingUser, "Incomplete", referCodeUsed);
                     }
 
                     var userDiscountExist = await _context.UserDiscount.Where(x => x.ReferralId == existingUser.Id).FirstOrDefaultAsync();
-                    if(userDiscountExist != null)
+                    if (userDiscountExist != null)
                     {
                         referCodeUsed = userDiscountExist.Code;
                         return new Tuple<Users, string, string>(existingUser, "Incomplete", referCodeUsed);
@@ -3557,7 +3595,10 @@ namespace CPEA.Utilities.Services
                     // Enum.GetName(typeof(UserRolesEnums), existingUser.Role) ;
                 }
                 return new Tuple<Users, string, string>(existingUser, "Wrong Details", "");
-
+            }
+            else 
+            {
+                return new Tuple<Users, string, string>(null, "User Not Found", "");
             }
         }
         public async Task<StudentDashboardVM> DashboardRe(string userId, string IP4)

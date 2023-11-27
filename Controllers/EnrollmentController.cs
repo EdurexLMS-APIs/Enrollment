@@ -3,6 +3,7 @@ using CPEA.Models;
 using CPEA.Utilities;
 using CPEA.Utilities.Interface;
 using CPEA.Utilities.ViewModel;
+using iTextSharp.text.pdf.qrcode;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -21,14 +22,15 @@ namespace CPEA.Controllers
         private readonly INotyfService _notyfService;
         private readonly UserManager<Users> _userManager;
         private const string SessionUsername = "";
+        private readonly RoleManager<IdentityRole> _roleManager;
 
-        public EnrollmentController(ILogger<HomeController> logger, IProjectServices projectServices, INotyfService notyfService, UserManager<Users> userManager)
+        public EnrollmentController(RoleManager<IdentityRole> roleManager, ILogger<HomeController> logger, IProjectServices projectServices, INotyfService notyfService, UserManager<Users> userManager)
         {
             _logger = logger;
             _projectServices = projectServices;
             _notyfService = notyfService;
             _userManager = userManager;
-
+            _roleManager = roleManager;
         }
        
         [AcceptVerbs("Get", "Post")]
@@ -63,15 +65,20 @@ namespace CPEA.Controllers
             if (code != null && code != "")
             {
                 response.refCode = code;
-                var Referral = await _userManager.Users.Where(x => x.ReferralCode == code).Select(x => x.RoleId).FirstOrDefaultAsync();
-                if ((UserRolesEnums)Referral == UserRolesEnums.Staff)
+                var Referral = await _userManager.Users.Where(x => x.ReferralCode == code).Select(x => x.DefaultRole).FirstOrDefaultAsync();
+                if(Referral != null && Referral !="")
                 {
-                    response.percentageOffer = "7%";
+                    var role = await _roleManager.FindByIdAsync(Referral);
+                    if (role.Name == "Staff")
+                    {
+                        response.percentageOffer = "7%";
+                    }
+                    else if (role.Name == "Freelance")
+                    {
+                        response.percentageOffer = "5%";
+                    }
                 }
-                else if ((UserRolesEnums)Referral == UserRolesEnums.Freelance)
-                {
-                    response.percentageOffer = "5%";
-                }
+               
                 _notyfService.Success($"Congratulations, you have {response.percentageOffer} off course price.", 10);
 
             }
@@ -192,15 +199,18 @@ namespace CPEA.Controllers
             {
                 if (response.percentageOffer == 0)
                 {
-                    var Referral = await _userManager.Users.Where(x => x.ReferralCode == response.refCode).Select(x => x.RoleId).FirstOrDefaultAsync();
-
-                    if ((UserRolesEnums)Referral == UserRolesEnums.Staff)
+                    var Referral = await _userManager.Users.Where(x => x.ReferralCode == response.refCode).Select(x => x.DefaultRole).FirstOrDefaultAsync();
+                    if (Referral != null && Referral != "")
                     {
-                        response.percentageOffer = 7;
-                    }
-                    else if ((UserRolesEnums)Referral == UserRolesEnums.Freelance)
-                    {
-                        response.percentageOffer = 5;
+                        var role = await _roleManager.FindByIdAsync(Referral);
+                        if (role.Name == "Staff")
+                        {
+                            response.percentageOffer = 7;
+                        }
+                        else if (role.Name == "Freelance")
+                        {
+                            response.percentageOffer = 5;
+                        }
                     }
                 }
                

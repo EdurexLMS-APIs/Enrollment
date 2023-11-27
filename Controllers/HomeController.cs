@@ -25,6 +25,8 @@ using iTextSharp.text.pdf.qrcode;
 using Org.BouncyCastle.Ocsp;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Http;
+using SendGrid;
+using System.Data;
 //using DinkToPdf.Contracts;
 //using DinkToPdf;
 
@@ -39,10 +41,11 @@ namespace CPEA.Controllers
         private readonly ApplicationDbContext _context;
         private readonly IEmail _email;
         private const string SessionUsername = "";
+        private readonly RoleManager<IdentityRole> _roleManager;
 
         //private IConverter _converter;
 
-        public HomeController(IEmail email, ApplicationDbContext context, ILogger<HomeController> logger, IProjectServices projectServices, INotyfService notyfService, UserManager<Users> userManager)
+        public HomeController(RoleManager<IdentityRole> roleManager,IEmail email, ApplicationDbContext context, ILogger<HomeController> logger, IProjectServices projectServices, INotyfService notyfService, UserManager<Users> userManager)
         {
             _logger = logger;
             _projectServices = projectServices;
@@ -50,6 +53,7 @@ namespace CPEA.Controllers
             _userManager = userManager;
             _context = context;
             _email = email;
+            _roleManager = roleManager;
             //_converter = converter;
         }
         public IActionResult ResetPassword(string token)
@@ -1219,14 +1223,16 @@ namespace CPEA.Controllers
                 var courseDate = await _context.UserCourses.Include(x => x.CoursePriceOption).ThenInclude(x => x.Course).Where(x => x.Id == dto.ChangeCDateDTO.paymentDTO.UserPaymentForId).Select(x => new { coursePrice = x.CoursePriceOption.Amount }).FirstOrDefaultAsync();
 
                 discription = "Referral";
-                if ((UserRolesEnums)referral.Referral.RoleId == UserRolesEnums.Staff)
+
+                var role = await _roleManager.FindByIdAsync(referral.Referral.DefaultRole);
+                if (role.Name == "Staff")
                 {
                     discount = (7 * courseDate.coursePrice) / 100;
                     // perAmount = dto.userCourseOption.AmountPaid;
                     referral.ReferralDiscount = 3;
                     referral.ReferredDiscount = 7;
                 }
-                else if ((UserRolesEnums)referral.Referral.RoleId == UserRolesEnums.Freelance)
+                else if (role.Name == "Freelance")
                 {
                     discount = (5 * courseDate.coursePrice) / 100;
                     //perAmount = dto.userCourseOption.AmountPaid;
